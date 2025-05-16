@@ -17,8 +17,8 @@ import Messenger.GlobalComponents.Transition.Transitions exposing (fadeImgMix, f
 import Messenger.Scene.RawScene exposing (RawSceneInit, RawSceneUpdate, RawSceneView, genRawScene)
 import Messenger.Scene.Scene exposing (MConcreteScene, SceneOutputMsg(..), SceneStorage)
 import Quantity
-import REGL
 import REGL.BuiltinPrograms as P
+import REGL.Common exposing (group)
 import String exposing (fromInt)
 
 
@@ -86,7 +86,7 @@ comment =
 
 view : RawSceneView UserData Data
 view env data =
-    REGL.group []
+    group []
         [ P.clear Color.lightGreen
         , P.textbox ( 0, 30 ) 40 comment "firacode" Color.black
         , P.textbox ( 0, 900 ) 30 (fromInt env.globalData.sceneStartFrame) "firacode" Color.black

@@ -20,6 +20,7 @@ import Messenger.Scene.RawScene exposing (RawSceneInit, RawSceneUpdate, RawScene
 import Messenger.Scene.Scene exposing (MConcreteScene, SceneOutputMsg(..), SceneStorage)
 import REGL
 import REGL.BuiltinPrograms as P
+import REGL.Common exposing (group)
 
 
 type alias Data =
@@ -95,7 +96,7 @@ prompt =
 
 view : RawSceneView UserData Data
 view env data =
-    REGL.group []
+    group []
         [ P.clear Color.lightYellow
         , P.textbox ( 0, 30 ) 50 prompt "firacode" Color.black
         , renderSprite env.globalData.internalData ( 1200, 0 ) ( 0, 200 ) "ship"

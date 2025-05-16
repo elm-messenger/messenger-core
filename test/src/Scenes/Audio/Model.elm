@@ -17,8 +17,8 @@ import Messenger.Base exposing (UserEvent(..))
 import Messenger.GeneralModel exposing (Msg(..), MsgBase(..))
 import Messenger.Scene.RawScene exposing (RawSceneInit, RawSceneUpdate, RawSceneView, genRawScene)
 import Messenger.Scene.Scene exposing (MConcreteScene, SceneOutputMsg(..), SceneStorage)
-import REGL
 import REGL.BuiltinPrograms as P
+import REGL.Common exposing (group)
 import Time
 
 
@@ -101,7 +101,7 @@ prompt =
 
 view : RawSceneView UserData Data
 view env data =
-    REGL.group []
+    group []
         [ P.clear (Color.rgb 1.0 0.0 0.0)
         , P.textbox ( 0, 30 ) 50 prompt "firacode" Color.black
         ]
