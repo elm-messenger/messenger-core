@@ -24,7 +24,8 @@ import Messenger.Scene.Loader exposing (existScene, loadSceneByName)
 import Messenger.Scene.Scene exposing (unroll)
 import Messenger.UI.Input exposing (Input)
 import Messenger.UI.SOMHandler exposing (handleSOMs)
-import REGL exposing (Renderable)
+import REGL
+import REGL.Common exposing (Renderable, group, render)
 import Set
 
 
@@ -366,8 +367,8 @@ renderModel input model oldcmd =
     Cmd.batch
         [ oldcmd
         , input.config.ports.setView <|
-            REGL.render <|
-                REGL.group []
+            render <|
+                group []
                     ((postProcess sceneView <| combinePP model.globalComponents)
                         :: gcView
                     )

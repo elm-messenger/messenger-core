@@ -54,7 +54,7 @@ import Messenger.Base exposing (Env, UserEvent)
 import Messenger.GeneralModel exposing (AbstractGeneralModel, ConcreteGeneralModel, abstract, unroll)
 import Messenger.Recursion exposing (updateObjects, updateObjectsWithTarget)
 import Messenger.Scene.Scene exposing (MMsg, MMsgBase, SceneOutputMsg)
-import REGL exposing (Renderable, group)
+import REGL.Common exposing (Renderable, group)
 
 
 {-| ConcreteUserComponent

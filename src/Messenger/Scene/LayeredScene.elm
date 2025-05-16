@@ -29,7 +29,7 @@ import Messenger.GeneralModel exposing (MsgBase(..), filterSOM, viewModelList)
 import Messenger.Layer.Layer exposing (AbstractLayer)
 import Messenger.Recursion exposing (updateObjects)
 import Messenger.Scene.Scene exposing (SceneOutputMsg, SceneStorage, abstract)
-import REGL exposing (Effect, Renderable, group)
+import REGL.Common exposing (Effect, Renderable, group)
 
 
 {-| Layered Scene Data.

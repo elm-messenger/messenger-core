@@ -40,7 +40,7 @@ A General model has the ability to:
 -}
 
 import Messenger.Base exposing (Env, UserEvent)
-import REGL exposing (Renderable)
+import REGL.Common exposing (Renderable)
 
 
 {-| MsgBase

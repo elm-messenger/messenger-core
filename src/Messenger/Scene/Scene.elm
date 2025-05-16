@@ -50,7 +50,8 @@ import Messenger.Audio.Base exposing (AudioOption, AudioTarget)
 import Messenger.Base exposing (Env, UserEvent)
 import Messenger.GeneralModel exposing (AbstractGeneralModel, ConcreteGeneralModel, Msg, MsgBase)
 import Messenger.Resources.Base exposing (ResourceDef)
-import REGL exposing (Renderable)
+import REGL
+import REGL.Common exposing (Renderable)
 
 
 {-| Concrete Scene Model

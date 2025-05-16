@@ -17,7 +17,7 @@ module Messenger.Component.GlobalComponent exposing
 
 import Messenger.GeneralModel as GM
 import Messenger.Scene.Scene exposing (AbstractGlobalComponent, ConcreteGlobalComponent, GCBaseData, GCCommonData, GCMsg, GCTarget, GlobalComponentStorage, MConcreteGeneralModel)
-import REGL exposing (Renderable)
+import REGL.Common exposing (Renderable)
 
 
 {-| Generate abstract global component from concrete global component.

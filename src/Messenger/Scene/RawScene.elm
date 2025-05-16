@@ -24,7 +24,7 @@ their own logic and framework(instead of layer/component) or do a minimum amount
 
 import Messenger.Base exposing (Env, UserEvent)
 import Messenger.Scene.Scene exposing (MConcreteScene, SceneOutputMsg, SceneStorage, abstract)
-import REGL exposing (Renderable)
+import REGL.Common exposing (Renderable)
 
 
 {-| init type sugar

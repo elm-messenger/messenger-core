@@ -36,7 +36,7 @@ General Model and Helper functions for Layers.
 import Messenger.Base exposing (Env, UserEvent)
 import Messenger.GeneralModel exposing (Matcher, abstract)
 import Messenger.Scene.Scene exposing (MAbstractGeneralModel, MConcreteGeneralModel, MMsg, MMsgBase)
-import REGL exposing (Renderable)
+import REGL.Common exposing (Renderable)
 
 
 {-| init type sugar

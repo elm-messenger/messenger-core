@@ -15,8 +15,9 @@ module Messenger.Render.Texture exposing
 
 import Messenger.Base exposing (InternalData)
 import Messenger.Resources.Base exposing (igetSprite)
-import REGL exposing (Renderable, Texture)
+import REGL exposing (Texture)
 import REGL.BuiltinPrograms as P
+import REGL.Common exposing (Renderable)
 
 
 {-| Render a sprite with the size automatically calculated from the texture.
@@ -38,17 +39,17 @@ renderSprite gd position size name =
 renderSpriteAutoHelper : ( Float, Float ) -> ( Float, Float ) -> Texture -> Renderable
 renderSpriteAutoHelper ( newx, newy ) ( w, h ) t =
     if w /= 0 && h /= 0 then
-        P.rectTexture ( newx, newy ) ( w, h ) t.name
+        P.rectTexture ( newx, newy ) ( w, h ) 1.0 t.name
 
     else if w /= 0 && h == 0 then
-        P.rectTexture ( newx, newy ) ( w, w / toFloat t.width * toFloat t.height ) t.name
+        P.rectTexture ( newx, newy ) ( w, w / toFloat t.width * toFloat t.height ) 1.0 t.name
 
     else if w == 0 && h /= 0 then
-        P.rectTexture ( newx, newy ) ( h / toFloat t.height * toFloat t.width, h ) t.name
+        P.rectTexture ( newx, newy ) ( h / toFloat t.height * toFloat t.width, h ) 1.0 t.name
 
     else
         -- All == 0
-        P.rectTexture ( newx, newy ) ( toFloat t.width, toFloat t.height ) t.name
+        P.rectTexture ( newx, newy ) ( toFloat t.width, toFloat t.height ) 1.0 t.name
 
 
 {-| Get the width and height of a texture.
