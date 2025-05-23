@@ -1,3 +1,0 @@
-[submodule "test/messenger-extra"]
-	path = test/messenger-extra
-	url = git@github.com:linsyking/messenger-extra.git
