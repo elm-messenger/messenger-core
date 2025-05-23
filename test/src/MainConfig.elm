@@ -88,6 +88,12 @@ initGlobalData data =
     , canvasAttributes = []
     , extraHTML = Nothing
     , userData = storage
+    , camera =
+        { x = virtualSize.width / 2
+        , y = virtualSize.height / 2
+        , zoom = 1
+        , angle = 0
+        }
     }
 
 

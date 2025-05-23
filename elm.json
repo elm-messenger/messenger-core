@@ -22,6 +22,7 @@
             "Messenger.Layer.Layer",
             "Messenger.Coordinate.HTML",
             "Messenger.Coordinate.Coordinates",
+            "Messenger.Coordinate.Camera",
             "Messenger.Component.Component",
             "Messenger.Component.GlobalComponent",
             "Messenger.Audio.Base",

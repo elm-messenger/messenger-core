@@ -15,6 +15,8 @@ import Messenger.Audio.Audio exposing (audioDuration)
 import Messenger.Audio.Base exposing (AudioCommonOption, AudioOption(..), AudioTarget(..))
 import Messenger.Base exposing (UserEvent(..))
 import Messenger.GeneralModel exposing (Msg(..), MsgBase(..))
+import Messenger.GlobalComponents.Transition.Model exposing (genMixedTransitionSOM)
+import Messenger.GlobalComponents.Transition.Transitions exposing (fadeMix)
 import Messenger.Scene.RawScene exposing (RawSceneInit, RawSceneUpdate, RawSceneView, genRawScene)
 import Messenger.Scene.Scene exposing (MConcreteScene, SceneOutputMsg(..), SceneStorage)
 import REGL.BuiltinPrograms as P
@@ -38,6 +40,13 @@ update env msg data =
             audioDuration env.globalData.internalData "test"
     in
     case msg of
+        KeyDown 8 ->
+            ( data
+            , [ genMixedTransitionSOM ( fadeMix, Duration.seconds 1 ) ( "Home", Nothing )
+              ]
+            , env
+            )
+
         KeyDown 49 ->
             ( data
             , [ SOMStopAudio <| AudioName 0 "test", SOMPlayAudio 0 "test" <| AOnce Nothing ]

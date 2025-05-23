@@ -6,6 +6,7 @@ module Messenger.Base exposing
     , Flags
     , removeCommonData, addCommonData
     , UserViewGlobalData
+    , Camera
     , emptyInternalData, userGlobalDataToGlobalData, globalDataToUserGlobalData
     )
 
@@ -23,6 +24,7 @@ Some Basic Data Types for the game
 @docs Flags
 @docs removeCommonData, addCommonData
 @docs UserViewGlobalData
+@docs Camera
 @docs emptyInternalData, userGlobalDataToGlobalData, globalDataToUserGlobalData
 
 -}
@@ -98,6 +100,26 @@ type UserEvent
     | Prompt String String
 
 
+{-| Camera
+
+Camera is used to record the camera position and zoom level.
+
+  - `x` is the x position of the camera
+  - `y` is the y position of the camera
+  - `zoom` is the zoom level of the camera, default is 1
+  - `angle` is the angle of the camera, in real numbers
+
+Camera's position is the center of the screen.
+
+-}
+type alias Camera =
+    { x : Float
+    , y : Float
+    , zoom : Float
+    , angle : Float
+    }
+
+
 {-| GlobalData
 
 GlobalData is the data that doesn't change during the game.
@@ -118,6 +140,7 @@ It is mainly used for display and reading/writing some localstorage data.
   - `volume` records the volume of the game
   - `currentScene` records the current scene name
   - `mousePos` records the mouse position, in virtual coordinate
+  - `camera` records the camera position and zoom level
 
 -}
 type alias GlobalData userdata =
@@ -136,6 +159,7 @@ type alias GlobalData userdata =
     , volume : Float
     , userData : userdata
     , currentScene : String
+    , camera : Camera
     }
 
 
@@ -147,6 +171,7 @@ type alias UserViewGlobalData userdata =
     , globalStartTime : Float
     , sceneStartFrame : Int
     , globalStartFrame : Int
+    , camera : Camera
     , volume : Float
     , extraHTML : Maybe (Html WorldEvent)
     , canvasAttributes : List (Html.Attribute WorldEvent)
@@ -193,6 +218,7 @@ userGlobalDataToGlobalData user =
     , extraHTML = user.extraHTML
     , userData = user.userData
     , currentScene = ""
+    , camera = user.camera
     }
 
 
@@ -208,6 +234,7 @@ globalDataToUserGlobalData globalData =
     , extraHTML = globalData.extraHTML
     , canvasAttributes = globalData.canvasAttributes
     , userData = globalData.userData
+    , camera = globalData.camera
     }
 
 

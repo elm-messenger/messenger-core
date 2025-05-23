@@ -7,8 +7,12 @@ module Scenes.Stress.Model exposing (scene)
 -}
 
 import Color
+import Duration
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
+import Messenger.Base exposing (UserEvent(..))
+import Messenger.GlobalComponents.Transition.Model exposing (genMixedTransitionSOM)
+import Messenger.GlobalComponents.Transition.Transitions exposing (fadeMix)
 import Messenger.Scene.RawScene exposing (RawSceneInit, RawSceneUpdate, RawSceneView, genRawScene)
 import Messenger.Scene.Scene exposing (MConcreteScene, SceneStorage)
 import REGL.BuiltinPrograms as P
@@ -26,7 +30,16 @@ init env msg =
 
 update : RawSceneUpdate Data UserData SceneMsg
 update env msg data =
-    ( data, [], env )
+    case msg of
+        KeyDown 8 ->
+            ( data
+            , [ genMixedTransitionSOM ( fadeMix, Duration.seconds 1 ) ( "Home", Nothing )
+              ]
+            , env
+            )
+
+        _ ->
+            ( data, [], env )
 
 
 view : RawSceneView UserData Data
