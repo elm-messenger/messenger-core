@@ -12,4 +12,6 @@ make
 
 # Serve
 
-Use a static web server like `python -m http.server` to host the website.
+```bash
+make host
+```
