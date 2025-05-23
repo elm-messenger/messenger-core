@@ -16,6 +16,7 @@ import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
 import Messenger.Scene.Scene exposing (AllScenes)
 import Scenes.Audio.Model as Audio
+import Scenes.Camera.Model as Camera
 import Scenes.Home.Model as Home
 import Scenes.Stress.Model as Stress
 import Scenes.Transition.Model as Transition
@@ -30,7 +31,8 @@ allScenes : AllScenes UserData SceneMsg
 allScenes =
     Dict.fromList
         [ ( "Home", Home.scene )
-        , ( "Transition", Transition.scene )
         , ( "Stress", Stress.scene )
         , ( "Audio", Audio.scene )
+        , ( "Transition", Transition.scene )
+        , ( "Camera", Camera.scene )
         ]

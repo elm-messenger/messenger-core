@@ -1,6 +1,9 @@
 {
-    "version": "1.1.0",
-    "template_repo": "https://github.com/linsyking/messenger-templates",
+    "version": "1.2.0",
+    "template_repo": {
+        "url": "https://github.com/linsyking/messenger-templates",
+        "tag": ""
+    },
     "scenes": {
         "Home": {
             "components": {},
@@ -17,6 +20,9 @@
         "Transition": {
             "components": {},
             "layers": []
+        },
+        "Camera": {
+            "raw": true
         }
     },
     "sceneprotos": {}
