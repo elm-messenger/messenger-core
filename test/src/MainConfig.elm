@@ -92,7 +92,7 @@ initGlobalData data =
         { x = virtualSize.width / 2
         , y = virtualSize.height / 2
         , zoom = 1
-        , angle = 0
+        , rotation = 0
         }
     }
 

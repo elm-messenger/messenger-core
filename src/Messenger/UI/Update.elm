@@ -25,7 +25,7 @@ import Messenger.Scene.Scene exposing (unroll)
 import Messenger.UI.Input exposing (Input)
 import Messenger.UI.SOMHandler exposing (handleSOMs)
 import REGL
-import REGL.Common exposing (Renderable, group, render, renderWithCamera)
+import REGL.Common exposing (Renderable, group, groupWithCamera, render)
 import Set
 
 
@@ -370,9 +370,13 @@ renderModel input model oldcmd =
     Cmd.batch
         [ oldcmd
         , input.config.ports.setView <|
-            renderWithCamera [ camera.x, camera.y, camera.zoom, camera.angle ] <|
-                group []
-                    ((postProcess sceneView <| combinePP model.globalComponents)
+            render <|
+                group
+                    []
+                    (groupWithCamera camera
+                        []
+                        [ postProcess sceneView <| combinePP model.globalComponents
+                        ]
                         :: gcView
                     )
         ]

@@ -11,13 +11,13 @@ import Duration
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
 import Messenger.Base exposing (UserEvent(..))
-import Messenger.Coordinate.Camera exposing (setCameraAngle, setCameraPos, setCameraScale)
+import Messenger.Coordinate.Camera exposing (defaultCamera, setCameraAngle, setCameraPos, setCameraScale)
 import Messenger.GlobalComponents.Transition.Model exposing (genMixedTransitionSOM)
 import Messenger.GlobalComponents.Transition.Transitions exposing (fadeMix)
 import Messenger.Scene.RawScene exposing (RawSceneInit, RawSceneUpdate, RawSceneView, genRawScene)
 import Messenger.Scene.Scene exposing (MConcreteScene, SceneStorage)
 import REGL.BuiltinPrograms as P
-import REGL.Common exposing (group)
+import REGL.Common exposing (group, groupWithCamera)
 
 
 type alias Data =
@@ -79,7 +79,7 @@ update env msg data =
         KeyDown 52 ->
             let
                 ng =
-                    setCameraAngle (oldcam.angle + pi / 4) gd
+                    setCameraAngle (oldcam.rotation + pi / 4) gd
             in
             ( data
             , []
@@ -119,6 +119,10 @@ view env data =
     group []
         [ P.clear Color.lightBlue
         , P.textbox ( 0, 30 ) 40 comment "firacode" Color.black
+        , groupWithCamera (defaultCamera env.globalData)
+            []
+            [ P.textbox ( 100, 0 ) 30 "Some fixed text on the screen" "firacode" Color.black
+            ]
         ]
 
 

@@ -1,6 +1,6 @@
 module Messenger.Coordinate.Camera exposing
-    ( getCameraPos, getCameraScale, getCameraAngle
-    , setCameraPos, setCameraScale, setCameraAngle
+    ( setCameraPos, setCameraScale, setCameraAngle
+    , defaultCamera
     )
 
 {-|
@@ -8,39 +8,13 @@ module Messenger.Coordinate.Camera exposing
 
 # Camera Tools
 
-@docs getCameraPos, getCameraScale, getCameraAngle
 @docs setCameraPos, setCameraScale, setCameraAngle
+@docs defaultCamera
 
 -}
 
 import Messenger.Base exposing (GlobalData)
-
-
-getCameraPos : GlobalData u -> ( Float, Float )
-getCameraPos user =
-    let
-        uc =
-            user.camera
-    in
-    ( uc.x, uc.y )
-
-
-getCameraScale : GlobalData u -> Float
-getCameraScale user =
-    let
-        uc =
-            user.camera
-    in
-    uc.zoom
-
-
-getCameraAngle : GlobalData u -> Float
-getCameraAngle user =
-    let
-        uc =
-            user.camera
-    in
-    uc.angle
+import REGL.Common exposing (Camera)
 
 
 setCameraPos : ( Float, Float ) -> GlobalData u -> GlobalData u
@@ -81,6 +55,13 @@ setCameraAngle angle user =
     { user
         | camera =
             { uc
-                | angle = angle
+                | rotation = angle
             }
     }
+
+
+{-| Default camera for the game.
+-}
+defaultCamera : GlobalData u -> Camera
+defaultCamera gd =
+    { x = gd.internalData.virtualWidth / 2, y = gd.internalData.virtualHeight / 2, zoom = 1, rotation = 0 }

@@ -6,7 +6,6 @@ module Messenger.Base exposing
     , Flags
     , removeCommonData, addCommonData
     , UserViewGlobalData
-    , Camera
     , emptyInternalData, userGlobalDataToGlobalData, globalDataToUserGlobalData
     )
 
@@ -24,7 +23,6 @@ Some Basic Data Types for the game
 @docs Flags
 @docs removeCommonData, addCommonData
 @docs UserViewGlobalData
-@docs Camera
 @docs emptyInternalData, userGlobalDataToGlobalData, globalDataToUserGlobalData
 
 -}
@@ -36,6 +34,7 @@ import Html exposing (Html)
 import Json.Encode as Encode
 import Messenger.Audio.Internal exposing (AudioRepo, emptyRepo)
 import REGL
+import REGL.Common exposing (Camera)
 import Set exposing (Set)
 
 
@@ -98,26 +97,6 @@ type UserEvent
     | MouseUp Int ( Float, Float )
     | MouseWheel Int
     | Prompt String String
-
-
-{-| Camera
-
-Camera is used to record the camera position and zoom level.
-
-  - `x` is the x position of the camera
-  - `y` is the y position of the camera
-  - `zoom` is the zoom level of the camera, default is 1
-  - `angle` is the angle of the camera, in real numbers
-
-Camera's position is the center of the screen.
-
--}
-type alias Camera =
-    { x : Float
-    , y : Float
-    , zoom : Float
-    , angle : Float
-    }
 
 
 {-| GlobalData
