@@ -17,6 +17,8 @@ import Messenger.Base exposing (GlobalData)
 import REGL.Common exposing (Camera)
 
 
+{-| Set the camera position.
+-}
 setCameraPos : ( Float, Float ) -> GlobalData u -> GlobalData u
 setCameraPos ( x, y ) user =
     let
@@ -32,6 +34,8 @@ setCameraPos ( x, y ) user =
     }
 
 
+{-| Set the camera scale.
+-}
 setCameraScale : Float -> GlobalData u -> GlobalData u
 setCameraScale scale user =
     let
@@ -46,6 +50,8 @@ setCameraScale scale user =
     }
 
 
+{-| Set the camera angle.
+-}
 setCameraAngle : Float -> GlobalData u -> GlobalData u
 setCameraAngle angle user =
     let
