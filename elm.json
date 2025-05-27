@@ -3,7 +3,7 @@
     "name": "linsyking/messenger-core",
     "summary": "Core library for Messenger.",
     "license": "BSD-3-Clause",
-    "version": "16.1.1",
+    "version": "17.0.1",
     "exposed-modules": {
         "Base": [
             "Messenger.Base",
@@ -40,7 +40,7 @@
         "elm/json": "1.0.0 <= v < 2.0.0",
         "elm/time": "1.0.0 <= v < 2.0.0",
         "ianmackenzie/elm-units": "2.10.0 <= v < 3.0.0",
-        "linsyking/elm-regl": "7.0.0 <= v < 8.0.0"
+        "linsyking/elm-regl": "8.0.0 <= v < 9.0.0"
     },
     "test-dependencies": {}
 }
