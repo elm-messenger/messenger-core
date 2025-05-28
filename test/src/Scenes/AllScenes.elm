@@ -18,6 +18,7 @@ import Messenger.Scene.Scene exposing (AllScenes)
 import Scenes.Audio.Model as Audio
 import Scenes.Camera.Model as Camera
 import Scenes.Home.Model as Home
+import Scenes.Interaction.Model as Interaction
 import Scenes.Stress.Model as Stress
 import Scenes.Transition.Model as Transition
 
@@ -35,4 +36,5 @@ allScenes =
         , ( "Audio", Audio.scene )
         , ( "Transition", Transition.scene )
         , ( "Camera", Camera.scene )
+        , ( "Interaction", Interaction.scene )
         ]
