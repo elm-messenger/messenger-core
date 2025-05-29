@@ -107,7 +107,6 @@ view env data =
     group []
         [ P.clear Color.lightYellow
         , P.textbox ( 0, 30 ) 50 prompt "firacode" Color.black
-        , P.textbox ( 0, 230 ) 450 "Hello\nworld!" "consolas" Color.black
         , renderSprite env.globalData.internalData ( 1200, 0 ) ( 0, 200 ) "ship"
         , renderSprite env.globalData.internalData ( 1500, 300 ) ( 0, 200 ) "sq"
         ]
