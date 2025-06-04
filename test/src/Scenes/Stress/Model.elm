@@ -50,6 +50,7 @@ view env data =
     in
     group [] <|
         P.clear Color.white
+            :: P.textbox ( 0, 0 ) 50 "[Backspace] to go back to Home" "firacode" Color.black
             :: (List.concat <|
                     List.map
                         (\x ->
