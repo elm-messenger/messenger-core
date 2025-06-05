@@ -26,6 +26,9 @@
         },
         "Interaction": {
             "raw": true
+        },
+        "Components": {
+            "raw": false
         }
     },
     "sceneprotos": {}

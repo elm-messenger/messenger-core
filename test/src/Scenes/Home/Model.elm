@@ -85,6 +85,13 @@ update env msg data =
             , env
             )
 
+        KeyDown 56 ->
+            ( data
+            , [ SOMChangeScene Nothing "Components"
+              ]
+            , env
+            )
+
         _ ->
             ( data, [], env )
 
@@ -99,6 +106,7 @@ prompt =
 5. Change FPS to Animation Frame
 6. Load a new image (along with the asset loading GC)
 7. Camera Test
+8. Component Test
 """
 
 
