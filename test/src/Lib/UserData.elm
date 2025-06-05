@@ -15,8 +15,15 @@ import Json.Encode as Encode
 
 {-| User defined data
 -}
+type alias TetrisUserData =
+    { lastMaxScore : Int
+    , currentMaxScore : Int
+    }
+
+
 type alias UserData =
-    {}
+    { tetrisData : TetrisUserData
+    }
 
 
 {-| Encoder for the UserData.
@@ -25,9 +32,7 @@ encodeUserData : UserData -> String
 encodeUserData storage =
     Encode.encode 0
         (Encode.object
-            [--Aadd your data here
-             -- Example:
-             -- ( "volume", Encode.float storage.volume )
+            [ ( "maxScore", Encode.int storage.tetrisData.currentMaxScore )
             ]
         )
 
@@ -36,9 +41,8 @@ encodeUserData storage =
 -}
 decodeUserData : String -> UserData
 decodeUserData ls =
-    -- Example:
-    -- let
-    --     vol =
-    --         Result.withDefault 0.5 (decodeString (at [ "volume" ] Decode.float) ls)
-    -- in
-    UserData
+    let
+        lastMaxScore =
+            Result.withDefault 0 (decodeString (at [ "maxScore" ] Decode.int) ls)
+    in
+    UserData <| TetrisUserData lastMaxScore lastMaxScore

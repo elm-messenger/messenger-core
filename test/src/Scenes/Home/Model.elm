@@ -72,7 +72,7 @@ update env msg data =
 
         KeyDown 54 ->
             ( data
-            , [ SOMLoadResource "sq" (TextureRes "assets/sq.jpg" Nothing)
+            , [ SOMLoadResource "sq" (TextureRes "assets/img/sq.jpg" Nothing)
               , SOMLoadGC (InitScene.genGC Nothing)
               ]
             , env
@@ -92,6 +92,13 @@ update env msg data =
             , env
             )
 
+        KeyDown 57 ->
+            ( data
+            , [ SOMChangeScene Nothing "Tetris"
+              ]
+            , env
+            )
+
         _ ->
             ( data, [], env )
 
@@ -107,6 +114,7 @@ prompt =
 6. Load a new image (along with the asset loading GC)
 7. Camera Test
 8. Component Test
+9. Tetris
 """
 
 

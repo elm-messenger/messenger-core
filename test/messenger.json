@@ -29,6 +29,9 @@
         },
         "Components": {
             "raw": false
+        },
+        "Tetris": {
+            "raw": false
         }
     },
     "sceneprotos": {}
