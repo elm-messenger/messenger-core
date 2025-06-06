@@ -9,6 +9,7 @@ module Lib.Resources exposing (resources)
 
 -}
 
+import Lib.Programs.PointLight as PointLight
 import Messenger.Resources.Base exposing (ResourceDef(..), ResourceDefs)
 
 
@@ -79,4 +80,5 @@ Example:
 -}
 allProgram : ResourceDefs
 allProgram =
-    []
+    [ ( "plight", ProgramRes PointLight.prog )
+    ]

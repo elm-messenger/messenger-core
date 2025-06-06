@@ -8,6 +8,7 @@ module Scenes.Rain.Model exposing (scene)
 
 import Color
 import Lib.Base exposing (SceneMsg)
+import Lib.Programs.PointLight exposing (plight)
 import Lib.UserData exposing (UserData)
 import List exposing (length)
 import Messenger.Base exposing (UserEvent(..))
@@ -109,6 +110,7 @@ view env data =
     group []
         [ clear Color.black
         , lines data.rainPos (Color.rgba 0.7 0.7 0.8 0.8)
+        , plight 1500 200 500 (Color.rgba 1 1 1 1)
         ]
 
 
