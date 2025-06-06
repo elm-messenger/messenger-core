@@ -11,7 +11,7 @@ import Duration
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
 import Messenger.Base exposing (UserEvent(..))
-import Messenger.Coordinate.Camera exposing (defaultCamera, setCameraPos)
+import Messenger.Coordinate.Camera exposing (defaultCamera, setCameraPos, setCameraScale)
 import Messenger.GlobalComponents.AssetLoading.Model as InitScene
 import Messenger.GlobalComponents.Transition.Model exposing (genSequentialTransitionSOM)
 import Messenger.GlobalComponents.Transition.Transitions exposing (fadeIn, fadeOut)
@@ -101,7 +101,7 @@ update env msg data =
             ( data
             , [ SOMChangeScene Nothing "Tetris"
               ]
-            , { env | globalData = gd |> setCameraPos ( 220, 400 ) }
+            , { env | globalData = gd |> setCameraPos ( 220, 400 ) |> setCameraScale 1.5 }
             )
 
         _ ->

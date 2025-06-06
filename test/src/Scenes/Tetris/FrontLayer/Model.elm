@@ -14,6 +14,7 @@ import Lib.Base exposing (SceneMsg)
 import Lib.Tetris.Grid as Grid exposing (Grid)
 import Lib.UserData exposing (UserData)
 import Messenger.Base exposing (Env, UserEvent(..))
+import Messenger.Coordinate.Camera exposing (defaultCamera)
 import Messenger.GeneralModel exposing (Matcher, Msg(..), MsgBase(..))
 import Messenger.GlobalComponents.Transition.Model exposing (genMixedTransitionSOM)
 import Messenger.GlobalComponents.Transition.Transitions exposing (fadeMix)
@@ -38,13 +39,13 @@ init _ _ =
 
 
 update : LayerUpdate SceneCommonData UserData LayerTarget LayerMsg SceneMsg Data
-update env msg data =
+update ({ globalData } as env) msg data =
     case msg of
         KeyDown 8 ->
             ( data
             , [ Parent <| SOMMsg <| genMixedTransitionSOM ( fadeMix, Duration.seconds 1 ) ( "Home", Nothing )
               ]
-            , ( env, False )
+            , ( { env | globalData = { globalData | camera = defaultCamera globalData } }, False )
             )
 
         _ ->
