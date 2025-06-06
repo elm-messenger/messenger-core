@@ -32,6 +32,9 @@
         },
         "Tetris": {
             "raw": false
+        },
+        "Rain": {
+            "raw": true
         }
     },
     "sceneprotos": {}
