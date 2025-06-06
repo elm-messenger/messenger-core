@@ -117,7 +117,10 @@ update env msg data =
 
 prompt : String
 prompt =
-    """Menu
+    """Instructions:
+Press the following key to trigger actions.
+Press Backspace to return to the menu.
+-= Menu =-
 1. Transition Test
 2. Rendering Stress Test
 3. Audio Test

@@ -7,10 +7,14 @@ module Scenes.Interaction.Model exposing (scene)
 -}
 
 import Color
+import Duration
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
+import Messenger.Base exposing (UserEvent(..))
 import Messenger.Component.Component exposing (AbstractComponent, updateComponents, viewComponents)
 import Messenger.GeneralModel exposing (Msg(..), MsgBase(..))
+import Messenger.GlobalComponents.Transition.Model exposing (genMixedTransitionSOM)
+import Messenger.GlobalComponents.Transition.Transitions exposing (fadeMix)
 import Messenger.Layer.Layer exposing (Handler, handleComponentMsgs)
 import Messenger.Scene.RawScene exposing (RawSceneInit, RawSceneUpdate, RawSceneView, genRawScene)
 import Messenger.Scene.Scene exposing (MConcreteScene, SceneStorage)
@@ -92,7 +96,16 @@ update env msg data =
                 )
                 msgs2
     in
-    ( data1, sommsgs, env2 )
+    case msg of
+        KeyDown 8 ->
+            ( data1
+            , [ genMixedTransitionSOM ( fadeMix, Duration.seconds 1 ) ( "Home", Nothing )
+              ]
+            , env2
+            )
+
+        _ ->
+            ( data1, sommsgs, env2 )
 
 
 view : RawSceneView UserData Data

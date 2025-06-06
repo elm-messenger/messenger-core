@@ -34,6 +34,13 @@ init env msg =
 update : RawSceneUpdate Data UserData SceneMsg
 update env msg data =
     case msg of
+        KeyDown 8 ->
+            ( data
+            , [ genMixedTransitionSOM ( fadeMix, Duration.seconds 1 ) ( "Home", Nothing )
+              ]
+            , env
+            )
+
         KeyDown 49 ->
             ( data
             , [ genMixedTransitionSOM ( fadeMix, Duration.seconds 1 ) ( "Home", Nothing )
