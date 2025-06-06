@@ -70,7 +70,7 @@ update ({ commonData } as env) evnt ({ text } as data) basedata =
             else
                 ( ( data, basedata ), [], ( env, False ) )
 
-        MouseUp 0 pos ->
+        MouseUp 0 _ ->
             ( ( data, basedata ), [ Other ( "GameGrid", TetrisMsg Tetris.CancelAll ) ], ( env, False ) )
 
         _ ->
