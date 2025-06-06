@@ -6,6 +6,7 @@ module Messenger.Coordinate.Coordinates exposing
     , maxHandW
     , getStartPoint
     , judgeMouseRect
+    , judgeMouseRectWithCamera
     , fromMouseToVirtual
     )
 
@@ -25,11 +26,14 @@ Normally, users do not need to use this module directly, as Messenger will handl
 @docs maxHandW
 @docs getStartPoint
 @docs judgeMouseRect
+@docs judgeMouseRectWithCamera
 @docs fromMouseToVirtual
 
 -}
 
 import Messenger.Base exposing (InternalData)
+import Messenger.Coordinate.Camera exposing (transformPos, transformPosInverse)
+import REGL.Common exposing (Camera)
 
 
 plScale : ( Float, Float ) -> Float
@@ -162,8 +166,7 @@ getStartPoint vsize ( w, h ) =
         ( 0, (h - fh) / 2 )
 
 
-{-| judgeMouseRect
-Judge whether the mouse position is in the rectangle.
+{-| Judge whether the mouse position is in the rectangle.
 Usage: `judgeMouseRect ( mx, my ) ( x, y ) ( w, h )`
 
   - (mx,my) is the coordinate of the mouse, which you can get easily from globalData.
@@ -175,6 +178,26 @@ The function returns a bool indicating whether the mouse is in the rectangle.
 -}
 judgeMouseRect : ( Float, Float ) -> ( Float, Float ) -> ( Float, Float ) -> Bool
 judgeMouseRect ( mx, my ) ( x, y ) ( w, h ) =
+    x <= mx && mx <= x + w && y <= my && my <= y + h
+
+
+{-| Judge whether the mouse position is in the rectangle, with camera.
+-}
+judgeMouseRectWithCamera : Camera -> ( Float, Float ) -> ( Float, Float ) -> ( Float, Float ) -> Bool
+judgeMouseRectWithCamera cam mpos ( x, y ) ( w, h ) =
+    let
+        ( mx, my ) =
+            transformPosInverse cam mpos
+
+        _ =
+            Debug.log "Raw mouse" mpos
+
+        _ =
+            Debug.log "cam" cam
+
+        _ =
+            Debug.log "new mouse" ( mx, my )
+    in
     x <= mx && mx <= x + w && y <= my && my <= y + h
 
 

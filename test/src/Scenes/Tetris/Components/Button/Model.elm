@@ -12,7 +12,7 @@ import Lib.Tetris.Base as Tetris
 import Lib.UserData exposing (UserData)
 import Messenger.Base exposing (UserEvent(..))
 import Messenger.Component.Component exposing (ComponentInit, ComponentMatcher, ComponentStorage, ComponentUpdate, ComponentUpdateRec, ComponentView, ConcreteUserComponent, genComponent)
-import Messenger.Coordinate.Coordinates exposing (judgeMouseRect)
+import Messenger.Coordinate.Coordinates exposing (judgeMouseRect, judgeMouseRectWithCamera)
 import Messenger.GeneralModel exposing (Msg(..))
 import REGL.BuiltinPrograms as P exposing (defaultTextBoxOption)
 import REGL.Common exposing (group)
@@ -44,7 +44,7 @@ update : ComponentUpdate SceneCommonData Data UserData SceneMsg ComponentTarget 
 update ({ commonData } as env) evnt ({ text } as data) basedata =
     case evnt of
         MouseDown 0 pos ->
-            if judgeMouseRect pos data.position data.size then
+            if judgeMouseRectWithCamera env.globalData.camera pos data.position data.size then
                 case ( data.buttonType, commonData.state ) of
                     ( Button.State, Stopped ) ->
                         ( ( { data | text = { text | content = "Pause" } }, basedata ), [ Other ( "GameGrid", TetrisMsg Tetris.Start ) ], ( { env | commonData = { commonData | state = Playing } }, False ) )
