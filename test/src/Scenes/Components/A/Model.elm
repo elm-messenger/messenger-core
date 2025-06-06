@@ -42,10 +42,10 @@ handleComponentMsg env compmsg data =
         OtherMsg msg ->
             case msg of
                 RectReportMsg rm ->
-                    let
-                        _ =
-                            Debug.log "RectReportMsg" rm
-                    in
+                    -- let
+                    --     _ =
+                    --         Debug.log "RectReportMsg" rm
+                    -- in
                     ( data, [], env )
 
                 _ ->
