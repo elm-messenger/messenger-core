@@ -104,6 +104,13 @@ update env msg data =
             , { env | globalData = gd |> setCameraPos ( 220, 400 ) |> setCameraScale 1.5 }
             )
 
+        KeyDown 81 ->
+            ( data
+            , [ SOMChangeScene Nothing "Interaction"
+              ]
+            , env
+            )
+
         _ ->
             ( data, [], env )
 
@@ -120,6 +127,7 @@ prompt =
 7. Camera Test
 8. Component Test
 9. Tetris
+q. Interaction
 """
 
 
