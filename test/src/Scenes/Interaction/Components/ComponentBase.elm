@@ -11,6 +11,8 @@ module Scenes.Interaction.Components.ComponentBase exposing (ComponentMsg(..), C
 
 import Scenes.Interaction.Components.Button.Init as ButtonInit
 import Scenes.Interaction.Components.Button.Msg as ButtonMsg
+import Scenes.Interaction.Components.Slider.Init as SliderInit
+import Scenes.Interaction.Components.Slider.Msg as SliderMsg
 
 
 {-| Component message
@@ -18,6 +20,8 @@ import Scenes.Interaction.Components.Button.Msg as ButtonMsg
 type ComponentMsg
     = ButtonInitMsg ButtonInit.InitData
     | ButtonUpdateMsg ButtonMsg.ButtonMsg
+    | SliderInitMsg SliderInit.InitData
+    | SliderUpdateMsg SliderMsg.SliderMsg
     | NullComponentMsg
 
 

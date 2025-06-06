@@ -6,6 +6,7 @@ module Messenger.Coordinate.Coordinates exposing
     , maxHandW
     , getStartPoint
     , judgeMouseRect
+    , judgeMouseCircle
     , judgeMouseRectWithCamera
     , fromMouseToVirtual
     )
@@ -26,6 +27,7 @@ Normally, users do not need to use this module directly, as Messenger will handl
 @docs maxHandW
 @docs getStartPoint
 @docs judgeMouseRect
+@docs judgeMouseCircle
 @docs judgeMouseRectWithCamera
 @docs fromMouseToVirtual
 
@@ -179,6 +181,20 @@ The function returns a bool indicating whether the mouse is in the rectangle.
 judgeMouseRect : ( Float, Float ) -> ( Float, Float ) -> ( Float, Float ) -> Bool
 judgeMouseRect ( mx, my ) ( x, y ) ( w, h ) =
     x <= mx && mx <= x + w && y <= my && my <= y + h
+
+
+{-| Judge whether the mouse position is in the circle.
+-}
+judgeMouseCircle : ( Float, Float ) -> ( Float, Float ) -> Float -> Bool
+judgeMouseCircle ( mx, my ) ( cx, cy ) r =
+    let
+        dx =
+            mx - cx
+
+        dy =
+            my - cy
+    in
+    dx * dx + dy * dy <= r * r
 
 
 {-| Judge whether the mouse position is in the rectangle, with camera.

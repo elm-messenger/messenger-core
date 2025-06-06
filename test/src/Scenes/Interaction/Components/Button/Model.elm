@@ -12,9 +12,11 @@ import Lib.UserData exposing (UserData)
 import Messenger.Base exposing (UserEvent(..))
 import Messenger.Component.Component exposing (ComponentInit, ComponentMatcher, ComponentStorage, ComponentUpdate, ComponentUpdateRec, ComponentView, ConcreteUserComponent, genComponent)
 import Messenger.Coordinate.Coordinates exposing (judgeMouseRect)
+import Messenger.GeneralModel exposing (Msg(..), MsgBase(..))
 import REGL.BuiltinPrograms as P
 import REGL.Common exposing (group)
 import Scenes.Interaction.Components.Button.Init exposing (InitData)
+import Scenes.Interaction.Components.Button.Msg as BMsg
 import Scenes.Interaction.Components.ComponentBase exposing (BaseData, ComponentMsg(..), ComponentTarget)
 import Scenes.Interaction.SceneBase exposing (SceneCommonData)
 
@@ -67,11 +69,11 @@ update env evnt data basedata =
     in
     case evnt of
         MouseUp _ _ ->
-            ( ( { data | curState = Normal }, basedata ), [], ( env, True ) )
+            ( ( { data | curState = Normal }, basedata ), [ Parent <| OtherMsg <| ButtonUpdateMsg BMsg.Released ], ( env, False ) )
 
         MouseDown _ _ ->
             if judgeMouseRect env.globalData.mousePos data.pos data.initdata.size then
-                ( ( { data | curState = Pressed }, basedata ), [], ( env, True ) )
+                ( ( { data | curState = Pressed }, basedata ), [ Parent <| OtherMsg <| ButtonUpdateMsg BMsg.Pressed ], ( env, True ) )
 
             else
                 ( ( data, basedata ), [], ( env, False ) )
