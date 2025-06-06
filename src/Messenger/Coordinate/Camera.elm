@@ -1,7 +1,7 @@
 module Messenger.Coordinate.Camera exposing
     ( setCameraPos, setCameraScale, setCameraAngle
-    , transformPos, transformPosInverse
     , defaultCamera
+    , viewToWorld, worldToView
     )
 
 {-|
@@ -75,10 +75,10 @@ defaultCamera gd =
     { x = gd.internalData.virtualWidth / 2, y = gd.internalData.virtualHeight / 2, zoom = 1, rotation = 0 }
 
 
-{-| Tranform a position from the virtual canvas to the camera coordinate system.
+{-| Tranform a position from the world coordinate system to the view (camera) coordinate system.
 -}
-transformPos : Camera -> ( Float, Float ) -> ( Float, Float )
-transformPos camera ( x, y ) =
+worldToView : Camera -> ( Float, Float ) -> ( Float, Float )
+worldToView camera ( x, y ) =
     let
         scale =
             camera.zoom
@@ -96,21 +96,27 @@ transformPos camera ( x, y ) =
         ( (x - camera.x) * scale, (y - camera.y) * scale )
 
     else
-        ( (x - camera.x) * scale * cosAngle - (y - camera.y) * scale * sinAngle
-        , (y - camera.y) * scale * cosAngle + (x - camera.x) * scale * sinAngle
+        ( (x - camera.x) * scale * cosAngle + (y - camera.y) * scale * sinAngle
+        , (y - camera.y) * scale * cosAngle - (x - camera.x) * scale * sinAngle
         )
 
 
-{-| Transform a position from the camera coordinate system to the virtual canvas.
+{-| Transform a position from the view coordinate system to the world coordinate system.
 
-This is the inverse of `transformPos`.
+This is the inverse of `worldToView`.
 
 -}
-transformPosInverse : Camera -> ( Float, Float ) -> ( Float, Float )
-transformPosInverse camera ( x, y ) =
+viewToWorld : Camera -> ( Float, Float ) -> ( Float, Float )
+viewToWorld camera ( x, y ) =
     let
         scale =
             camera.zoom
+
+        xs =
+            x / scale
+
+        ys =
+            y / scale
 
         angle =
             camera.rotation
@@ -122,9 +128,9 @@ transformPosInverse camera ( x, y ) =
             sin angle
     in
     if angle == 0 then
-        ( x / scale + camera.x, y / scale + camera.y )
+        ( xs + camera.x, ys + camera.y )
 
     else
-        ( x / scale * cosAngle + y / scale * sinAngle + camera.x
-        , y / scale * cosAngle - x / scale * sinAngle + camera.y
+        ( xs * cosAngle - ys * sinAngle + camera.x
+        , ys * cosAngle + xs * sinAngle + camera.y
         )

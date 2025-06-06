@@ -44,7 +44,7 @@ update : ComponentUpdate SceneCommonData Data UserData SceneMsg ComponentTarget 
 update ({ commonData } as env) evnt ({ text } as data) basedata =
     case evnt of
         MouseDown 0 pos ->
-            if judgeMouseRectWithCamera env.globalData.camera pos data.position data.size then
+            if judgeMouseRectWithCamera env.globalData.internalData env.globalData.camera pos data.position data.size then
                 case ( data.buttonType, commonData.state ) of
                     ( Button.State, Stopped ) ->
                         ( ( { data | text = { text | content = "Pause" } }, basedata ), [ Other ( "GameGrid", TetrisMsg Tetris.Start ) ], ( { env | commonData = { commonData | state = Playing } }, False ) )
@@ -71,11 +71,7 @@ update ({ commonData } as env) evnt ({ text } as data) basedata =
                 ( ( data, basedata ), [], ( env, False ) )
 
         MouseUp 0 pos ->
-            if judgeMouseRect pos data.position data.size then
-                ( ( data, basedata ), [ Other ( "GameGrid", TetrisMsg Tetris.CancelAll ) ], ( env, False ) )
-
-            else
-                ( ( data, basedata ), [], ( env, False ) )
+            ( ( data, basedata ), [ Other ( "GameGrid", TetrisMsg Tetris.CancelAll ) ], ( env, False ) )
 
         _ ->
             ( ( data, basedata ), [], ( env, False ) )

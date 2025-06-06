@@ -32,7 +32,7 @@ Normally, users do not need to use this module directly, as Messenger will handl
 -}
 
 import Messenger.Base exposing (InternalData)
-import Messenger.Coordinate.Camera exposing (transformPos, transformPosInverse)
+import Messenger.Coordinate.Camera exposing (viewToWorld)
 import REGL.Common exposing (Camera)
 
 
@@ -183,20 +183,14 @@ judgeMouseRect ( mx, my ) ( x, y ) ( w, h ) =
 
 {-| Judge whether the mouse position is in the rectangle, with camera.
 -}
-judgeMouseRectWithCamera : Camera -> ( Float, Float ) -> ( Float, Float ) -> ( Float, Float ) -> Bool
-judgeMouseRectWithCamera cam mpos ( x, y ) ( w, h ) =
+judgeMouseRectWithCamera : InternalData -> Camera -> ( Float, Float ) -> ( Float, Float ) -> ( Float, Float ) -> Bool
+judgeMouseRectWithCamera id cam ( x1, y1 ) ( x, y ) ( w, h ) =
     let
+        ( x2, y2 ) =
+            ( x1 - id.virtualWidth / 2, y1 - id.virtualHeight / 2 )
+
         ( mx, my ) =
-            transformPosInverse cam mpos
-
-        _ =
-            Debug.log "Raw mouse" mpos
-
-        _ =
-            Debug.log "cam" cam
-
-        _ =
-            Debug.log "new mouse" ( mx, my )
+            viewToWorld cam ( x2, y2 )
     in
     x <= mx && mx <= x + w && y <= my && my <= y + h
 
