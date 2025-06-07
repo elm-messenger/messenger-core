@@ -14,7 +14,7 @@ import List exposing (length)
 import Messenger.Base exposing (UserEvent(..))
 import Messenger.Scene.RawScene exposing (RawSceneInit, RawSceneUpdate, RawSceneView, genRawScene)
 import Messenger.Scene.Scene exposing (MConcreteScene, SceneStorage)
-import REGL.BuiltinPrograms exposing (clear, lines)
+import REGL.BuiltinPrograms as P exposing (clear, lines)
 import REGL.Common exposing (group)
 import Random
 
@@ -109,8 +109,8 @@ view : RawSceneView UserData Data
 view env data =
     group []
         [ clear Color.black
+        , plight 1600 200 100 500 (Color.rgba 1 0.8 0.3 1)
         , lines data.rainPos (Color.rgba 0.7 0.7 0.8 0.8)
-        , plight 1500 200 500 (Color.rgba 1 1 1 1)
         ]
 
 

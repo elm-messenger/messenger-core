@@ -9,10 +9,10 @@ import REGL.Program exposing (ProgValue(..), REGLProgram)
 
 frag =
     """
-precision mediump float;
+precision highp float;
 uniform vec2 view;
 uniform vec4 camera;
-uniform vec3 pr; // x, y, radius
+uniform vec4 pr; // x, y, radius, radius2
 uniform vec4 color;
 varying vec2 v_position;
 void main() {
@@ -25,11 +25,21 @@ void main() {
         cpos = (rotation * (pr.xy - camera.xy));
     }
 
-    float distance = distance(position, cpos);
+    float dist = distance(position, cpos);
+    
+    if (dist > pr.w) discard;
 
-    float intensity = 1.0 - smoothstep(0.0, pr.z, distance);
 
-    gl_FragColor = color * intensity;
+    float alpha;
+
+    if (dist < pr.z) {
+        alpha = 1.0;
+    } else {
+        float t = (dist - pr.z) / (pr.w - pr.z);  // [0, 1]
+        alpha = 1.0 - pow(t, 1.0 / 3.0);           // cubic root falloff
+    }
+
+    gl_FragColor = color * alpha;
 }
 
 """
@@ -79,11 +89,11 @@ prog =
     }
 
 
-plight : Float -> Float -> Float -> Color -> Renderable
-plight x y r color =
+plight : Float -> Float -> Float -> Float -> Color -> Renderable
+plight x y r r2 color =
     genProg <|
         [ ( "_c", Encode.int 0 )
         , ( "_p", Encode.string "plight" )
-        , ( "pr", Encode.list Encode.float [ x, y, r ] )
+        , ( "pr", Encode.list Encode.float [ x, y, r, r2 ] )
         , ( "color", Encode.list Encode.float (toRgbaList color) )
         ]
