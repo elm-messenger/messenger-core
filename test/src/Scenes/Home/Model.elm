@@ -104,9 +104,16 @@ update env msg data =
             , { env | globalData = gd |> setCameraPos ( 220, 400 ) |> setCameraScale 1.5 }
             )
 
-        KeyDown 81 ->
+        KeyDown 65 ->
             ( data
             , [ SOMChangeScene Nothing "Interaction"
+              ]
+            , env
+            )
+
+        KeyDown 66 ->
+            ( data
+            , [ SOMChangeScene Nothing "Rain"
               ]
             , env
             )
@@ -130,7 +137,8 @@ Press Backspace to return to the menu.
 7. Camera Test
 8. Component Test
 9. Tetris
-q. Interaction
+a. Interaction
+b. Rain
 """
 
 
@@ -138,7 +146,7 @@ view : RawSceneView UserData Data
 view env data =
     group []
         [ P.clear Color.lightYellow
-        , P.textbox ( 0, 30 ) 50 prompt "firacode" Color.black
+        , P.textbox ( 0, 30 ) 30 prompt "firacode" Color.black
         , renderSprite env.globalData.internalData ( 1200, 0 ) ( 0, 200 ) "ship"
         , renderSprite env.globalData.internalData ( 1500, 300 ) ( 0, 200 ) "sq"
         ]
