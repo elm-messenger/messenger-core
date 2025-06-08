@@ -105,8 +105,6 @@ prompt =
 4. Play loop with 1 to the end
 5. Scale audio to 0.5 and loop (volume x 0.5)
 6. Audio fading out and in
-
-[Backspace] to go back to Home
 """
 
 

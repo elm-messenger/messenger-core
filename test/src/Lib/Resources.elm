@@ -9,6 +9,7 @@ module Lib.Resources exposing (resources)
 
 -}
 
+import Lib.Programs.PointLight as PointLight
 import Messenger.Resources.Base exposing (ResourceDef(..), ResourceDefs)
 
 
@@ -34,8 +35,8 @@ Example:
 -}
 allTexture : ResourceDefs
 allTexture =
-    [ ( "ship", TextureRes "assets/enemy.png" Nothing )
-    , ( "mask", TextureRes "assets/mask.jpg" Nothing )
+    [ ( "ship", TextureRes "assets/img/enemy.png" Nothing )
+    , ( "mask", TextureRes "assets/img/mask.jpg" Nothing )
     ]
 
 
@@ -51,7 +52,7 @@ Example:
 -}
 allAudio : ResourceDefs
 allAudio =
-    [ ( "test", AudioRes "assets/test.ogg" )
+    [ ( "test", AudioRes "assets/aud/test.ogg" )
     ]
 
 
@@ -65,7 +66,7 @@ Example:
 -}
 allFont : ResourceDefs
 allFont =
-    [ ( "firacode", FontRes "assets/FiraCode-Regular.png" "assets/FiraCode-Regular.json" )
+    [ ( "firacode", FontRes "assets/fonts/font_0.png" "assets/fonts/FiraCode-Regular.json" )
     ]
 
 
@@ -79,4 +80,5 @@ Example:
 -}
 allProgram : ResourceDefs
 allProgram =
-    []
+    [ ( "plight", ProgramRes PointLight.prog )
+    ]

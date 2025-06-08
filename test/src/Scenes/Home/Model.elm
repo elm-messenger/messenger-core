@@ -11,6 +11,7 @@ import Duration
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
 import Messenger.Base exposing (UserEvent(..))
+import Messenger.Coordinate.Camera exposing (defaultCamera, setCameraPos, setCameraScale)
 import Messenger.GlobalComponents.AssetLoading.Model as InitScene
 import Messenger.GlobalComponents.Transition.Model exposing (genSequentialTransitionSOM)
 import Messenger.GlobalComponents.Transition.Transitions exposing (fadeIn, fadeOut)
@@ -72,7 +73,7 @@ update env msg data =
 
         KeyDown 54 ->
             ( data
-            , [ SOMLoadResource "sq" (TextureRes "assets/sq.jpg" Nothing)
+            , [ SOMLoadResource "sq" (TextureRes "assets/img/sq.jpg" Nothing)
               , SOMLoadGC (InitScene.genGC Nothing)
               ]
             , env
@@ -92,13 +93,41 @@ update env msg data =
             , env
             )
 
+        KeyDown 57 ->
+            let
+                gd =
+                    env.globalData
+            in
+            ( data
+            , [ SOMChangeScene Nothing "Tetris"
+              ]
+            , { env | globalData = gd |> setCameraPos ( 220, 400 ) |> setCameraScale 1.5 }
+            )
+
+        KeyDown 65 ->
+            ( data
+            , [ SOMChangeScene Nothing "Interaction"
+              ]
+            , env
+            )
+
+        KeyDown 66 ->
+            ( data
+            , [ SOMChangeScene Nothing "Rain"
+              ]
+            , env
+            )
+
         _ ->
             ( data, [], env )
 
 
 prompt : String
 prompt =
-    """Menu
+    """Instructions:
+Press the following key to trigger actions.
+Press Backspace to return to the menu.
+-= Menu =-
 1. Transition Test
 2. Rendering Stress Test
 3. Audio Test
@@ -107,6 +136,9 @@ prompt =
 6. Load a new image (along with the asset loading GC)
 7. Camera Test
 8. Component Test
+9. Tetris
+a. Interaction
+b. Rain
 """
 
 
@@ -114,7 +146,7 @@ view : RawSceneView UserData Data
 view env data =
     group []
         [ P.clear Color.lightYellow
-        , P.textbox ( 0, 30 ) 50 prompt "firacode" Color.black
+        , P.textbox ( 0, 30 ) 30 prompt "firacode" Color.black
         , renderSprite env.globalData.internalData ( 1200, 0 ) ( 0, 200 ) "ship"
         , renderSprite env.globalData.internalData ( 1500, 300 ) ( 0, 200 ) "sq"
         ]

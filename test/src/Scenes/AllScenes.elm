@@ -20,7 +20,9 @@ import Scenes.Camera.Model as Camera
 import Scenes.Components.Model as Components
 import Scenes.Home.Model as Home
 import Scenes.Interaction.Model as Interaction
+import Scenes.Rain.Model as Rain
 import Scenes.Stress.Model as Stress
+import Scenes.Tetris.Model as Tetris
 import Scenes.Transition.Model as Transition
 
 
@@ -39,4 +41,6 @@ allScenes =
         , ( "Camera", Camera.scene )
         , ( "Interaction", Interaction.scene )
         , ( "Components", Components.scene )
+        , ( "Tetris", Tetris.scene )
+        , ( "Rain", Rain.scene )
         ]

@@ -29,6 +29,12 @@
         },
         "Components": {
             "raw": false
+        },
+        "Tetris": {
+            "raw": false
+        },
+        "Rain": {
+            "raw": true
         }
     },
     "sceneprotos": {}

@@ -6,6 +6,8 @@ module Messenger.Coordinate.Coordinates exposing
     , maxHandW
     , getStartPoint
     , judgeMouseRect
+    , judgeMouseCircle
+    , judgeMouseRectWithCamera
     , fromMouseToVirtual
     )
 
@@ -25,11 +27,15 @@ Normally, users do not need to use this module directly, as Messenger will handl
 @docs maxHandW
 @docs getStartPoint
 @docs judgeMouseRect
+@docs judgeMouseCircle
+@docs judgeMouseRectWithCamera
 @docs fromMouseToVirtual
 
 -}
 
 import Messenger.Base exposing (InternalData)
+import Messenger.Coordinate.Camera exposing (viewToWorld)
+import REGL.Common exposing (Camera)
 
 
 plScale : ( Float, Float ) -> Float
@@ -162,8 +168,7 @@ getStartPoint vsize ( w, h ) =
         ( 0, (h - fh) / 2 )
 
 
-{-| judgeMouseRect
-Judge whether the mouse position is in the rectangle.
+{-| Judge whether the mouse position is in the rectangle.
 Usage: `judgeMouseRect ( mx, my ) ( x, y ) ( w, h )`
 
   - (mx,my) is the coordinate of the mouse, which you can get easily from globalData.
@@ -175,6 +180,34 @@ The function returns a bool indicating whether the mouse is in the rectangle.
 -}
 judgeMouseRect : ( Float, Float ) -> ( Float, Float ) -> ( Float, Float ) -> Bool
 judgeMouseRect ( mx, my ) ( x, y ) ( w, h ) =
+    x <= mx && mx <= x + w && y <= my && my <= y + h
+
+
+{-| Judge whether the mouse position is in the circle.
+-}
+judgeMouseCircle : ( Float, Float ) -> ( Float, Float ) -> Float -> Bool
+judgeMouseCircle ( mx, my ) ( cx, cy ) r =
+    let
+        dx =
+            mx - cx
+
+        dy =
+            my - cy
+    in
+    dx * dx + dy * dy <= r * r
+
+
+{-| Judge whether the mouse position is in the rectangle, with camera.
+-}
+judgeMouseRectWithCamera : InternalData -> Camera -> ( Float, Float ) -> ( Float, Float ) -> ( Float, Float ) -> Bool
+judgeMouseRectWithCamera id cam ( x1, y1 ) ( x, y ) ( w, h ) =
+    let
+        ( x2, y2 ) =
+            ( x1 - id.virtualWidth / 2, y1 - id.virtualHeight / 2 )
+
+        ( mx, my ) =
+            viewToWorld cam ( x2, y2 )
+    in
     x <= mx && mx <= x + w && y <= my && my <= y + h
 
 
