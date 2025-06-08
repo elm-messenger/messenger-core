@@ -1,7 +1,6 @@
 module Messenger.Coordinate.Camera exposing
     ( setCameraPos, setCameraScale, setCameraAngle
-    , defaultCamera
-    , viewToWorld, worldToView
+    , defaultCamera, worldToView, viewToWorld
     )
 
 {-|
@@ -10,8 +9,7 @@ module Messenger.Coordinate.Camera exposing
 # Camera Tools
 
 @docs setCameraPos, setCameraScale, setCameraAngle
-@docs transformPos, transformPosInverse
-@docs defaultCamera
+@docs defaultCamera, worldToView, viewToWorld
 
 -}
 
