@@ -39,7 +39,7 @@ init _ _ =
 
 
 update : ComponentUpdate SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-update ({ globalData } as env) evnt data basedata =
+update ({ globalData, commonData } as env) evnt data basedata =
     if globalData.windowVisibility == Visible then
         case evnt of
             KeyDown 37 ->
@@ -57,6 +57,22 @@ update ({ globalData } as env) evnt data basedata =
             KeyDown 40 ->
                 --Down
                 ( ( startAccelerate True data, basedata ), [], ( env, False ) )
+
+            KeyDown 32 ->
+                -- Space
+                case commonData.state of
+                    Stopped ->
+                        let
+                            ( newData, newEnv ) =
+                                spawnTetrimino { env | commonData = { commonData | score = 0, lines = 0, state = Playing } } { data | grid = G.empty }
+                        in
+                        ( ( newData, basedata ), [], ( newEnv, False ) )
+
+                    Paused ->
+                        ( ( cancelState data, basedata ), [], ( { env | commonData = { commonData | state = Playing } }, False ) )
+
+                    Playing ->
+                        ( ( cancelState data, basedata ), [], ( { env | commonData = { commonData | state = Paused } }, False ) )
 
             KeyUp _ ->
                 ( ( cancelState data, basedata ), [], ( env, False ) )
