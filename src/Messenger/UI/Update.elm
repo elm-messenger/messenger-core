@@ -233,24 +233,32 @@ update input audiodata msg model =
                 gameUpdateInner (KeyDown 113) model
 
         WKeyUp key ->
-            let
-                newPressedKeys =
-                    Set.remove key gd.pressedKeys
+            if Set.member key gd.pressedKeys then
+                let
+                    newPressedKeys =
+                        Set.remove key gd.pressedKeys
 
-                newEnv =
-                    { env | globalData = { gd | pressedKeys = newPressedKeys } }
-            in
-            gameUpdateInner (KeyUp key) { model | env = newEnv }
+                    newEnv =
+                        { env | globalData = { gd | pressedKeys = newPressedKeys } }
+                in
+                gameUpdateInner (KeyUp key) { model | env = newEnv }
+
+            else
+                ( model, Cmd.none, Audio.cmdNone )
 
         WKeyDown key ->
-            let
-                newPressedKeys =
-                    Set.insert key gd.pressedKeys
+            if Set.member key gd.pressedKeys then
+                ( model, Cmd.none, Audio.cmdNone )
 
-                newEnv =
-                    { env | globalData = { gd | pressedKeys = newPressedKeys } }
-            in
-            gameUpdateInner (KeyDown key) { model | env = newEnv }
+            else
+                let
+                    newPressedKeys =
+                        Set.insert key gd.pressedKeys
+
+                    newEnv =
+                        { env | globalData = { gd | pressedKeys = newPressedKeys } }
+                in
+                gameUpdateInner (KeyDown key) { model | env = newEnv }
 
         WPrompt "load" result ->
             if existScene result scenes then
