@@ -35,8 +35,9 @@ Example:
 -}
 allTexture : ResourceDefs
 allTexture =
-    [ ( "ship", TextureRes "assets/img/enemy.png" Nothing )
+    [ ( "enemy", TextureRes "assets/img/enemy.png" Nothing )
     , ( "mask", TextureRes "assets/img/mask.jpg" Nothing )
+    , ( "ship", TextureRes "assets/img/ship.png" Nothing )
     ]
 
 

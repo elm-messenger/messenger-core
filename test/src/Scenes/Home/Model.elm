@@ -118,6 +118,13 @@ update env msg data =
             , env
             )
 
+        KeyDown 67 ->
+            ( data
+            , [ SOMChangeScene Nothing "SSLevel1"
+              ]
+            , env
+            )
+
         _ ->
             ( data, [], env )
 
@@ -139,6 +146,7 @@ Press Backspace to return to the menu.
 9. Tetris
 a. Interaction
 b. Rain
+c. Spaceshooter
 """
 
 
