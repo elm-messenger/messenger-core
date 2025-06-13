@@ -1,5 +1,5 @@
 module Messenger.Audio exposing
-    ( elementWithAudio, documentWithAudio, applicationWithAudio, Model, Msg, AudioData, Ports
+    ( elementWithAudio, Model, Msg, AudioData, Ports
     , AudioCmd, loadAudio, LoadError(..), Source, cmdMap, cmdBatch, cmdNone
     , Audio, audio, group, silence, length, audioWithConfig, audioDefaultConfig, PlayAudioConfig, LoopConfig
     , scaleVolume, scaleVolumeAt, offsetBy
@@ -12,7 +12,7 @@ module Messenger.Audio exposing
 
 Create an Elm app that supports playing audio.
 
-@docs elementWithAudio, documentWithAudio, applicationWithAudio, Model, Msg, AudioData, Ports
+@docs elementWithAudio, Model, Msg, AudioData, Ports
 
 
 # Load audio
@@ -40,7 +40,6 @@ Effects you can apply to `Audio`.
 -}
 
 import Browser
-import Browser.Navigation exposing (Key)
 import Dict exposing (Dict)
 import Duration exposing (Duration)
 import Html exposing (Html)
@@ -197,72 +196,6 @@ elementWithAudio =
                 , subscriptions = subscriptions app
                 }
                     |> Browser.element
-           )
-
-
-{-| Browser.document but with the ability to play sounds.
--}
-documentWithAudio :
-    { init : flags -> ( model, Cmd msg, AudioCmd msg )
-    , view : AudioData -> model -> Browser.Document msg
-    , update : AudioData -> msg -> model -> ( model, Cmd msg, AudioCmd msg )
-    , subscriptions : AudioData -> model -> Sub msg
-    , audio : AudioData -> model -> Audio
-    , audioPort : Ports msg
-    }
-    -> Platform.Program flags (Model msg model) (Msg msg)
-documentWithAudio =
-    withAudioOffset
-        >> (\app ->
-                { init = app.init >> initHelper app.audioPort.toJS app.audio
-                , view =
-                    \model ->
-                        let
-                            { title, body } =
-                                app.view (audioData model) (getUserModel model)
-                        in
-                        { title = title
-                        , body = body |> List.map (Html.map UserMsg)
-                        }
-                , update = update app
-                , subscriptions = subscriptions app
-                }
-                    |> Browser.document
-           )
-
-
-{-| Browser.application but with the ability to play sounds.
--}
-applicationWithAudio :
-    { init : flags -> Url -> Key -> ( model, Cmd msg, AudioCmd msg )
-    , view : AudioData -> model -> Browser.Document msg
-    , update : AudioData -> msg -> model -> ( model, Cmd msg, AudioCmd msg )
-    , subscriptions : AudioData -> model -> Sub msg
-    , onUrlRequest : Browser.UrlRequest -> msg
-    , onUrlChange : Url -> msg
-    , audio : AudioData -> model -> Audio
-    , audioPort : Ports msg
-    }
-    -> Platform.Program flags (Model msg model) (Msg msg)
-applicationWithAudio =
-    withAudioOffset
-        >> (\app ->
-                { init = \flags url key -> app.init flags url key |> initHelper app.audioPort.toJS app.audio
-                , view =
-                    \model ->
-                        let
-                            { title, body } =
-                                app.view (audioData model) (getUserModel model)
-                        in
-                        { title = title
-                        , body = body |> List.map (Html.map UserMsg)
-                        }
-                , update = update app
-                , subscriptions = subscriptions app
-                , onUrlRequest = app.onUrlRequest >> UserMsg
-                , onUrlChange = app.onUrlChange >> UserMsg
-                }
-                    |> Browser.application
            )
 
 
