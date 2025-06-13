@@ -45,7 +45,7 @@ function startmessenger(appname) {
 
     // Disable F1-F4 keys
     window.addEventListener("keydown", (e) => {
-        const { key, keyCode, metaKey, shiftKey, altKey, ctrlKey } = e;
+        const {  keyCode } = e;
         if (keyCode >= 112 && keyCode <= 115) {
             e.preventDefault();
         }

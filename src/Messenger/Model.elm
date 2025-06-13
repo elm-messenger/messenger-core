@@ -23,11 +23,16 @@ import Messenger.Base exposing (Env)
 import Messenger.Scene.Scene exposing (AbstractGlobalComponent, MAbstractScene)
 
 
+type alias CoreData =
+    { audioData : ()
+    }
+
 {-| The model for the game
 -}
 type alias Model userdata scenemsg =
     { env : Env (MAbstractScene userdata scenemsg) userdata
     , globalComponents : List (AbstractGlobalComponent userdata scenemsg)
+    , coreData: CoreData
     }
 
 
