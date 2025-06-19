@@ -98,7 +98,7 @@ view env data =
                     ]
 
             else
-                REGL.empty
+                P.empty
     in
     [ group gameOverVE
         [ P.textboxPro ( 1900, 80 ) { defaultTextBoxOption | size = 50, text = "Score: " ++ fromInt env.commonData.score, fonts = [ "firacode" ], color = Color.black, align = Just "right" }

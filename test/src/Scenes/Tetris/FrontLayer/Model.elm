@@ -66,7 +66,7 @@ renderBlock : SceneCommonData -> Renderable
 renderBlock commonData =
     case commonData.state of
         Playing ->
-            REGL.empty
+            P.empty
 
         _ ->
             P.rect ( 0, 30 ) ( 300, 600 ) <| Color.rgba 0.8 0.6 0.8 0.65
