@@ -33,7 +33,7 @@ renderSprite gd position size name =
             renderSpriteAutoHelper position size t
 
         Nothing ->
-            REGL.empty
+            P.empty
 
 
 renderSpriteAutoHelper : ( Float, Float ) -> ( Float, Float ) -> Texture -> Renderable
