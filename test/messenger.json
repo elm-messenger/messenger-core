@@ -35,7 +35,23 @@
         },
         "Rain": {
             "raw": true
+        },
+        "SSLevel1": {
+            "sceneproto": "Spaceshooter",
+            "raw": false
+        },
+        "SSLevel2": {
+            "sceneproto": "Spaceshooter",
+            "raw": false
         }
     },
-    "sceneprotos": {}
+    "sceneprotos": {
+        "Spaceshooter": {
+            "raw": false,
+            "levels": [
+                "SSLevel1",
+                "SSLevel2"
+            ]
+        }
+    }
 }

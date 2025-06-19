@@ -21,6 +21,7 @@ import Messenger.Scene.Scene exposing (AbstractScene(..), MAbstractScene, SceneO
 import Messenger.UI.Input exposing (Input)
 import Messenger.UserConfig exposing (EnabledBuiltinProgram(..), UserConfig)
 import REGL
+import REGL.BuiltinPrograms as P
 import Task
 
 
@@ -37,7 +38,7 @@ emptyScene =
             in
             Roll
                 { update = updates
-                , view = \_ -> REGL.empty
+                , view = \_ -> P.empty
                 }
     in
     abstractRec ()

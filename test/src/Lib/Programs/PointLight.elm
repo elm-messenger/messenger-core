@@ -2,8 +2,8 @@ module Lib.Programs.PointLight exposing (..)
 
 import Color exposing (Color)
 import Json.Encode as Encode
-import REGL.BuiltinPrograms as P exposing (toRgbaList)
-import REGL.Common exposing (Renderable, genProg)
+import REGL.BuiltinPrograms as P
+import REGL.Common exposing (Renderable, genProg, toRgbaList)
 import REGL.Program exposing (ProgValue(..), REGLProgram)
 
 

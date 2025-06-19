@@ -21,6 +21,8 @@ import Scenes.Components.Model as Components
 import Scenes.Home.Model as Home
 import Scenes.Interaction.Model as Interaction
 import Scenes.Rain.Model as Rain
+import Scenes.SSLevel1.Model as SSLevel1
+import Scenes.SSLevel2.Model as SSLevel2
 import Scenes.Stress.Model as Stress
 import Scenes.Tetris.Model as Tetris
 import Scenes.Transition.Model as Transition
@@ -43,4 +45,6 @@ allScenes =
         , ( "Components", Components.scene )
         , ( "Tetris", Tetris.scene )
         , ( "Rain", Rain.scene )
+        , ( "SSLevel1", SSLevel1.scene )
+        , ( "SSLevel2", SSLevel2.scene )
         ]
