@@ -1,12 +1,14 @@
 module Messenger.Base exposing
     ( WorldEvent(..)
     , UserEvent(..)
-    , GlobalData, InternalData
+    , GlobalData
     , Env
     , Flags
     , removeCommonData, addCommonData
     , UserViewGlobalData
-    , emptyInternalData, userGlobalDataToGlobalData, globalDataToUserGlobalData
+    , userGlobalDataToGlobalData, globalDataToUserGlobalData
+    , getVirtualSize, getRealSize, getViewPort, getCanvasOffset
+    , getLoadingProgress, getFonts, getPrograms, getSprite, getAllSprites
     )
 
 {-|
@@ -18,12 +20,20 @@ Some Basic Data Types for the game
 
 @docs WorldEvent
 @docs UserEvent
-@docs GlobalData, InternalData
+@docs GlobalData
 @docs Env
 @docs Flags
 @docs removeCommonData, addCommonData
 @docs UserViewGlobalData
-@docs emptyInternalData, userGlobalDataToGlobalData, globalDataToUserGlobalData
+@docs userGlobalDataToGlobalData, globalDataToUserGlobalData
+
+
+## Internal Data Getters
+
+Safe access to internal engine state
+
+@docs getVirtualSize, getRealSize, getViewPort, getCanvasOffset
+@docs getLoadingProgress, getFonts, getPrograms, getSprite, getAllSprites
 
 -}
 
@@ -32,7 +42,7 @@ import Browser.Events exposing (Visibility(..))
 import Dict exposing (Dict)
 import Html exposing (Html)
 import Json.Encode as Encode
-import Messenger.Audio.Internal exposing (AudioRepo, emptyRepo)
+import Messenger.Internal as Internal exposing (InternalData)
 import REGL
 import REGL.Common exposing (Camera)
 import Set exposing (Set)
@@ -158,31 +168,13 @@ type alias UserViewGlobalData userdata =
     }
 
 
-{-| Empty InternalData
--}
-emptyInternalData : InternalData
-emptyInternalData =
-    { browserViewPort = ( 0, 0 )
-    , realHeight = 0
-    , realWidth = 0
-    , startLeft = 0
-    , startTop = 0
-    , sprites = Dict.empty
-    , virtualWidth = 0
-    , virtualHeight = 0
-    , audioRepo = emptyRepo
-    , loadedResNum = 0
-    , totResNum = 0
-    , fonts = Set.empty
-    , programs = Set.empty
-    }
 
 
 {-| Turn UserViewGlobalData into GlobalData
 -}
 userGlobalDataToGlobalData : UserViewGlobalData userdata -> GlobalData userdata
 userGlobalDataToGlobalData user =
-    { internalData = emptyInternalData
+    { internalData = Internal.emptyInternalData
     , currentTimeStamp = 0
     , sceneStartTime = user.sceneStartTime
     , globalStartTime = user.globalStartTime
@@ -254,31 +246,6 @@ addCommonData commonData env =
     }
 
 
-{-| Internal GlobalData
-
-Basically users do not need to get or modify them.
-
-  - `browserViewPort` records the browser size.
-  - `sprites` records all the sprites(images).
-
--}
-type alias InternalData =
-    { browserViewPort : ( Float, Float )
-    , realWidth : Float
-    , realHeight : Float
-    , startLeft : Float
-    , startTop : Float
-    , sprites : Dict String REGL.Texture
-    , loadedResNum : Int
-    , totResNum : Int
-    , fonts : Set String
-    , programs : Set String
-    , virtualWidth : Float
-    , virtualHeight : Float
-    , audioRepo : AudioRepo
-    }
-
-
 {-| The main flags.
 
 Get info from js script.
@@ -290,3 +257,70 @@ type alias Flags =
     { timeStamp : Float
     , info : String
     }
+
+
+
+-- INTERNAL DATA GETTERS
+
+
+{-| Get virtual coordinate dimensions
+-}
+getVirtualSize : GlobalData userdata -> ( Float, Float )
+getVirtualSize globalData =
+    ( globalData.internalData.virtualWidth, globalData.internalData.virtualHeight )
+
+
+{-| Get real canvas dimensions
+-}
+getRealSize : GlobalData userdata -> ( Float, Float )
+getRealSize globalData =
+    ( globalData.internalData.realWidth, globalData.internalData.realHeight )
+
+
+{-| Get browser viewport dimensions
+-}
+getViewPort : GlobalData userdata -> ( Float, Float )
+getViewPort globalData =
+    globalData.internalData.browserViewPort
+
+
+{-| Get canvas positioning offset
+-}
+getCanvasOffset : GlobalData userdata -> ( Float, Float )
+getCanvasOffset globalData =
+    ( globalData.internalData.startLeft, globalData.internalData.startTop )
+
+
+{-| Get resource loading progress (loaded, total)
+-}
+getLoadingProgress : GlobalData userdata -> ( Int, Int )
+getLoadingProgress globalData =
+    ( globalData.internalData.loadedResNum, globalData.internalData.totResNum )
+
+
+{-| Get set of loaded font names
+-}
+getFonts : GlobalData userdata -> Set String
+getFonts globalData =
+    globalData.internalData.fonts
+
+
+{-| Get set of loaded shader program names
+-}
+getPrograms : GlobalData userdata -> Set String
+getPrograms globalData =
+    globalData.internalData.programs
+
+
+{-| Get a specific sprite texture by name
+-}
+getSprite : String -> GlobalData userdata -> Maybe REGL.Texture
+getSprite name globalData =
+    Dict.get name globalData.internalData.sprites
+
+
+{-| Get all loaded sprite textures
+-}
+getAllSprites : GlobalData userdata -> Dict String REGL.Texture
+getAllSprites globalData =
+    globalData.internalData.sprites

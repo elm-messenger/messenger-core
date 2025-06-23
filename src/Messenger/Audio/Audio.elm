@@ -26,7 +26,7 @@ If an audio is finished playing, it will be removed from the playing channel.
 import Dict
 import Duration exposing (Duration)
 import List exposing (maximum)
-import Messenger.Base exposing (InternalData)
+import Messenger.Internal exposing (InternalData)
 
 
 {-| Generate a new unique audio channel number.

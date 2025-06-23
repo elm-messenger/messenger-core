@@ -13,7 +13,8 @@ Initialize the game
 
 import Audio exposing (AudioCmd)
 import Browser.Dom exposing (getViewport)
-import Messenger.Base exposing (Env, Flags, GlobalData, UserEvent, WorldEvent(..), emptyInternalData, userGlobalDataToGlobalData)
+import Messenger.Base exposing (Env, Flags, GlobalData, UserEvent, WorldEvent(..), userGlobalDataToGlobalData)
+import Messenger.Internal exposing (emptyInternalData)
 import Messenger.Model exposing (Model)
 import Messenger.Resources.Base exposing (ResourceDef(..), resourceNum)
 import Messenger.Scene.Loader exposing (loadSceneByName)

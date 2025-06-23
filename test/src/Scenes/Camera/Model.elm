@@ -10,7 +10,7 @@ import Color
 import Duration
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (UserEvent(..))
+import Messenger.Base exposing (UserEvent(..), getVirtualSize)
 import Messenger.Coordinate.Camera exposing (defaultCamera, setCameraAngle, setCameraPos, setCameraScale)
 import Messenger.GlobalComponents.Transition.Model exposing (genMixedTransitionSOM)
 import Messenger.GlobalComponents.Transition.Transitions exposing (fadeMix)
@@ -88,9 +88,12 @@ update env msg data =
 
         KeyDown 53 ->
             let
+                ( virtualWidth, virtualHeight ) =
+                    getVirtualSize gd
+
                 ng =
                     gd
-                        |> setCameraPos ( gd.internalData.virtualWidth / 2, gd.internalData.virtualHeight / 2 )
+                        |> setCameraPos ( virtualWidth / 2, virtualHeight / 2 )
                         |> setCameraScale 1
                         |> setCameraAngle 0
             in

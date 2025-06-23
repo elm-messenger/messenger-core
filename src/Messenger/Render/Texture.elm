@@ -13,7 +13,7 @@ module Messenger.Render.Texture exposing
 
 -}
 
-import Messenger.Base exposing (InternalData)
+import Messenger.Internal exposing (InternalData)
 import Messenger.Resources.Base exposing (igetSprite)
 import REGL exposing (Texture)
 import REGL.BuiltinPrograms as P

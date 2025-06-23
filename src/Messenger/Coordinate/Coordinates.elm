@@ -33,7 +33,7 @@ Normally, users do not need to use this module directly, as Messenger will handl
 
 -}
 
-import Messenger.Base exposing (InternalData)
+import Messenger.Internal exposing (InternalData)
 import Messenger.Coordinate.Camera exposing (viewToWorld)
 import REGL.Common exposing (Camera)
 

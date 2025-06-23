@@ -13,7 +13,7 @@ This is only useful when you use extraHTML.
 
 import Html exposing (Attribute)
 import Html.Attributes exposing (style)
-import Messenger.Base exposing (InternalData)
+import Messenger.Internal exposing (InternalData)
 import Messenger.Coordinate.Coordinates exposing (fixedPosToReal, lengthToReal)
 
 
