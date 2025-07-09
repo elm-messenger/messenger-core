@@ -11,6 +11,7 @@ module Lib.Resources exposing (resources)
 
 import Lib.Programs.PointLight as PointLight
 import Messenger.Resources.Base exposing (ResourceDef(..), ResourceDefs)
+import REGL exposing (TextureMagOption(..))
 
 
 {-| Resources
@@ -39,6 +40,43 @@ allTexture =
     , ( "mask", TextureRes "assets/img/mask.jpg" Nothing )
     , ( "ship", TextureRes "assets/img/ship.png" Nothing )
     ]
+        ++ spriteSheet
+
+
+playerSize : List Int
+playerSize =
+    [ 13
+    , 8
+    , 10
+    , 10
+    , 10
+    , 6
+    , 4
+    , 7
+    ]
+
+
+spriteSheet : ResourceDefs
+spriteSheet =
+    List.concat <|
+        List.indexedMap
+            (\row colsize ->
+                List.map
+                    (\col ->
+                        ( "char" ++ String.fromInt row ++ String.fromInt col
+                        , TextureRes "assets/img/sheet.png"
+                            (Just
+                                { mag = Just MagNearest
+                                , min = Nothing
+                                , crop = Just ( ( 32 * col, 32 * row ), ( 32, 32 ) )
+                                }
+                            )
+                        )
+                    )
+                <|
+                    List.range 0 colsize
+            )
+            playerSize
 
 
 {-| All audio assets.
