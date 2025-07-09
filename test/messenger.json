@@ -46,6 +46,9 @@
         "SSLevel2": {
             "sceneproto": "Spaceshooter",
             "raw": false
+        },
+        "SpriteSheet": {
+            "raw": true
         }
     },
     "sceneprotos": {
