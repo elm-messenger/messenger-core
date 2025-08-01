@@ -1,9 +1,12 @@
 {
-    "version": "1.2.0",
+    "version": "1.2.1",
     "template_repo": {
         "url": "https://github.com/linsyking/messenger-templates",
         "tag": ""
     },
+    "auto_commit": true,
+    "use_cdn": true,
+    "use_min": true,
     "scenes": {
         "Home": {
             "components": {},
@@ -43,6 +46,9 @@
         "SSLevel2": {
             "sceneproto": "Spaceshooter",
             "raw": false
+        },
+        "SpriteSheet": {
+            "raw": true
         }
     },
     "sceneprotos": {
