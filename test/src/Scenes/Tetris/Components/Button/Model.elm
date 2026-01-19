@@ -12,7 +12,7 @@ import Lib.Tetris.Base as Tetris
 import Lib.UserData exposing (UserData)
 import Messenger.Base exposing (UserEvent(..))
 import Messenger.Component.Component exposing (ComponentInit, ComponentMatcher, ComponentStorage, ComponentUpdate, ComponentUpdateRec, ComponentView, ConcreteUserComponent, genComponent)
-import Messenger.Coordinate.Coordinates exposing (judgeMouseRect, judgeMouseRectWithCamera)
+import Messenger.Coordinate.Coordinates exposing (judgeMouseRectWithCamera)
 import Messenger.GeneralModel exposing (Msg(..))
 import REGL.BuiltinPrograms as P exposing (defaultTextBoxOption)
 import REGL.Common exposing (group)
@@ -79,16 +79,22 @@ update ({ commonData } as env) evnt ({ text } as data) basedata =
 
 updaterec : ComponentUpdateRec SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
 updaterec env msg ({ text } as data) basedata =
-    case msg of
-        TetrisMsg Tetris.GameOver ->
-            if data.buttonType == Button.State then
+    if data.buttonType == Button.State then
+        case msg of
+            TetrisMsg Tetris.GameOver ->
                 ( ( { data | text = { text | content = "New Game" } }, basedata ), [], env )
 
-            else
+            TetrisMsg Tetris.Pause ->
+                ( ( { data | text = { text | content = "Resume" } }, basedata ), [], env )
+
+            TetrisMsg Tetris.Resume ->
+                ( ( { data | text = { text | content = "Pause" } }, basedata ), [], env )
+
+            _ ->
                 ( ( data, basedata ), [], env )
 
-        _ ->
-            ( ( data, basedata ), [], env )
+    else
+        ( ( data, basedata ), [], env )
 
 
 view : ComponentView SceneCommonData UserData Data BaseData
