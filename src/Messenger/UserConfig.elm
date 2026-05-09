@@ -97,4 +97,6 @@ type alias PortDefs =
     , setView : Encode.Value -> Cmd WorldEvent
     , execREGLCmd : Encode.Value -> Cmd WorldEvent
     , recvREGLCmd : (Encode.Value -> WorldEvent) -> Sub WorldEvent
+    , loadDataFile : { name : String, path : String } -> Cmd WorldEvent
+    , dataFileLoaded : ({ name : String, data : String } -> WorldEvent) -> Sub WorldEvent
     }

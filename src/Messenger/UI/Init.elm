@@ -137,16 +137,30 @@ init input flags =
                             Nothing
                 )
                 resources
+
+        dataloadcmds =
+            List.filterMap
+                (\( key, res ) ->
+                    case res of
+                        DataRes path ->
+                            Just <| config.ports.loadDataFile { name = key, path = path }
+
+                        _ ->
+                            Nothing
+                )
+                resources
     in
     ( { ms | env = newEnv2, globalComponents = gcs }
     , Cmd.batch <|
-        Task.perform (\res -> NewWindowSize ( res.scene.width, res.scene.height )) getViewport
+        (Task.perform (\res -> NewWindowSize ( res.scene.width, res.scene.height )) getViewport
             :: (REGL.batchExec config.ports.execREGLCmd <|
                     REGL.startREGL (REGL.REGLStartConfig config.virtualSize.width config.virtualSize.height config.fboNum (bulitinPrograms config.enabledProgram))
                         :: REGL.configREGL
                             (REGL.REGLConfig config.timeInterval)
                         :: resloadcmds
                )
+        )
+            ++ dataloadcmds
     , Audio.cmdBatch audioLoad
     )
 
