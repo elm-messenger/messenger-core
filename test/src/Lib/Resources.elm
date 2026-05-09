@@ -18,7 +18,7 @@ import REGL exposing (TextureMagOption(..))
 -}
 resources : ResourceDefs
 resources =
-    allTexture ++ allAudio ++ allFont ++ allProgram
+    allTexture ++ allAudio ++ allFont ++ allProgram ++ allData
 
 
 {-| allTexture
@@ -133,4 +133,5 @@ Example:
 -}
 allData : ResourceDefs
 allData =
-    []
+    [ ( "texts", DataRes "assets/data/texts.json" )
+    ]
