@@ -18,6 +18,7 @@ import Messenger.Scene.Scene exposing (AllScenes)
 import Scenes.Audio.Model as Audio
 import Scenes.Camera.Model as Camera
 import Scenes.Components.Model as Components
+import Scenes.ConfigData.Model as ConfigData
 import Scenes.Home.Model as Home
 import Scenes.Interaction.Model as Interaction
 import Scenes.Rain.Model as Rain
@@ -40,6 +41,7 @@ allScenes =
         [ ( "Audio", Audio.scene )
         , ( "Camera", Camera.scene )
         , ( "Components", Components.scene )
+        , ( "ConfigData", ConfigData.scene )
         , ( "Home", Home.scene )
         , ( "Interaction", Interaction.scene )
         , ( "Rain", Rain.scene )
