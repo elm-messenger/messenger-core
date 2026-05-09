@@ -214,3 +214,10 @@ handleSOM config scenes som model =
                         , [ REGL.createREGLProgram key program config.ports.execREGLCmd ]
                         , []
                         )
+
+                DataRes path ->
+                    if Dict.member key gdid.configData then
+                        ( model, [], [] )
+
+                    else
+                        ( nm, [ config.ports.loadDataFile { name = key, path = path } ], [] )
