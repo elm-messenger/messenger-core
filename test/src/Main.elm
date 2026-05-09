@@ -13,7 +13,7 @@ Main module for the whole game.
 
 import GlobalComponents exposing (allGlobalComponents)
 import Lib.Base exposing (SceneMsg)
-import Lib.Ports exposing (alert, audioPortFromJS, audioPortToJS, execREGLCmd, prompt, promptReceiver, recvREGLCmd, reglupdate, sendInfo, setView)
+import Lib.Ports exposing (alert, audioPortFromJS, audioPortToJS, dataFileLoaded, execREGLCmd, loadDataFile, prompt, promptReceiver, recvREGLCmd, reglupdate, sendInfo, setView)
 import Lib.Resources exposing (resources)
 import Lib.UserData exposing (UserData)
 import MainConfig exposing (debug, enabledBuiltinPrograms, fboNum, initGlobalData, initScene, initSceneMsg, saveGlobalData, timeInterval, virtualSize)
@@ -46,6 +46,8 @@ userConfig =
         , setView = setView
         , execREGLCmd = execREGLCmd
         , recvREGLCmd = recvREGLCmd
+        , loadDataFile = loadDataFile
+        , dataFileLoaded = dataFileLoaded
         }
     , enabledProgram = enabledBuiltinPrograms
     , fboNum = fboNum

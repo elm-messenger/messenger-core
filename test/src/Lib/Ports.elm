@@ -2,6 +2,7 @@ port module Lib.Ports exposing
     ( audioPortFromJS, audioPortToJS
     , alert, prompt, promptReceiver, sendInfo
     , setView, execREGLCmd, recvREGLCmd, reglupdate
+    , loadDataFile, dataFileLoaded
     )
 
 {-|
@@ -14,6 +15,7 @@ The ports that will be used in the game.
 @docs audioPortFromJS, audioPortToJS
 @docs alert, prompt, promptReceiver, sendInfo
 @docs setView, execREGLCmd, recvREGLCmd, reglupdate
+@docs loadDataFile, dataFileLoaded
 
 -}
 
@@ -69,3 +71,13 @@ port recvREGLCmd : (Encode.Value -> msg) -> Sub msg
 {-| Port to update REGL
 -}
 port reglupdate : (Float -> msg) -> Sub msg
+
+
+{-| Port to load data files
+-}
+port loadDataFile : { name : String, path : String } -> Cmd msg
+
+
+{-| Port to receive loaded data file content
+-}
+port dataFileLoaded : ({ name : String, data : String } -> msg) -> Sub msg

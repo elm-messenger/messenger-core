@@ -121,3 +121,16 @@ allProgram : ResourceDefs
 allProgram =
     [ ( "plight", ProgramRes PointLight.prog )
     ]
+
+
+{-| All data files.
+
+Example:
+
+        [ ( "level1", DataRes "assets/data/level1.json" )
+        ]
+
+-}
+allData : ResourceDefs
+allData =
+    []
