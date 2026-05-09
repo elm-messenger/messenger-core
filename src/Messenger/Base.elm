@@ -60,6 +60,7 @@ type WorldEvent
     | MouseMove ( Float, Float )
     | WMouseWheel Int
     | WPrompt String String
+    | WDataLoaded String String
     | NullEvent
 
 
@@ -171,6 +172,7 @@ emptyInternalData =
     , virtualWidth = 0
     , virtualHeight = 0
     , audioRepo = emptyRepo
+    , configData = Dict.empty
     , loadedResNum = 0
     , totResNum = 0
     , fonts = Set.empty
@@ -276,6 +278,7 @@ type alias InternalData =
     , virtualWidth : Float
     , virtualHeight : Float
     , audioRepo : AudioRepo
+    , configData : Dict String String
     }
 
 
