@@ -359,6 +359,16 @@ update input audiodata msg model =
                 _ ->
                     ( model, Cmd.none, Audio.cmdNone )
 
+        WDataLoaded name data ->
+            let
+                newIT =
+                    { gdid | configData = Dict.insert name data gdid.configData, loadedResNum = gdid.loadedResNum + 1 }
+
+                newEnv =
+                    { env | globalData = { gd | internalData = newIT } }
+            in
+            ( { model | env = newEnv }, Cmd.none, Audio.cmdNone )
+
         NullEvent ->
             ( model, Cmd.none, Audio.cmdNone )
 

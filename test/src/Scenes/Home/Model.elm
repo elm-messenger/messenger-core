@@ -125,6 +125,20 @@ update env msg data =
             , env
             )
 
+        KeyDown 68 ->
+            ( data
+            , [ SOMChangeScene Nothing "SpriteSheet"
+              ]
+            , env
+            )
+
+        KeyDown 69 ->
+            ( data
+            , [ SOMChangeScene Nothing "ConfigData"
+              ]
+            , env
+            )
+
         _ ->
             ( data, [], env )
 
@@ -147,6 +161,8 @@ Press Backspace to return to the menu.
 a. Interaction
 b. Rain
 c. Spaceshooter
+d. SpriteSheet
+e. ConfigData Test
 """
 
 

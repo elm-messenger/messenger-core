@@ -66,13 +66,13 @@ update ({ globalData, commonData } as env) evnt data basedata =
                             ( newData, newEnv ) =
                                 spawnTetrimino { env | commonData = { commonData | score = 0, lines = 0, state = Playing } } { data | grid = G.empty }
                         in
-                        ( ( newData, basedata ), [], ( newEnv, False ) )
+                        ( ( newData, basedata ), [ Other ( "Button", TetrisMsg Resume ) ], ( newEnv, False ) )
 
                     Paused ->
-                        ( ( cancelState data, basedata ), [], ( { env | commonData = { commonData | state = Playing } }, False ) )
+                        ( ( cancelState data, basedata ), [ Other ( "Button", TetrisMsg Resume ) ], ( { env | commonData = { commonData | state = Playing } }, False ) )
 
                     Playing ->
-                        ( ( cancelState data, basedata ), [], ( { env | commonData = { commonData | state = Paused } }, False ) )
+                        ( ( cancelState data, basedata ), [ Other ( "Button", TetrisMsg Pause ) ], ( { env | commonData = { commonData | state = Paused } }, False ) )
 
             KeyUp _ ->
                 ( ( cancelState data, basedata ), [], ( env, False ) )

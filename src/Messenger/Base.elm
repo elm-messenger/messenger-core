@@ -70,6 +70,7 @@ type WorldEvent
     | MouseMove ( Float, Float )
     | WMouseWheel Int
     | WPrompt String String
+    | WDataLoaded String String
     | NullEvent
 
 

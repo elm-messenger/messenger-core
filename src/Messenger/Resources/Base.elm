@@ -51,6 +51,7 @@ type ResourceDef
     | AudioRes String
     | FontRes String String
     | ProgramRes REGLProgram
+    | DataRes String
 
 
 {-| A list of resource definitions.

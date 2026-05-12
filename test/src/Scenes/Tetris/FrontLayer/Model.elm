@@ -19,7 +19,6 @@ import Messenger.GeneralModel exposing (Matcher, Msg(..), MsgBase(..))
 import Messenger.GlobalComponents.Transition.Model exposing (genMixedTransitionSOM)
 import Messenger.GlobalComponents.Transition.Transitions exposing (fadeMix)
 import Messenger.Layer.Layer exposing (ConcreteLayer, LayerInit, LayerStorage, LayerUpdate, LayerUpdateRec, LayerView, genLayer)
-import REGL
 import REGL.BuiltinPrograms as P
 import REGL.Common exposing (Renderable, group)
 import Scenes.Tetris.SceneBase exposing (..)
