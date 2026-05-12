@@ -37,6 +37,7 @@ type alias InternalData =
     , virtualWidth : Float
     , virtualHeight : Float
     , audioRepo : AudioRepo
+    , configData : Dict.Dict String String
     }
 
 
@@ -57,4 +58,5 @@ emptyInternalData =
     , totResNum = 0
     , fonts = Set.empty
     , programs = Set.empty
+    , configData = Dict.empty
     }
