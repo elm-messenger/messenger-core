@@ -2,13 +2,14 @@ module Messenger.Base exposing
     ( WorldEvent(..)
     , UserEvent(..)
     , GlobalData
+    , InternalData
     , Env
     , Flags
     , removeCommonData, addCommonData
     , UserViewGlobalData
     , userGlobalDataToGlobalData, globalDataToUserGlobalData
     , getVirtualSize, getRealSize, getViewPort, getCanvasOffset
-    , getLoadingProgress, getFonts, getPrograms, getSprite, getAllSprites
+    , getLoadingProgress, getFonts, getPrograms, getSprite, getAllSprites, getConfigData
     )
 
 {-|
@@ -21,6 +22,7 @@ Some Basic Data Types for the game
 @docs WorldEvent
 @docs UserEvent
 @docs GlobalData
+@docs InternalData
 @docs Env
 @docs Flags
 @docs removeCommonData, addCommonData
@@ -33,7 +35,7 @@ Some Basic Data Types for the game
 Safe access to internal engine state
 
 @docs getVirtualSize, getRealSize, getViewPort, getCanvasOffset
-@docs getLoadingProgress, getFonts, getPrograms, getSprite, getAllSprites
+@docs getLoadingProgress, getFonts, getPrograms, getSprite, getAllSprites, getConfigData
 
 -}
 
@@ -42,10 +44,16 @@ import Browser.Events exposing (Visibility(..))
 import Dict exposing (Dict)
 import Html exposing (Html)
 import Json.Encode as Encode
-import Messenger.Internal as Internal exposing (InternalData)
+import Messenger.Internal as Internal
 import REGL
 import REGL.Common exposing (Camera)
 import Set exposing (Set)
+
+
+{-| Opaque internal engine data.
+-}
+type alias InternalData =
+    Internal.InternalData
 
 
 {-| World Event
@@ -169,8 +177,6 @@ type alias UserViewGlobalData userdata =
     }
 
 
-
-
 {-| Turn UserViewGlobalData into GlobalData
 -}
 userGlobalDataToGlobalData : UserViewGlobalData userdata -> GlobalData userdata
@@ -268,60 +274,83 @@ type alias Flags =
 -}
 getVirtualSize : GlobalData userdata -> ( Float, Float )
 getVirtualSize globalData =
-    ( globalData.internalData.virtualWidth, globalData.internalData.virtualHeight )
+    let
+        internalData =
+            Internal.getInternalData globalData.internalData
+    in
+    ( internalData.virtualWidth, internalData.virtualHeight )
 
 
 {-| Get real canvas dimensions
 -}
 getRealSize : GlobalData userdata -> ( Float, Float )
 getRealSize globalData =
-    ( globalData.internalData.realWidth, globalData.internalData.realHeight )
+    let
+        internalData =
+            Internal.getInternalData globalData.internalData
+    in
+    ( internalData.realWidth, internalData.realHeight )
 
 
 {-| Get browser viewport dimensions
 -}
 getViewPort : GlobalData userdata -> ( Float, Float )
 getViewPort globalData =
-    globalData.internalData.browserViewPort
+    (Internal.getInternalData globalData.internalData).browserViewPort
 
 
 {-| Get canvas positioning offset
 -}
 getCanvasOffset : GlobalData userdata -> ( Float, Float )
 getCanvasOffset globalData =
-    ( globalData.internalData.startLeft, globalData.internalData.startTop )
+    let
+        internalData =
+            Internal.getInternalData globalData.internalData
+    in
+    ( internalData.startLeft, internalData.startTop )
 
 
 {-| Get resource loading progress (loaded, total)
 -}
 getLoadingProgress : GlobalData userdata -> ( Int, Int )
 getLoadingProgress globalData =
-    ( globalData.internalData.loadedResNum, globalData.internalData.totResNum )
+    let
+        internalData =
+            Internal.getInternalData globalData.internalData
+    in
+    ( internalData.loadedResNum, internalData.totResNum )
 
 
 {-| Get set of loaded font names
 -}
 getFonts : GlobalData userdata -> Set String
 getFonts globalData =
-    globalData.internalData.fonts
+    (Internal.getInternalData globalData.internalData).fonts
 
 
 {-| Get set of loaded shader program names
 -}
 getPrograms : GlobalData userdata -> Set String
 getPrograms globalData =
-    globalData.internalData.programs
+    (Internal.getInternalData globalData.internalData).programs
 
 
 {-| Get a specific sprite texture by name
 -}
 getSprite : String -> GlobalData userdata -> Maybe REGL.Texture
 getSprite name globalData =
-    Dict.get name globalData.internalData.sprites
+    Dict.get name (Internal.getInternalData globalData.internalData).sprites
 
 
 {-| Get all loaded sprite textures
 -}
 getAllSprites : GlobalData userdata -> Dict String REGL.Texture
 getAllSprites globalData =
-    globalData.internalData.sprites
+    (Internal.getInternalData globalData.internalData).sprites
+
+
+{-| Get loaded config data by key.
+-}
+getConfigData : String -> GlobalData userdata -> Maybe String
+getConfigData key globalData =
+    Dict.get key (Internal.getInternalData globalData.internalData).configData

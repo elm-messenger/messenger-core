@@ -33,8 +33,9 @@ Normally, users do not need to use this module directly, as Messenger will handl
 
 -}
 
-import Messenger.Internal exposing (InternalData)
+import Messenger.Base exposing (InternalData)
 import Messenger.Coordinate.Camera exposing (viewToWorld)
+import Messenger.Internal as Internal
 import REGL.Common exposing (Camera)
 
 
@@ -59,7 +60,11 @@ Example: If your screen is 2560\*1440, the virtual canvas size is 1920\*1080 and
 -}
 fixedPosToReal : InternalData -> ( Float, Float ) -> ( Float, Float )
 fixedPosToReal gd ( x, y ) =
-    floatpairadd (posToReal gd ( x, y )) ( gd.startLeft, gd.startTop )
+    let
+        internalData =
+            Internal.getInternalData gd
+    in
+    floatpairadd (posToReal gd ( x, y )) ( internalData.startLeft, internalData.startTop )
 
 
 {-| Transform from the virtual coordinate system to the real pixel system.
@@ -74,13 +79,16 @@ The function returns the position in real canvas.
 posToReal : InternalData -> ( Float, Float ) -> ( Float, Float )
 posToReal gd ( x, y ) =
     let
+        internalData =
+            Internal.getInternalData gd
+
         realWidth =
-            gd.realWidth
+            internalData.realWidth
 
         realHeight =
-            gd.realHeight
+            internalData.realHeight
     in
-    ( realWidth * (x / gd.virtualWidth), realHeight * (y / gd.virtualHeight) )
+    ( realWidth * (x / internalData.virtualWidth), realHeight * (y / internalData.virtualHeight) )
 
 
 {-| Inverse of posToReal. This is helpful if you need to render sprite with real coordinates.
@@ -92,13 +100,16 @@ The function returns the coordinate in virtual coordinate system.
 posToVirtual : InternalData -> ( Float, Float ) -> ( Float, Float )
 posToVirtual gd ( x, y ) =
     let
+        internalData =
+            Internal.getInternalData gd
+
         realWidth =
-            gd.realWidth
+            internalData.realWidth
 
         realHeight =
-            gd.realHeight
+            internalData.realHeight
     in
-    ( gd.virtualWidth * (x / realWidth), gd.virtualHeight * (y / realHeight) )
+    ( internalData.virtualWidth * (x / realWidth), internalData.virtualHeight * (y / realHeight) )
 
 
 {-| Use this if you want to draw something based on the length. It turns the virtual length to real length.
@@ -116,7 +127,11 @@ The function returns the length in real coordinate system.
 -}
 lengthToReal : InternalData -> Float -> Float
 lengthToReal gd x =
-    gd.realWidth * (x / gd.virtualWidth)
+    let
+        internalData =
+            Internal.getInternalData gd
+    in
+    internalData.realWidth * (x / internalData.virtualWidth)
 
 
 {-| The inverse function of widthToReal. Turns the length in real length to virtual length.
@@ -133,7 +148,11 @@ The function returns the length in virtual coordinate system.
 -}
 fromRealLength : InternalData -> Float -> Float
 fromRealLength gd x =
-    gd.virtualWidth * (x / gd.realWidth)
+    let
+        internalData =
+            Internal.getInternalData gd
+    in
+    internalData.virtualWidth * (x / internalData.realWidth)
 
 
 {-| Used internally.
@@ -202,8 +221,11 @@ judgeMouseCircle ( mx, my ) ( cx, cy ) r =
 judgeMouseRectWithCamera : InternalData -> Camera -> ( Float, Float ) -> ( Float, Float ) -> ( Float, Float ) -> Bool
 judgeMouseRectWithCamera id cam ( x1, y1 ) ( x, y ) ( w, h ) =
     let
+        internalData =
+            Internal.getInternalData id
+
         ( x2, y2 ) =
-            ( x1 - id.virtualWidth / 2, y1 - id.virtualHeight / 2 )
+            ( x1 - internalData.virtualWidth / 2, y1 - internalData.virtualHeight / 2 )
 
         ( mx, my ) =
             viewToWorld cam ( x2, y2 )
@@ -218,4 +240,8 @@ The coordinate in the globalData is already in virtual coordinates.
 -}
 fromMouseToVirtual : InternalData -> ( Float, Float ) -> ( Float, Float )
 fromMouseToVirtual gd ( px, py ) =
-    posToVirtual gd ( px - gd.startLeft, py - gd.startTop )
+    let
+        internalData =
+            Internal.getInternalData gd
+    in
+    posToVirtual gd ( px - internalData.startLeft, py - internalData.startTop )

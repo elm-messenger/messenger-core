@@ -26,7 +26,8 @@ If an audio is finished playing, it will be removed from the playing channel.
 import Dict
 import Duration exposing (Duration)
 import List exposing (maximum)
-import Messenger.Internal exposing (InternalData)
+import Messenger.Base exposing (InternalData)
+import Messenger.Internal as Internal
 
 
 {-| Generate a new unique audio channel number.
@@ -38,8 +39,11 @@ import Messenger.Internal exposing (InternalData)
 newAudioChannel : InternalData -> Int
 newAudioChannel idata =
     let
+        internalData =
+            Internal.getInternalData idata
+
         playingChannels =
-            List.map (\pl -> pl.channel) idata.audioRepo.playing
+            List.map (\pl -> pl.channel) internalData.audioRepo.playing
     in
     case maximum playingChannels of
         Just maxChannel ->
@@ -63,7 +67,7 @@ Example: audioDuration id "Boom" |> Duration.inSeconds == 1.274 -- the duration 
 -}
 audioDuration : InternalData -> String -> Maybe Duration
 audioDuration internalData audioId =
-    case Dict.get audioId internalData.audioRepo.audio of
+    case Dict.get audioId (Internal.getInternalData internalData).audioRepo.audio of
         Just ( _, duration ) ->
             Just duration
 

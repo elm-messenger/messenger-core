@@ -14,7 +14,7 @@ Initialize the game
 import Audio exposing (AudioCmd)
 import Browser.Dom exposing (getViewport)
 import Messenger.Base exposing (Env, Flags, GlobalData, UserEvent, WorldEvent(..), userGlobalDataToGlobalData)
-import Messenger.Internal exposing (emptyInternalData)
+import Messenger.Internal as Internal
 import Messenger.Model exposing (Model)
 import Messenger.Resources.Base exposing (ResourceDef(..), resourceNum)
 import Messenger.Scene.Loader exposing (loadSceneByName)
@@ -88,11 +88,16 @@ init input flags =
             loadSceneByName config.initScene scenes config.initSceneMsg { im | env = newEnv1 }
 
         newIT =
-            { emptyInternalData
-                | virtualWidth = config.virtualSize.width
-                , virtualHeight = config.virtualSize.height
-                , totResNum = resourceNum input.resources
-            }
+            let
+                emptyInternalData =
+                    Internal.getInternalData Internal.emptyInternalData
+            in
+            Internal.InternalData
+                { emptyInternalData
+                    | virtualWidth = config.virtualSize.width
+                    , virtualHeight = config.virtualSize.height
+                    , totResNum = resourceNum input.resources
+                }
 
         initGlobalData =
             userGlobalDataToGlobalData (config.globalDataCodec.decode flags.info)

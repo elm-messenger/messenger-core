@@ -14,6 +14,7 @@ import Dict
 import Messenger.Audio.Internal exposing (playAudio, stopAudio, updateAudio)
 import Messenger.Base exposing (WorldEvent(..), globalDataToUserGlobalData)
 import Messenger.GeneralModel exposing (filterSOM)
+import Messenger.Internal as Internal
 import Messenger.Model exposing (Model, resetSceneStartTime)
 import Messenger.Recursion exposing (removeObjects, updateObjectsWithTarget)
 import Messenger.Resources.Base exposing (ResourceDef(..))
@@ -56,7 +57,7 @@ handleSOM config scenes som model =
             model.env
 
         gdid =
-            gd.internalData
+            Internal.getInternalData gd.internalData
     in
     case som of
         SOMChangeScene tm name ->
@@ -77,7 +78,7 @@ handleSOM config scenes som model =
                     playAudio gdid.audioRepo ch name opt gd.currentTimeStamp
 
                 newEnv =
-                    { env | globalData = { gd | internalData = { gdid | audioRepo = newRepo } } }
+                    { env | globalData = { gd | internalData = Internal.InternalData { gdid | audioRepo = newRepo } } }
             in
             ( { model | env = newEnv }, [], [] )
 
@@ -97,7 +98,7 @@ handleSOM config scenes som model =
                     stopAudio gdid.audioRepo gd.currentTimeStamp ch
 
                 newEnv =
-                    { env | globalData = { gd | internalData = { gdid | audioRepo = newRepo } } }
+                    { env | globalData = { gd | internalData = Internal.InternalData { gdid | audioRepo = newRepo } } }
             in
             ( { model | env = newEnv }, [], [] )
 
@@ -142,7 +143,7 @@ handleSOM config scenes som model =
                     updateAudio gdid.audioRepo tar trans
 
                 newModel =
-                    { model | env = { env | globalData = { gd | internalData = { gdid | audioRepo = newAR } } } }
+                    { model | env = { env | globalData = { gd | internalData = Internal.InternalData { gdid | audioRepo = newAR } } } }
             in
             ( newModel, [], [] )
 
@@ -158,7 +159,7 @@ handleSOM config scenes som model =
         SOMLoadResource key res ->
             let
                 nm =
-                    { model | env = { env | globalData = { gd | internalData = { gdid | totResNum = gdid.totResNum + 1 } } } }
+                    { model | env = { env | globalData = { gd | internalData = Internal.InternalData { gdid | totResNum = gdid.totResNum + 1 } } } }
             in
             case res of
                 AudioRes url ->

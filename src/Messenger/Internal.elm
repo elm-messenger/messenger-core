@@ -1,6 +1,6 @@
 module Messenger.Internal exposing
-    ( InternalData
-    , emptyInternalData
+    ( InternalData(..), InternalDataObj
+    , emptyInternalData, getInternalData
     )
 
 {-|
@@ -10,8 +10,8 @@ module Messenger.Internal exposing
 
 Internal engine state that should not be directly accessible to user code.
 
-@docs InternalData
-@docs emptyInternalData
+@docs InternalData, InternalDataObj
+@docs emptyInternalData, getInternalData
 
 -}
 
@@ -21,9 +21,15 @@ import REGL
 import Set exposing (Set)
 
 
-{-| Internal engine data that tracks rendering and resource state
+{-| Opaque internal engine data.
 -}
-type alias InternalData =
+type InternalData
+    = InternalData InternalDataObj
+
+
+{-| Internal engine data object that tracks rendering and resource state.
+-}
+type alias InternalDataObj =
     { browserViewPort : ( Float, Float )
     , realWidth : Float
     , realHeight : Float
@@ -45,18 +51,26 @@ type alias InternalData =
 -}
 emptyInternalData : InternalData
 emptyInternalData =
-    { browserViewPort = ( 0, 0 )
-    , realHeight = 0
-    , realWidth = 0
-    , startLeft = 0
-    , startTop = 0
-    , sprites = Dict.empty
-    , virtualWidth = 0
-    , virtualHeight = 0
-    , audioRepo = emptyRepo
-    , loadedResNum = 0
-    , totResNum = 0
-    , fonts = Set.empty
-    , programs = Set.empty
-    , configData = Dict.empty
-    }
+    InternalData
+        { browserViewPort = ( 0, 0 )
+        , realHeight = 0
+        , realWidth = 0
+        , startLeft = 0
+        , startTop = 0
+        , sprites = Dict.empty
+        , virtualWidth = 0
+        , virtualHeight = 0
+        , audioRepo = emptyRepo
+        , loadedResNum = 0
+        , totResNum = 0
+        , fonts = Set.empty
+        , programs = Set.empty
+        , configData = Dict.empty
+        }
+
+
+{-| Get the internal data object.
+-}
+getInternalData : InternalData -> InternalDataObj
+getInternalData (InternalData internalData) =
+    internalData
