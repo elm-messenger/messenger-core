@@ -8,6 +8,7 @@ module Scenes.SpriteSheet.Model exposing (scene)
 
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
+import Messenger.Base exposing (getSceneStartTime)
 import Messenger.Render.Texture exposing (renderSprite)
 import Messenger.Scene.RawScene exposing (RawSceneInit, RawSceneUpdate, RawSceneView, genRawScene)
 import Messenger.Scene.Scene exposing (MConcreteScene, SceneStorage)
@@ -42,7 +43,7 @@ view env data =
             100
 
         currentAct x =
-            String.fromInt (modBy x (floor (gd.sceneStartTime / rate)))
+            String.fromInt (modBy x (floor (getSceneStartTime gd / rate)))
     in
     group []
         [ renderSprite id ( 100, 300 ) ( 100, 0 ) ("char0" ++ currentAct 13)

@@ -12,6 +12,7 @@ import Lib.Tetris.Base exposing (AnimationState, Direction(..), TetrisEvent(..))
 import Lib.Tetris.Grid as G
 import Lib.Tetris.Tetriminos as Tetriminos
 import Lib.UserData exposing (UserData)
+import Messenger.Base exposing (getCurrentTimeStamp)
 import Messenger.GeneralModel exposing (Msg(..), MsgBase(..))
 import Scenes.Tetris.Components.ComponentBase exposing (ComponentMsg(..))
 import Scenes.Tetris.Components.GameGrid.Base exposing (Data, EnvGameGrid, OutputMsg)
@@ -78,7 +79,7 @@ spawnTetrimino : EnvGameGrid -> Data -> ( Data, EnvGameGrid )
 spawnTetrimino ({ commonData, globalData } as env) data =
     let
         next =
-            Tetriminos.random <| round globalData.currentTimeStamp
+            Tetriminos.random <| round (getCurrentTimeStamp globalData)
 
         ( x, y ) =
             G.initPosition data.scale.width commonData.next

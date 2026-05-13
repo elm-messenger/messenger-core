@@ -16,7 +16,7 @@ module Messenger.UserConfig exposing
 import Audio
 import Json.Decode as Decode
 import Json.Encode as Encode
-import Messenger.Base exposing (UserViewGlobalData, WorldEvent)
+import Messenger.Base exposing (GlobalData, GlobalDataInit, WorldEvent)
 import REGL
 
 
@@ -48,9 +48,8 @@ to send to a scene when switching scenes.
 
   - `initScene` represents the scene users get start
   - `initSceneMsg` represents the message to initialize the start scene
-  - `globalDataCodec` is for local storage, users can encode the any data in global data
-    and user data to storage them, and decode them when reopen the game.
-    This globalData is a subset of the real global data, removing all internal data structures
+  - `globalDataCodec` is for local storage. Users decode saved data into initial global data,
+    and encode the current global data when saving.
   - `virtualSize` represents how users want their game be virtual sized. In other words,
     users make their game in the virtual size, and the game will be resized due to the browser window size
     but keeping the aspect ratio
@@ -66,8 +65,8 @@ type alias UserConfig userdata scenemsg =
     { initScene : String
     , initSceneMsg : Maybe scenemsg
     , globalDataCodec :
-        { encode : UserViewGlobalData userdata -> String
-        , decode : String -> UserViewGlobalData userdata
+        { encode : GlobalData userdata -> String
+        , decode : String -> GlobalDataInit userdata
         }
     , virtualSize :
         { width : Float

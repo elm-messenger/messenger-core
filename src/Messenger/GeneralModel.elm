@@ -53,7 +53,7 @@ Use **OtherMsg** when sending a normal message to parent.
 Examples:
 
   - Parent <| SOMMsg <| SOMChangeScene (Just NullSceneMsg) "SelectLevel" -- SOMMsg
-  - Parent <| OtherMsg <| genMeteor env.commonData.playerPos env.globalData.globalStartTime -- In a component. This genMeteor message will be handled in the layer containing the component.
+  - Parent <| OtherMsg <| genMeteor env.commonData.playerPos (getGlobalStartTime env.globalData) -- In a component. This genMeteor message will be handled in the layer containing the component.
 
 -}
 type MsgBase othermsg sommsg

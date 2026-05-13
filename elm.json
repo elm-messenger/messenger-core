@@ -17,6 +17,7 @@
         ],
         "Lib": [
             "Messenger.Scene.Scene",
+            "Messenger.Scene.VSR",
             "Messenger.Scene.RawScene",
             "Messenger.Scene.LayeredScene",
             "Messenger.Layer.Layer",

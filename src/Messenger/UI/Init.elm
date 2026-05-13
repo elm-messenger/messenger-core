@@ -13,7 +13,7 @@ Initialize the game
 
 import Audio exposing (AudioCmd)
 import Browser.Dom exposing (getViewport)
-import Messenger.Base exposing (Env, Flags, GlobalData, UserEvent, WorldEvent(..), userGlobalDataToGlobalData)
+import Messenger.Base exposing (Env, Flags, GlobalData, UserEvent, WorldEvent(..), globalDataInitToGlobalData)
 import Messenger.Internal as Internal
 import Messenger.Model exposing (Model)
 import Messenger.Resources.Base exposing (ResourceDef(..), resourceNum)
@@ -49,7 +49,7 @@ emptyScene =
 -}
 emptyGlobalData : UserConfig userdata scenemsg -> GlobalData userdata
 emptyGlobalData config =
-    userGlobalDataToGlobalData (config.globalDataCodec.decode "")
+    globalDataInitToGlobalData (config.globalDataCodec.decode "")
 
 
 {-| Initial model
@@ -89,21 +89,23 @@ init input flags =
 
         newIT =
             let
-                emptyInternalData =
-                    Internal.getInternalData Internal.emptyInternalData
+                initInternalData =
+                    Internal.getInternalData initGlobalData.internalData
             in
             Internal.InternalData
-                { emptyInternalData
+                { initInternalData
                     | virtualWidth = config.virtualSize.width
                     , virtualHeight = config.virtualSize.height
                     , totResNum = resourceNum input.resources
+                    , currentTimeStamp = flags.timeStamp
+                    , currentScene = config.initScene
                 }
 
         initGlobalData =
-            userGlobalDataToGlobalData (config.globalDataCodec.decode flags.info)
+            globalDataInitToGlobalData (config.globalDataCodec.decode flags.info)
 
         newgd =
-            { initGlobalData | currentTimeStamp = flags.timeStamp, internalData = newIT, currentScene = config.initScene }
+            { initGlobalData | internalData = newIT }
 
         audioLoad =
             List.filterMap

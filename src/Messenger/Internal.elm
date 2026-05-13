@@ -15,6 +15,7 @@ Internal engine state that should not be directly accessible to user code.
 
 -}
 
+import Browser.Events exposing (Visibility(..))
 import Dict exposing (Dict)
 import Messenger.Audio.Internal exposing (AudioRepo, emptyRepo)
 import REGL
@@ -27,7 +28,13 @@ type InternalData
     = InternalData InternalDataObj
 
 
-{-| Internal engine data object that tracks rendering and resource state.
+{-| Internal engine data object.
+
+This stores all engine-owned global values: rendering dimensions, loaded
+resources, audio state, runtime timing, input state, scene name, volume, and
+loaded config data. It is intentionally hidden from package users; core modules
+can unwrap `InternalData` when they need to update engine state.
+
 -}
 type alias InternalDataObj =
     { browserViewPort : ( Float, Float )
@@ -44,6 +51,17 @@ type alias InternalDataObj =
     , virtualHeight : Float
     , audioRepo : AudioRepo
     , configData : Dict.Dict String String
+    , sceneStartTime : Float
+    , globalStartTime : Float
+    , globalStartFrame : Int
+    , sceneStartFrame : Int
+    , currentTimeStamp : Float
+    , windowVisibility : Visibility
+    , mousePos : ( Float, Float )
+    , pressedMouseButtons : Set Int
+    , pressedKeys : Set Int
+    , volume : Float
+    , currentScene : String
     }
 
 
@@ -66,6 +84,17 @@ emptyInternalData =
         , fonts = Set.empty
         , programs = Set.empty
         , configData = Dict.empty
+        , sceneStartTime = 0
+        , globalStartTime = 0
+        , globalStartFrame = 0
+        , sceneStartFrame = 0
+        , currentTimeStamp = 0
+        , windowVisibility = Visible
+        , mousePos = ( 0, 0 )
+        , pressedMouseButtons = Set.empty
+        , pressedKeys = Set.empty
+        , volume = 1
+        , currentScene = ""
         }
 
 

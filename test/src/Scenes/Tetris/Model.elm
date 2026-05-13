@@ -9,7 +9,7 @@ module Scenes.Tetris.Model exposing (scene)
 import Lib.Base exposing (SceneMsg)
 import Lib.Tetris.Tetriminos as Tetriminos
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (Env, addCommonData)
+import Messenger.Base exposing (Env, addCommonData, getCurrentTimeStamp)
 import Messenger.Scene.LayeredScene exposing (LayeredSceneEffectFunc, LayeredSceneInit, genLayeredScene)
 import Messenger.Scene.Scene exposing (SceneStorage)
 import Scenes.Tetris.FrontLayer.Model as FrontLayer
@@ -22,7 +22,7 @@ commonDataInit env _ =
     { state = Stopped
     , score = 0
     , lines = 0
-    , next = Tetriminos.random <| round env.globalData.currentTimeStamp
+    , next = Tetriminos.random <| round (getCurrentTimeStamp env.globalData)
     }
 
 

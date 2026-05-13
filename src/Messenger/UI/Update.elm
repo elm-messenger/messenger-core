@@ -171,7 +171,15 @@ update input audiodata msg model =
         WindowVisibility v ->
             let
                 newgd =
-                    { gd | windowVisibility = v, pressedKeys = Set.empty, pressedMouseButtons = Set.empty }
+                    { gd
+                        | internalData =
+                            Internal.InternalData
+                                { gdid
+                                    | windowVisibility = v
+                                    , pressedKeys = Set.empty
+                                    , pressedMouseButtons = Set.empty
+                                }
+                    }
 
                 newEnv =
                     { env | globalData = newgd }
@@ -184,17 +192,17 @@ update input audiodata msg model =
                     fromMouseToVirtual gd.internalData ( px, py )
 
                 newEnv =
-                    { env | globalData = { gd | mousePos = mp } }
+                    { env | globalData = { gd | internalData = Internal.InternalData { gdid | mousePos = mp } } }
             in
             ( { model | env = newEnv }, Cmd.none, Audio.cmdNone )
 
         WMouseDown e pos ->
             let
                 newPressedMouseButtons =
-                    Set.insert e gd.pressedMouseButtons
+                    Set.insert e gdid.pressedMouseButtons
 
                 newEnv =
-                    { env | globalData = { gd | pressedMouseButtons = newPressedMouseButtons } }
+                    { env | globalData = { gd | internalData = Internal.InternalData { gdid | pressedMouseButtons = newPressedMouseButtons } } }
 
                 newModel =
                     { model | env = newEnv }
@@ -204,10 +212,10 @@ update input audiodata msg model =
         WMouseUp e pos ->
             let
                 newPressedMouseButtons =
-                    Set.remove e gd.pressedMouseButtons
+                    Set.remove e gdid.pressedMouseButtons
 
                 newEnv =
-                    { env | globalData = { gd | pressedMouseButtons = newPressedMouseButtons } }
+                    { env | globalData = { gd | internalData = Internal.InternalData { gdid | pressedMouseButtons = newPressedMouseButtons } } }
 
                 newModel =
                     { model | env = newEnv }
@@ -231,13 +239,13 @@ update input audiodata msg model =
                 gameUpdateInner (KeyDown 113) model
 
         WKeyUp key ->
-            if Set.member key gd.pressedKeys then
+            if Set.member key gdid.pressedKeys then
                 let
                     newPressedKeys =
-                        Set.remove key gd.pressedKeys
+                        Set.remove key gdid.pressedKeys
 
                     newEnv =
-                        { env | globalData = { gd | pressedKeys = newPressedKeys } }
+                        { env | globalData = { gd | internalData = Internal.InternalData { gdid | pressedKeys = newPressedKeys } } }
                 in
                 gameUpdateInner (KeyUp key) { model | env = newEnv }
 
@@ -245,16 +253,16 @@ update input audiodata msg model =
                 ( model, Cmd.none, Audio.cmdNone )
 
         WKeyDown key ->
-            if Set.member key gd.pressedKeys then
+            if Set.member key gdid.pressedKeys then
                 ( model, Cmd.none, Audio.cmdNone )
 
             else
                 let
                     newPressedKeys =
-                        Set.insert key gd.pressedKeys
+                        Set.insert key gdid.pressedKeys
 
                     newEnv =
-                        { env | globalData = { gd | pressedKeys = newPressedKeys } }
+                        { env | globalData = { gd | internalData = Internal.InternalData { gdid | pressedKeys = newPressedKeys } } }
                 in
                 gameUpdateInner (KeyDown key) { model | env = newEnv }
 
@@ -278,7 +286,7 @@ update input audiodata msg model =
                 Just v ->
                     let
                         newgd =
-                            { gd | volume = v }
+                            { gd | internalData = Internal.InternalData { gdid | volume = v } }
 
                         newEnv =
                             { env | globalData = newgd }
@@ -294,10 +302,18 @@ update input audiodata msg model =
         WTick ts ->
             let
                 timeInterval =
-                    ts - gd.currentTimeStamp
+                    ts - gdid.currentTimeStamp
 
                 newgd =
-                    { gd | currentTimeStamp = ts, globalStartFrame = gd.globalStartFrame + 1, globalStartTime = gd.globalStartTime + timeInterval }
+                    { gd
+                        | internalData =
+                            Internal.InternalData
+                                { gdid
+                                    | currentTimeStamp = ts
+                                    , globalStartFrame = gdid.globalStartFrame + 1
+                                    , globalStartTime = gdid.globalStartTime + timeInterval
+                                }
+                    }
 
                 newEnv =
                     { env | globalData = newgd }

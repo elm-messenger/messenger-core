@@ -10,7 +10,7 @@ import Color
 import Duration
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (UserEvent(..))
+import Messenger.Base exposing (UserEvent(..), getSceneStartFrame)
 import Messenger.GlobalComponents.Transition.Base exposing (nullTransition)
 import Messenger.GlobalComponents.Transition.Model exposing (genMixedTransitionSOM, genSequentialTransitionSOM)
 import Messenger.GlobalComponents.Transition.Transitions exposing (fadeImgMix, fadeIn, fadeInImg, fadeInWithRenderable, fadeMix, fadeOut, fadeOutImg)
@@ -96,7 +96,7 @@ view env data =
     group []
         [ P.clear Color.lightGreen
         , P.textbox ( 0, 30 ) 40 comment "firacode" Color.black
-        , P.textbox ( 0, 900 ) 30 (fromInt env.globalData.sceneStartFrame) "firacode" Color.black
+        , P.textbox ( 0, 900 ) 30 (fromInt (getSceneStartFrame env.globalData)) "firacode" Color.black
         ]
 
 

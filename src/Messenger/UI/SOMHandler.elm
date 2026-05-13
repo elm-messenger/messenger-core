@@ -12,7 +12,7 @@ module Messenger.UI.SOMHandler exposing (handleSOMs, handleSOM)
 import Audio exposing (AudioCmd)
 import Dict
 import Messenger.Audio.Internal exposing (playAudio, stopAudio, updateAudio)
-import Messenger.Base exposing (WorldEvent(..), globalDataToUserGlobalData)
+import Messenger.Base exposing (WorldEvent(..))
 import Messenger.GeneralModel exposing (filterSOM)
 import Messenger.Internal as Internal
 import Messenger.Model exposing (Model, resetSceneStartTime)
@@ -75,7 +75,7 @@ handleSOM config scenes som model =
         SOMPlayAudio ch name opt ->
             let
                 newRepo =
-                    playAudio gdid.audioRepo ch name opt gd.currentTimeStamp
+                    playAudio gdid.audioRepo ch name opt gdid.currentTimeStamp
 
                 newEnv =
                     { env | globalData = { gd | internalData = Internal.InternalData { gdid | audioRepo = newRepo } } }
@@ -85,7 +85,7 @@ handleSOM config scenes som model =
         SOMSetVolume s ->
             let
                 newgd2 =
-                    { gd | volume = s }
+                    { gd | internalData = Internal.InternalData { gdid | volume = s } }
 
                 newEnv =
                     { env | globalData = newgd2 }
@@ -95,7 +95,7 @@ handleSOM config scenes som model =
         SOMStopAudio ch ->
             let
                 newRepo =
-                    stopAudio gdid.audioRepo gd.currentTimeStamp ch
+                    stopAudio gdid.audioRepo gdid.currentTimeStamp ch
 
                 newEnv =
                     { env | globalData = { gd | internalData = Internal.InternalData { gdid | audioRepo = newRepo } } }
@@ -111,7 +111,7 @@ handleSOM config scenes som model =
         SOMSaveGlobalData ->
             let
                 encodedGD =
-                    config.globalDataCodec.encode (globalDataToUserGlobalData gd)
+                    config.globalDataCodec.encode gd
             in
             ( model, [ config.ports.sendInfo encodedGD ], [] )
 

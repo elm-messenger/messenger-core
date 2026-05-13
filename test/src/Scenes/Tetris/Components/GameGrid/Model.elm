@@ -12,7 +12,7 @@ import Lib.Base exposing (SceneMsg)
 import Lib.Tetris.Base exposing (AnimationState, Direction(..), TetrisEvent(..))
 import Lib.Tetris.Grid as G
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (UserEvent(..))
+import Messenger.Base exposing (UserEvent(..), getWindowVisibility)
 import Messenger.Component.Component exposing (ComponentInit, ComponentMatcher, ComponentStorage, ComponentUpdate, ComponentUpdateRec, ComponentView, ConcreteUserComponent, genComponent)
 import Messenger.GeneralModel exposing (Msg(..), MsgBase(..))
 import Messenger.Scene.Scene exposing (SceneOutputMsg(..))
@@ -40,7 +40,7 @@ init _ _ =
 
 update : ComponentUpdate SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
 update ({ globalData, commonData } as env) evnt data basedata =
-    if globalData.windowVisibility == Visible then
+    if getWindowVisibility globalData == Visible then
         case evnt of
             KeyDown 37 ->
                 --Left

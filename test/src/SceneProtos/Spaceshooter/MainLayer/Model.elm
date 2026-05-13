@@ -11,7 +11,7 @@ Set the Data Type, Init logic, Update logic, View logic and Matcher logic here.
 import Color
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (Env)
+import Messenger.Base exposing (Env, getGlobalStartTime)
 import Messenger.Component.Component exposing (AbstractComponent, updateComponentsWithBlock, updateComponentsWithTarget, viewComponents)
 import Messenger.GeneralModel exposing (Matcher, Msg(..), MsgBase(..), unroll)
 import Messenger.Layer.Layer exposing (ConcreteLayer, Handler, LayerInit, LayerStorage, LayerUpdate, LayerUpdateRec, LayerView, genLayer, handleComponentMsgs)
@@ -73,10 +73,10 @@ addEnemy env comps =
     else
         let
             fixp =
-                (\x -> (*) (2 * pi) <| (-) x <| toFloat <| floor x) <| env.globalData.globalStartTime / (240 * pi)
+                (\x -> (*) (2 * pi) <| (-) x <| toFloat <| floor x) <| getGlobalStartTime env.globalData / (240 * pi)
 
             rangep =
-                fixp + (toFloat <| genRandomInt (floor env.globalData.globalStartTime) ( -50, 50 ))
+                fixp + (toFloat <| genRandomInt (floor (getGlobalStartTime env.globalData)) ( -50, 50 ))
         in
         Enemy.component (EnemyInitMsg <| EnemyInit.InitData 1 (-1 / 10) ( 1920, 150 * (3 - cos rangep) ) 120 30 200) env :: comps
 
