@@ -1,12 +1,18 @@
 module Messenger.Base exposing
     ( WorldEvent(..)
     , UserEvent(..)
-    , GlobalData, InternalData
+    , GlobalData
+    , InternalData
     , Env
     , Flags
     , removeCommonData, addCommonData
-    , UserViewGlobalData
-    , emptyInternalData, userGlobalDataToGlobalData, globalDataToUserGlobalData
+    , GlobalDataInit
+    , globalDataInitToGlobalData
+    , getSceneStartTime, getGlobalStartTime, getGlobalStartFrame, getSceneStartFrame
+    , getCurrentTimeStamp, getWindowVisibility, getMousePos
+    , getPressedMouseButtons, getPressedKeys, getVolume, getCurrentScene
+    , getVirtualSize, getRealSize, getViewPort, getCanvasOffset
+    , getLoadingProgress, getFonts, getPrograms, getSprite, getAllSprites, getConfigData
     )
 
 {-|
@@ -18,12 +24,24 @@ Some Basic Data Types for the game
 
 @docs WorldEvent
 @docs UserEvent
-@docs GlobalData, InternalData
+@docs GlobalData
+@docs InternalData
 @docs Env
 @docs Flags
 @docs removeCommonData, addCommonData
-@docs UserViewGlobalData
-@docs emptyInternalData, userGlobalDataToGlobalData, globalDataToUserGlobalData
+@docs GlobalDataInit
+@docs globalDataInitToGlobalData
+
+
+## Internal Data Getters
+
+Safe access to internal engine state
+
+@docs getSceneStartTime, getGlobalStartTime, getGlobalStartFrame, getSceneStartFrame
+@docs getCurrentTimeStamp, getWindowVisibility, getMousePos
+@docs getPressedMouseButtons, getPressedKeys, getVolume, getCurrentScene
+@docs getVirtualSize, getRealSize, getViewPort, getCanvasOffset
+@docs getLoadingProgress, getFonts, getPrograms, getSprite, getAllSprites, getConfigData
 
 -}
 
@@ -32,10 +50,16 @@ import Browser.Events exposing (Visibility(..))
 import Dict exposing (Dict)
 import Html exposing (Html)
 import Json.Encode as Encode
-import Messenger.Audio.Internal exposing (AudioRepo, emptyRepo)
+import Messenger.Internal as Internal
 import REGL
 import REGL.Common exposing (Camera)
 import Set exposing (Set)
+
+
+{-| Opaque internal engine data.
+-}
+type alias InternalData =
+    Internal.InternalData
 
 
 {-| World Event
@@ -60,6 +84,7 @@ type WorldEvent
     | MouseMove ( Float, Float )
     | WMouseWheel Int
     | WPrompt String String
+    | WDataLoaded String String
     | NullEvent
 
 
@@ -74,7 +99,7 @@ Users can get outside information through these events.
 `KeyDown`, `KeyUp` records the keyboard events.
 "KeyDown" event is sent when the key is pressed, "KeyUp" is sent when the key is released.
 
-  - Note: if you just want to check if a key is pressed or not, use globalData.pressedKeys instead.
+  - Note: if you just want to check if a key is pressed or not, use `getPressedKeys globalData` instead.
     check all the keycodes [here](https://www.toptal.com/developers/keycode).
 
 `MouseDown`, `MouseUp` records the button code and position when mouse up and down.
@@ -101,43 +126,26 @@ type UserEvent
 
 {-| GlobalData
 
-GlobalData is the data that doesn't change during the game.
+GlobalData is the user-facing global state.
 
 It won't be reset if you change the scene.
 
 It is mainly used for display and reading/writing some localstorage data.
+Runtime values like time, input state, scene name, and volume are read-only;
+use the getter functions below to read them.
 
-  - `globalStartFrame` records the past frames number since the game started
-  - `globalStartTime` records the past time since the game started, in milliseconds
-  - `sceneStartFrame` records the past frames number since this scene started
-  - `sceneStartTime` records the past time since this scene started, in milliseconds
   - `userdata` records the data that users set to save
   - `extraHTML` is used to render extra HTML tags. Be careful to use this
-  - `windowVisibility` records whether users stay in this tab/window
-  - `pressedKeys` records the keycodes that are be pressed now
-  - `pressedMouseButtons` records the mouse buttons that are pressed now
-  - `volume` records the volume of the game
-  - `currentScene` records the current scene name
-  - `mousePos` records the mouse position, in virtual coordinate
+  - `canvasAttributes` is used to attach attributes to the game canvas
   - `camera` records the camera position and zoom level
+  - `internalData` stores opaque engine-owned data; use getters instead of editing it
 
 -}
 type alias GlobalData userdata =
     { internalData : InternalData
-    , sceneStartTime : Float
-    , globalStartTime : Float
-    , globalStartFrame : Int
-    , sceneStartFrame : Int
-    , currentTimeStamp : Float
-    , windowVisibility : Visibility
-    , mousePos : ( Float, Float )
-    , pressedMouseButtons : Set Int
-    , pressedKeys : Set Int
     , extraHTML : Maybe (Html WorldEvent)
     , canvasAttributes : List (Html.Attribute WorldEvent)
-    , volume : Float
     , userData : userdata
-    , currentScene : String
     , camera : Camera
     }
 
@@ -145,12 +153,8 @@ type alias GlobalData userdata =
 {-| This type is for user to use when initializing the messenger.
 It is very useful when dealing with local storage.
 -}
-type alias UserViewGlobalData userdata =
-    { sceneStartTime : Float
-    , globalStartTime : Float
-    , sceneStartFrame : Int
-    , globalStartFrame : Int
-    , camera : Camera
+type alias GlobalDataInit userdata =
+    { camera : Camera
     , volume : Float
     , extraHTML : Maybe (Html WorldEvent)
     , canvasAttributes : List (Html.Attribute WorldEvent)
@@ -158,62 +162,23 @@ type alias UserViewGlobalData userdata =
     }
 
 
-{-| Empty InternalData
+{-| Turn GlobalDataInit into GlobalData.
 -}
-emptyInternalData : InternalData
-emptyInternalData =
-    { browserViewPort = ( 0, 0 )
-    , realHeight = 0
-    , realWidth = 0
-    , startLeft = 0
-    , startTop = 0
-    , sprites = Dict.empty
-    , virtualWidth = 0
-    , virtualHeight = 0
-    , audioRepo = emptyRepo
-    , loadedResNum = 0
-    , totResNum = 0
-    , fonts = Set.empty
-    , programs = Set.empty
-    }
-
-
-{-| Turn UserViewGlobalData into GlobalData
--}
-userGlobalDataToGlobalData : UserViewGlobalData userdata -> GlobalData userdata
-userGlobalDataToGlobalData user =
-    { internalData = emptyInternalData
-    , currentTimeStamp = 0
-    , sceneStartTime = user.sceneStartTime
-    , globalStartTime = user.globalStartTime
-    , sceneStartFrame = user.sceneStartFrame
-    , globalStartFrame = user.globalStartFrame
-    , volume = user.volume
-    , windowVisibility = Visible
-    , pressedKeys = Set.empty
-    , pressedMouseButtons = Set.empty
+globalDataInitToGlobalData : GlobalDataInit userdata -> GlobalData userdata
+globalDataInitToGlobalData user =
+    let
+        emptyInternalData =
+            Internal.getInternalData Internal.emptyInternalData
+    in
+    { internalData =
+        Internal.InternalData
+            { emptyInternalData
+                | volume = user.volume
+            }
     , canvasAttributes = user.canvasAttributes
-    , mousePos = ( 0, 0 )
     , extraHTML = user.extraHTML
     , userData = user.userData
-    , currentScene = ""
     , camera = user.camera
-    }
-
-
-{-| Turn GlobalData into UserViewGlobalData
--}
-globalDataToUserGlobalData : GlobalData userdata -> UserViewGlobalData userdata
-globalDataToUserGlobalData globalData =
-    { sceneStartTime = globalData.sceneStartTime
-    , globalStartTime = globalData.globalStartTime
-    , sceneStartFrame = globalData.sceneStartFrame
-    , globalStartFrame = globalData.globalStartFrame
-    , volume = globalData.volume
-    , extraHTML = globalData.extraHTML
-    , canvasAttributes = globalData.canvasAttributes
-    , userData = globalData.userData
-    , camera = globalData.camera
     }
 
 
@@ -254,31 +219,6 @@ addCommonData commonData env =
     }
 
 
-{-| Internal GlobalData
-
-Basically users do not need to get or modify them.
-
-  - `browserViewPort` records the browser size.
-  - `sprites` records all the sprites(images).
-
--}
-type alias InternalData =
-    { browserViewPort : ( Float, Float )
-    , realWidth : Float
-    , realHeight : Float
-    , startLeft : Float
-    , startTop : Float
-    , sprites : Dict String REGL.Texture
-    , loadedResNum : Int
-    , totResNum : Int
-    , fonts : Set String
-    , programs : Set String
-    , virtualWidth : Float
-    , virtualHeight : Float
-    , audioRepo : AudioRepo
-    }
-
-
 {-| The main flags.
 
 Get info from js script.
@@ -290,3 +230,170 @@ type alias Flags =
     { timeStamp : Float
     , info : String
     }
+
+
+
+-- INTERNAL DATA GETTERS
+
+
+{-| Get elapsed time since the current scene started.
+-}
+getSceneStartTime : GlobalData userdata -> Float
+getSceneStartTime globalData =
+    (Internal.getInternalData globalData.internalData).sceneStartTime
+
+
+{-| Get elapsed time since the game started.
+-}
+getGlobalStartTime : GlobalData userdata -> Float
+getGlobalStartTime globalData =
+    (Internal.getInternalData globalData.internalData).globalStartTime
+
+
+{-| Get the frame count since the game started.
+-}
+getGlobalStartFrame : GlobalData userdata -> Int
+getGlobalStartFrame globalData =
+    (Internal.getInternalData globalData.internalData).globalStartFrame
+
+
+{-| Get the frame count since the current scene started.
+-}
+getSceneStartFrame : GlobalData userdata -> Int
+getSceneStartFrame globalData =
+    (Internal.getInternalData globalData.internalData).sceneStartFrame
+
+
+{-| Get the current timestamp.
+-}
+getCurrentTimeStamp : GlobalData userdata -> Float
+getCurrentTimeStamp globalData =
+    (Internal.getInternalData globalData.internalData).currentTimeStamp
+
+
+{-| Get the current browser visibility.
+-}
+getWindowVisibility : GlobalData userdata -> Visibility
+getWindowVisibility globalData =
+    (Internal.getInternalData globalData.internalData).windowVisibility
+
+
+{-| Get the mouse position in virtual coordinates.
+-}
+getMousePos : GlobalData userdata -> ( Float, Float )
+getMousePos globalData =
+    (Internal.getInternalData globalData.internalData).mousePos
+
+
+{-| Get the pressed mouse buttons.
+-}
+getPressedMouseButtons : GlobalData userdata -> Set Int
+getPressedMouseButtons globalData =
+    (Internal.getInternalData globalData.internalData).pressedMouseButtons
+
+
+{-| Get the pressed keys.
+-}
+getPressedKeys : GlobalData userdata -> Set Int
+getPressedKeys globalData =
+    (Internal.getInternalData globalData.internalData).pressedKeys
+
+
+{-| Get the current volume.
+-}
+getVolume : GlobalData userdata -> Float
+getVolume globalData =
+    (Internal.getInternalData globalData.internalData).volume
+
+
+{-| Get the current scene name.
+-}
+getCurrentScene : GlobalData userdata -> String
+getCurrentScene globalData =
+    (Internal.getInternalData globalData.internalData).currentScene
+
+
+{-| Get virtual coordinate dimensions
+-}
+getVirtualSize : GlobalData userdata -> ( Float, Float )
+getVirtualSize globalData =
+    let
+        internalData =
+            Internal.getInternalData globalData.internalData
+    in
+    ( internalData.virtualWidth, internalData.virtualHeight )
+
+
+{-| Get real canvas dimensions
+-}
+getRealSize : GlobalData userdata -> ( Float, Float )
+getRealSize globalData =
+    let
+        internalData =
+            Internal.getInternalData globalData.internalData
+    in
+    ( internalData.realWidth, internalData.realHeight )
+
+
+{-| Get browser viewport dimensions
+-}
+getViewPort : GlobalData userdata -> ( Float, Float )
+getViewPort globalData =
+    (Internal.getInternalData globalData.internalData).browserViewPort
+
+
+{-| Get canvas positioning offset
+-}
+getCanvasOffset : GlobalData userdata -> ( Float, Float )
+getCanvasOffset globalData =
+    let
+        internalData =
+            Internal.getInternalData globalData.internalData
+    in
+    ( internalData.startLeft, internalData.startTop )
+
+
+{-| Get resource loading progress (loaded, total)
+-}
+getLoadingProgress : GlobalData userdata -> ( Int, Int )
+getLoadingProgress globalData =
+    let
+        internalData =
+            Internal.getInternalData globalData.internalData
+    in
+    ( internalData.loadedResNum, internalData.totResNum )
+
+
+{-| Get set of loaded font names
+-}
+getFonts : GlobalData userdata -> Set String
+getFonts globalData =
+    (Internal.getInternalData globalData.internalData).fonts
+
+
+{-| Get set of loaded shader program names
+-}
+getPrograms : GlobalData userdata -> Set String
+getPrograms globalData =
+    (Internal.getInternalData globalData.internalData).programs
+
+
+{-| Get a specific sprite texture by name
+-}
+getSprite : String -> GlobalData userdata -> Maybe REGL.Texture
+getSprite name globalData =
+    Dict.get name (Internal.getInternalData globalData.internalData).sprites
+
+
+{-| Get all loaded sprite textures
+-}
+getAllSprites : GlobalData userdata -> Dict String REGL.Texture
+getAllSprites globalData =
+    (Internal.getInternalData globalData.internalData).sprites
+
+
+{-| Get loaded config data by key.
+-}
+getConfigData : String -> GlobalData userdata -> Maybe String
+getConfigData key globalData =
+    Dict.get key (Internal.getInternalData globalData.internalData).configData

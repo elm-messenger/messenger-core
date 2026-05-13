@@ -18,6 +18,7 @@ import Html.Events exposing (on)
 import Json.Decode as Decode
 import Messenger.Audio.Internal exposing (getAudio)
 import Messenger.Base exposing (WorldEvent(..))
+import Messenger.Internal as Internal
 import Messenger.Model exposing (Model)
 import Messenger.UI.Input exposing (Input)
 import REGL
@@ -31,13 +32,16 @@ view _ _ model =
         gd =
             model.env.globalData
 
+        internalData =
+            Internal.getInternalData gd.internalData
+
         canvas =
             REGL.toHtmlWith
-                { width = floor gd.internalData.realWidth
-                , height = floor gd.internalData.realHeight
+                { width = floor internalData.realWidth
+                , height = floor internalData.realHeight
                 }
-                ([ style "left" (String.fromFloat gd.internalData.startLeft)
-                 , style "top" (String.fromFloat gd.internalData.startTop)
+                ([ style "left" (String.fromFloat internalData.startLeft)
+                 , style "top" (String.fromFloat internalData.startTop)
                  , style "position" "fixed"
                  ]
                     ++ gd.canvasAttributes
@@ -60,5 +64,9 @@ The audio argument needed in the main model.
 -}
 audio : AudioData -> Model userdata scenemsg -> Audio
 audio _ model =
-    Audio.group (getAudio model.env.globalData.internalData.audioRepo)
-        |> Audio.scaleVolume model.env.globalData.volume
+    let
+        internalData =
+            Internal.getInternalData model.env.globalData.internalData
+    in
+    Audio.group (getAudio internalData.audioRepo)
+        |> Audio.scaleVolume internalData.volume

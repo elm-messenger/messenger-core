@@ -26,6 +26,7 @@ subscriptions config _ _ =
     Sub.batch
         [ config.ports.reglupdate WTick
         , config.ports.recvREGLCmd REGLRecv
+        , config.ports.dataFileLoaded (\r -> WDataLoaded r.name r.data)
         , onKeyDown
             (Decode.map2
                 (\x rep ->

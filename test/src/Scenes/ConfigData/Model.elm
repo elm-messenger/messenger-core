@@ -1,4 +1,4 @@
-module Scenes.Stress.Model exposing (scene)
+module Scenes.ConfigData.Model exposing (scene)
 
 {-| Scene configuration module
 
@@ -8,9 +8,10 @@ module Scenes.Stress.Model exposing (scene)
 
 import Color
 import Duration
+import Json.Decode as Decode
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (UserEvent(..), getSceneStartFrame)
+import Messenger.Base exposing (Env, UserEvent(..), getConfigData)
 import Messenger.GlobalComponents.Transition.Model exposing (genMixedTransitionSOM)
 import Messenger.GlobalComponents.Transition.Transitions exposing (fadeMix)
 import Messenger.Scene.RawScene exposing (RawSceneInit, RawSceneUpdate, RawSceneView, genRawScene)
@@ -20,12 +21,31 @@ import REGL.Common exposing (group)
 
 
 type alias Data =
-    {}
+    { texts : List String
+    , index : Int
+    }
+
+
+parseTexts : Env () UserData -> List String
+parseTexts env =
+    case getConfigData "texts" env.globalData of
+        Just raw ->
+            case Decode.decodeString (Decode.list Decode.string) raw of
+                Ok texts ->
+                    texts
+
+                Err _ ->
+                    []
+
+        Nothing ->
+            []
 
 
 init : RawSceneInit Data UserData SceneMsg
-init env msg =
-    {}
+init env _ =
+    { texts = parseTexts env
+    , index = 0
+    }
 
 
 update : RawSceneUpdate Data UserData SceneMsg
@@ -38,6 +58,12 @@ update env msg data =
             , env
             )
 
+        KeyDown 13 ->
+            ( { data | index = modBy (List.length data.texts) (data.index + 1) }
+            , []
+            , env
+            )
+
         _ ->
             ( data, [], env )
 
@@ -45,22 +71,16 @@ update env msg data =
 view : RawSceneView UserData Data
 view env data =
     let
-        time =
-            getSceneStartFrame env.globalData
+        currentText =
+            Maybe.withDefault "" <|
+                List.head <|
+                    List.drop data.index data.texts
     in
-    group [] <|
-        P.clear Color.white
-            :: (List.concat <|
-                    List.map
-                        (\x ->
-                            List.map
-                                (\y ->
-                                    P.centeredTexture ( toFloat x * 20 + toFloat time, toFloat y * 20 ) ( 20, 20 ) 0 "ship"
-                                )
-                                (List.range 0 50)
-                        )
-                        (List.range 0 100)
-               )
+    group []
+        [ P.clear Color.lightYellow
+        , P.textbox ( 0, 30 ) 40 "Press Enter to show next" "firacode" Color.black
+        , P.textbox ( 0, 100 ) 40 currentText "firacode" Color.black
+        ]
 
 
 scenecon : MConcreteScene Data UserData SceneMsg

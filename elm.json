@@ -3,7 +3,7 @@
     "name": "linsyking/messenger-core",
     "summary": "Core library for Messenger.",
     "license": "BSD-3-Clause",
-    "version": "17.1.3",
+    "version": "18.0.0",
     "exposed-modules": {
         "Base": [
             "Messenger.Base",
@@ -17,6 +17,7 @@
         ],
         "Lib": [
             "Messenger.Scene.Scene",
+            "Messenger.Scene.VSR",
             "Messenger.Scene.RawScene",
             "Messenger.Scene.LayeredScene",
             "Messenger.Layer.Layer",

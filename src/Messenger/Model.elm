@@ -20,6 +20,7 @@ We only use it in the main update.
 -}
 
 import Messenger.Base exposing (Env)
+import Messenger.Internal as Internal
 import Messenger.Scene.Scene exposing (AbstractGlobalComponent, MAbstractScene)
 
 
@@ -42,8 +43,18 @@ updateSceneTime m delta =
         env =
             m.env
 
+        internalData =
+            Internal.getInternalData gd.internalData
+
         ngd =
-            { gd | sceneStartTime = gd.sceneStartTime + delta, sceneStartFrame = gd.sceneStartFrame + 1 }
+            { gd
+                | internalData =
+                    Internal.InternalData
+                        { internalData
+                            | sceneStartTime = internalData.sceneStartTime + delta
+                            , sceneStartFrame = internalData.sceneStartFrame + 1
+                        }
+            }
     in
     { m | env = { env | globalData = ngd } }
 
@@ -59,7 +70,17 @@ resetSceneStartTime m =
         env =
             m.env
 
+        internalData =
+            Internal.getInternalData gd.internalData
+
         ngd =
-            { gd | sceneStartTime = 0, sceneStartFrame = 0 }
+            { gd
+                | internalData =
+                    Internal.InternalData
+                        { internalData
+                            | sceneStartTime = 0
+                            , sceneStartFrame = 0
+                        }
+            }
     in
     { m | env = { env | globalData = ngd } }

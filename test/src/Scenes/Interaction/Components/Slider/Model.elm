@@ -9,7 +9,7 @@ module Scenes.Interaction.Components.Slider.Model exposing (component)
 import Color
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (UserEvent(..))
+import Messenger.Base exposing (UserEvent(..), getMousePos)
 import Messenger.Component.Component exposing (ComponentInit, ComponentMatcher, ComponentStorage, ComponentUpdate, ComponentUpdateRec, ComponentView, ConcreteUserComponent, genComponent)
 import Messenger.Coordinate.Coordinates exposing (judgeMouseCircle)
 import Messenger.GeneralModel exposing (Msg(..), MsgBase(..))
@@ -48,7 +48,7 @@ update env evnt data basedata =
             ( ( { data | selected = False }, basedata ), [], ( env, False ) )
 
         MouseDown _ _ ->
-            if judgeMouseCircle env.globalData.mousePos data.pos 15 then
+            if judgeMouseCircle (getMousePos env.globalData) data.pos 15 then
                 ( ( { data | selected = True }, basedata ), [], ( env, True ) )
 
             else
@@ -58,7 +58,7 @@ update env evnt data basedata =
             if data.selected then
                 let
                     ( posx, _ ) =
-                        env.globalData.mousePos
+                        getMousePos env.globalData
 
                     ( cx, cy ) =
                         data.initData.center

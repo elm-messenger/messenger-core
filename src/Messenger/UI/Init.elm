@@ -13,7 +13,8 @@ Initialize the game
 
 import Audio exposing (AudioCmd)
 import Browser.Dom exposing (getViewport)
-import Messenger.Base exposing (Env, Flags, GlobalData, UserEvent, WorldEvent(..), emptyInternalData, userGlobalDataToGlobalData)
+import Messenger.Base exposing (Env, Flags, GlobalData, UserEvent, WorldEvent(..), globalDataInitToGlobalData)
+import Messenger.Internal as Internal
 import Messenger.Model exposing (Model)
 import Messenger.Resources.Base exposing (ResourceDef(..), resourceNum)
 import Messenger.Scene.Loader exposing (loadSceneByName)
@@ -48,7 +49,7 @@ emptyScene =
 -}
 emptyGlobalData : UserConfig userdata scenemsg -> GlobalData userdata
 emptyGlobalData config =
-    userGlobalDataToGlobalData (config.globalDataCodec.decode "")
+    globalDataInitToGlobalData (config.globalDataCodec.decode "")
 
 
 {-| Initial model
@@ -87,17 +88,24 @@ init input flags =
             loadSceneByName config.initScene scenes config.initSceneMsg { im | env = newEnv1 }
 
         newIT =
-            { emptyInternalData
-                | virtualWidth = config.virtualSize.width
-                , virtualHeight = config.virtualSize.height
-                , totResNum = resourceNum input.resources
-            }
+            let
+                initInternalData =
+                    Internal.getInternalData initGlobalData.internalData
+            in
+            Internal.InternalData
+                { initInternalData
+                    | virtualWidth = config.virtualSize.width
+                    , virtualHeight = config.virtualSize.height
+                    , totResNum = resourceNum input.resources
+                    , currentTimeStamp = flags.timeStamp
+                    , currentScene = config.initScene
+                }
 
         initGlobalData =
-            userGlobalDataToGlobalData (config.globalDataCodec.decode flags.info)
+            globalDataInitToGlobalData (config.globalDataCodec.decode flags.info)
 
         newgd =
-            { initGlobalData | currentTimeStamp = flags.timeStamp, internalData = newIT, currentScene = config.initScene }
+            { initGlobalData | internalData = newIT }
 
         audioLoad =
             List.filterMap
@@ -137,16 +145,30 @@ init input flags =
                             Nothing
                 )
                 resources
+
+        dataloadcmds =
+            List.filterMap
+                (\( key, res ) ->
+                    case res of
+                        DataRes path ->
+                            Just <| config.ports.loadDataFile { name = key, path = path }
+
+                        _ ->
+                            Nothing
+                )
+                resources
     in
     ( { ms | env = newEnv2, globalComponents = gcs }
     , Cmd.batch <|
-        Task.perform (\res -> NewWindowSize ( res.scene.width, res.scene.height )) getViewport
+        (Task.perform (\res -> NewWindowSize ( res.scene.width, res.scene.height )) getViewport
             :: (REGL.batchExec config.ports.execREGLCmd <|
                     REGL.startREGL (REGL.REGLStartConfig config.virtualSize.width config.virtualSize.height config.fboNum (bulitinPrograms config.enabledProgram))
                         :: REGL.configREGL
                             (REGL.REGLConfig config.timeInterval)
                         :: resloadcmds
                )
+        )
+            ++ dataloadcmds
     , Audio.cmdBatch audioLoad
     )
 

@@ -132,6 +132,13 @@ update env msg data =
             , env
             )
 
+        KeyDown 69 ->
+            ( data
+            , [ SOMChangeScene Nothing "ConfigData"
+              ]
+            , env
+            )
+
         _ ->
             ( data, [], env )
 
@@ -155,6 +162,7 @@ a. Interaction
 b. Rain
 c. Spaceshooter
 d. SpriteSheet
+e. ConfigData Test
 """
 
 

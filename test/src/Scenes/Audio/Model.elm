@@ -13,7 +13,7 @@ import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
 import Messenger.Audio.Audio exposing (audioDuration)
 import Messenger.Audio.Base exposing (AudioCommonOption, AudioOption(..), AudioTarget(..))
-import Messenger.Base exposing (UserEvent(..))
+import Messenger.Base exposing (UserEvent(..), getCurrentTimeStamp)
 import Messenger.GeneralModel exposing (Msg(..), MsgBase(..))
 import Messenger.GlobalComponents.Transition.Model exposing (genMixedTransitionSOM)
 import Messenger.GlobalComponents.Transition.Transitions exposing (fadeMix)
@@ -80,7 +80,7 @@ update env msg data =
         KeyDown 54 ->
             let
                 ts =
-                    env.globalData.currentTimeStamp
+                    getCurrentTimeStamp env.globalData
 
                 nts =
                     Time.millisToPosix <| floor ts + 2000
@@ -89,7 +89,7 @@ update env msg data =
                     Time.millisToPosix <| floor ts + 6000
             in
             ( data
-            , [ SOMStopAudio <| AudioName 0 "test", SOMPlayAudio 0 "test" <| ALoop Nothing Nothing, SOMTransformAudio (AudioName 0 "test") (scaleVolumeAt [ ( Time.millisToPosix <| floor env.globalData.currentTimeStamp, 0 ), ( nts, 2 ), ( lts, 0 ) ]) ]
+            , [ SOMStopAudio <| AudioName 0 "test", SOMPlayAudio 0 "test" <| ALoop Nothing Nothing, SOMTransformAudio (AudioName 0 "test") (scaleVolumeAt [ ( Time.millisToPosix <| floor (getCurrentTimeStamp env.globalData), 0 ), ( nts, 2 ), ( lts, 0 ) ]) ]
             , env
             )
 
