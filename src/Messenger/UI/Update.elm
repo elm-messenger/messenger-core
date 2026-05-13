@@ -17,6 +17,7 @@ import Messenger.Base exposing (UserEvent(..), WorldEvent(..), addCommonData, re
 import Messenger.Component.GlobalComponent exposing (combinePP, filterAliveGC)
 import Messenger.Coordinate.Coordinates exposing (fromMouseToVirtual, getStartPoint, maxHandW)
 import Messenger.GeneralModel exposing (filterSOM, viewModelList)
+import Messenger.Internal as Internal
 import Messenger.Model exposing (Model, resetSceneStartTime, updateSceneTime)
 import Messenger.Recursion exposing (updateObjects)
 import Messenger.Resources.Base exposing (resourceNum, saveSprite)
@@ -33,7 +34,7 @@ import Set
 -}
 gameUpdate : Input userdata scenemsg -> UserEvent -> Model userdata scenemsg -> ( Model userdata scenemsg, Cmd WorldEvent, AudioCmd WorldEvent )
 gameUpdate input evnt model =
-    if model.env.globalData.internalData.loadedResNum < resourceNum input.resources then
+    if (Internal.getInternalData model.env.globalData.internalData).loadedResNum < resourceNum input.resources then
         -- Still loading assets (only possible when the game is just started)
         ( model, Cmd.none, Audio.cmdNone )
 
@@ -112,7 +113,7 @@ update input audiodata msg model =
             model.env
 
         gdid =
-            gd.internalData
+            Internal.getInternalData gd.internalData
 
         scenes =
             input.scenes
@@ -135,7 +136,7 @@ update input audiodata msg model =
                             Dict.insert name ( sound, Audio.length audiodata sound ) ar.audio
 
                         newEnv =
-                            { env | globalData = { gd | internalData = { gdid | audioRepo = { ar | audio = ard }, loadedResNum = gdid.loadedResNum + 1 } } }
+                            { env | globalData = { gd | internalData = Internal.InternalData { gdid | audioRepo = { ar | audio = ard }, loadedResNum = gdid.loadedResNum + 1 } } }
                     in
                     ( { model | env = newEnv }
                     , Cmd.none
@@ -151,16 +152,13 @@ update input audiodata msg model =
         NewWindowSize t ->
             let
                 ( gw, gh ) =
-                    maxHandW ( gd.internalData.virtualWidth, gd.internalData.virtualHeight ) t
+                    maxHandW ( gdid.virtualWidth, gdid.virtualHeight ) t
 
                 ( fl, ft ) =
-                    getStartPoint ( gd.internalData.virtualWidth, gd.internalData.virtualHeight ) t
-
-                oldIT =
-                    gd.internalData
+                    getStartPoint ( gdid.virtualWidth, gdid.virtualHeight ) t
 
                 newIT =
-                    { oldIT | browserViewPort = t, realWidth = gw, realHeight = gh, startLeft = fl, startTop = ft }
+                    Internal.InternalData { gdid | browserViewPort = t, realWidth = gw, realHeight = gh, startLeft = fl, startTop = ft }
 
                 newgd =
                     { gd | internalData = newIT }
@@ -173,7 +171,15 @@ update input audiodata msg model =
         WindowVisibility v ->
             let
                 newgd =
-                    { gd | windowVisibility = v, pressedKeys = Set.empty, pressedMouseButtons = Set.empty }
+                    { gd
+                        | internalData =
+                            Internal.InternalData
+                                { gdid
+                                    | windowVisibility = v
+                                    , pressedKeys = Set.empty
+                                    , pressedMouseButtons = Set.empty
+                                }
+                    }
 
                 newEnv =
                     { env | globalData = newgd }
@@ -186,17 +192,17 @@ update input audiodata msg model =
                     fromMouseToVirtual gd.internalData ( px, py )
 
                 newEnv =
-                    { env | globalData = { gd | mousePos = mp } }
+                    { env | globalData = { gd | internalData = Internal.InternalData { gdid | mousePos = mp } } }
             in
             ( { model | env = newEnv }, Cmd.none, Audio.cmdNone )
 
         WMouseDown e pos ->
             let
                 newPressedMouseButtons =
-                    Set.insert e gd.pressedMouseButtons
+                    Set.insert e gdid.pressedMouseButtons
 
                 newEnv =
-                    { env | globalData = { gd | pressedMouseButtons = newPressedMouseButtons } }
+                    { env | globalData = { gd | internalData = Internal.InternalData { gdid | pressedMouseButtons = newPressedMouseButtons } } }
 
                 newModel =
                     { model | env = newEnv }
@@ -206,10 +212,10 @@ update input audiodata msg model =
         WMouseUp e pos ->
             let
                 newPressedMouseButtons =
-                    Set.remove e gd.pressedMouseButtons
+                    Set.remove e gdid.pressedMouseButtons
 
                 newEnv =
-                    { env | globalData = { gd | pressedMouseButtons = newPressedMouseButtons } }
+                    { env | globalData = { gd | internalData = Internal.InternalData { gdid | pressedMouseButtons = newPressedMouseButtons } } }
 
                 newModel =
                     { model | env = newEnv }
@@ -233,13 +239,13 @@ update input audiodata msg model =
                 gameUpdateInner (KeyDown 113) model
 
         WKeyUp key ->
-            if Set.member key gd.pressedKeys then
+            if Set.member key gdid.pressedKeys then
                 let
                     newPressedKeys =
-                        Set.remove key gd.pressedKeys
+                        Set.remove key gdid.pressedKeys
 
                     newEnv =
-                        { env | globalData = { gd | pressedKeys = newPressedKeys } }
+                        { env | globalData = { gd | internalData = Internal.InternalData { gdid | pressedKeys = newPressedKeys } } }
                 in
                 gameUpdateInner (KeyUp key) { model | env = newEnv }
 
@@ -247,16 +253,16 @@ update input audiodata msg model =
                 ( model, Cmd.none, Audio.cmdNone )
 
         WKeyDown key ->
-            if Set.member key gd.pressedKeys then
+            if Set.member key gdid.pressedKeys then
                 ( model, Cmd.none, Audio.cmdNone )
 
             else
                 let
                     newPressedKeys =
-                        Set.insert key gd.pressedKeys
+                        Set.insert key gdid.pressedKeys
 
                     newEnv =
-                        { env | globalData = { gd | pressedKeys = newPressedKeys } }
+                        { env | globalData = { gd | internalData = Internal.InternalData { gdid | pressedKeys = newPressedKeys } } }
                 in
                 gameUpdateInner (KeyDown key) { model | env = newEnv }
 
@@ -280,7 +286,7 @@ update input audiodata msg model =
                 Just v ->
                     let
                         newgd =
-                            { gd | volume = v }
+                            { gd | internalData = Internal.InternalData { gdid | volume = v } }
 
                         newEnv =
                             { env | globalData = newgd }
@@ -296,10 +302,18 @@ update input audiodata msg model =
         WTick ts ->
             let
                 timeInterval =
-                    ts - gd.currentTimeStamp
+                    ts - gdid.currentTimeStamp
 
                 newgd =
-                    { gd | currentTimeStamp = ts, globalStartFrame = gd.globalStartFrame + 1, globalStartTime = gd.globalStartTime + timeInterval }
+                    { gd
+                        | internalData =
+                            Internal.InternalData
+                                { gdid
+                                    | currentTimeStamp = ts
+                                    , globalStartFrame = gdid.globalStartFrame + 1
+                                    , globalStartTime = gdid.globalStartTime + timeInterval
+                                }
+                    }
 
                 newEnv =
                     { env | globalData = newgd }
@@ -319,7 +333,7 @@ update input audiodata msg model =
                         newgd =
                             let
                                 newIT =
-                                    { gdid | sprites = saveSprite gdid.sprites t.name t, loadedResNum = gdid.loadedResNum + 1 }
+                                    Internal.InternalData { gdid | sprites = saveSprite gdid.sprites t.name t, loadedResNum = gdid.loadedResNum + 1 }
                             in
                             { gd | internalData = newIT }
 
@@ -333,7 +347,7 @@ update input audiodata msg model =
                         newgd =
                             let
                                 newIT =
-                                    { gdid | fonts = Set.insert font gdid.fonts, loadedResNum = gdid.loadedResNum + 1 }
+                                    Internal.InternalData { gdid | fonts = Set.insert font gdid.fonts, loadedResNum = gdid.loadedResNum + 1 }
                             in
                             { gd | internalData = newIT }
 
@@ -347,7 +361,7 @@ update input audiodata msg model =
                         newgd =
                             let
                                 newIT =
-                                    { gdid | programs = Set.insert prog gdid.programs, loadedResNum = gdid.loadedResNum + 1 }
+                                    Internal.InternalData { gdid | programs = Set.insert prog gdid.programs, loadedResNum = gdid.loadedResNum + 1 }
                             in
                             { gd | internalData = newIT }
 
@@ -362,7 +376,7 @@ update input audiodata msg model =
         WDataLoaded name data ->
             let
                 newIT =
-                    { gdid | configData = Dict.insert name data gdid.configData, loadedResNum = gdid.loadedResNum + 1 }
+                    Internal.InternalData { gdid | configData = Dict.insert name data gdid.configData, loadedResNum = gdid.loadedResNum + 1 }
 
                 newEnv =
                     { env | globalData = { gd | internalData = newIT } }

@@ -10,7 +10,7 @@ import Color
 import Duration
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (UserEvent(..))
+import Messenger.Base exposing (UserEvent(..), getSceneStartFrame)
 import Messenger.GlobalComponents.Transition.Model exposing (genMixedTransitionSOM)
 import Messenger.GlobalComponents.Transition.Transitions exposing (fadeMix)
 import Messenger.Scene.RawScene exposing (RawSceneInit, RawSceneUpdate, RawSceneView, genRawScene)
@@ -46,11 +46,10 @@ view : RawSceneView UserData Data
 view env data =
     let
         time =
-            env.globalData.sceneStartFrame
+            getSceneStartFrame env.globalData
     in
     group [] <|
         P.clear Color.white
-            :: P.textbox ( 0, 0 ) 50 "[Backspace] to go back to Home" "firacode" Color.black
             :: (List.concat <|
                     List.map
                         (\x ->

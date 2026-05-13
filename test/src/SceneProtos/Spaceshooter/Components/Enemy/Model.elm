@@ -9,7 +9,7 @@ module SceneProtos.Spaceshooter.Components.Enemy.Model exposing (component)
 import Color
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (UserEvent(..))
+import Messenger.Base exposing (UserEvent(..), getSceneStartTime)
 import Messenger.Component.Component exposing (ComponentInit, ComponentMatcher, ComponentStorage, ComponentUpdate, ComponentUpdateRec, ComponentView, ConcreteUserComponent, genComponent)
 import Messenger.GeneralModel exposing (Msg(..), MsgBase(..))
 import REGL.BuiltinPrograms as P
@@ -50,7 +50,7 @@ update env evnt data basedata =
         Tick dt ->
             let
                 velx =
-                    sin (env.globalData.sceneStartTime / data.sinf) * data.sina
+                    sin (getSceneStartTime env.globalData / data.sinf) * data.sina
 
                 ( x, y ) =
                     basedata.position

@@ -9,7 +9,7 @@ module SceneProtos.Spaceshooter.Components.Ship.Model exposing (component)
 import Color
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (UserEvent(..))
+import Messenger.Base exposing (UserEvent(..), getPressedKeys)
 import Messenger.Component.Component exposing (ComponentInit, ComponentMatcher, ComponentStorage, ComponentUpdate, ComponentUpdateRec, ComponentView, ConcreteUserComponent, genComponent)
 import Messenger.GeneralModel exposing (Msg(..), MsgBase(..))
 import Messenger.Misc.KeyCode exposing (arrowDown, arrowUp)
@@ -84,7 +84,7 @@ update env evnt data basedata =
                     ( ( data, basedata ), [], ( env, False ) )
 
             KeyUp key ->
-                if (key == arrowDown || key == arrowUp) && not (Set.member arrowUp env.globalData.pressedKeys || Set.member arrowDown env.globalData.pressedKeys) then
+                if (key == arrowDown || key == arrowUp) && not (Set.member arrowUp (getPressedKeys env.globalData) || Set.member arrowDown (getPressedKeys env.globalData)) then
                     ( ( data, { basedata | velocity = 0 } ), [], ( env, False ) )
 
                 else

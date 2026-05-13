@@ -9,7 +9,7 @@ module Scenes.Interaction.Components.Button.Model exposing (component)
 import Color
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (UserEvent(..))
+import Messenger.Base exposing (UserEvent(..), getMousePos)
 import Messenger.Component.Component exposing (ComponentInit, ComponentMatcher, ComponentStorage, ComponentUpdate, ComponentUpdateRec, ComponentView, ConcreteUserComponent, genComponent)
 import Messenger.Coordinate.Coordinates exposing (judgeMouseRect)
 import Messenger.GeneralModel exposing (Msg(..), MsgBase(..))
@@ -55,7 +55,7 @@ update : ComponentUpdate SceneCommonData Data UserData SceneMsg ComponentTarget 
 update env evnt data basedata =
     let
         isHovered =
-            judgeMouseRect env.globalData.mousePos data.pos data.initdata.size
+            judgeMouseRect (getMousePos env.globalData) data.pos data.initdata.size
 
         nextState =
             if isHovered && data.curState == Normal then
@@ -72,7 +72,7 @@ update env evnt data basedata =
             ( ( { data | curState = Normal }, basedata ), [ Parent <| OtherMsg <| ButtonUpdateMsg BMsg.Released ], ( env, False ) )
 
         MouseDown _ _ ->
-            if judgeMouseRect env.globalData.mousePos data.pos data.initdata.size then
+            if judgeMouseRect (getMousePos env.globalData) data.pos data.initdata.size then
                 ( ( { data | curState = Pressed }, basedata ), [ Parent <| OtherMsg <| ButtonUpdateMsg BMsg.Pressed ], ( env, True ) )
 
             else

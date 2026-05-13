@@ -53,7 +53,7 @@ Use **OtherMsg** when sending a normal message to parent.
 Examples:
 
   - Parent <| SOMMsg <| SOMChangeScene (Just NullSceneMsg) "SelectLevel" -- SOMMsg
-  - Parent <| OtherMsg <| genMeteor env.commonData.playerPos env.globalData.globalStartTime -- In a component. This genMeteor message will be handled in the layer containing the component.
+  - Parent <| OtherMsg <| genMeteor env.commonData.playerPos (getGlobalStartTime env.globalData) -- In a component. This genMeteor message will be handled in the layer containing the component.
 
 -}
 type MsgBase othermsg sommsg
@@ -121,6 +121,7 @@ type alias UnrolledAbstractGeneralModel env event tar msg ren bdata sommsg =
     , view : env -> ren
     , matcher : tar -> Bool
     , baseData : bdata
+    , updateBaseData : bdata -> AbstractGeneralModel env event tar msg ren bdata sommsg
     }
 
 
@@ -176,24 +177,17 @@ abstract conmodel initMsg initEnv =
                     in
                     ( abstractRec new_d new_bd, new_m, new_e )
 
-                views : env -> ren
-                views env =
-                    conmodel.view env data base
-
-                matchers : tar -> Bool
-                matchers =
-                    conmodel.matcher data base
-
-                baseDatas : bdata
-                baseDatas =
-                    base
+                updatebd : bdata -> AbstractGeneralModel env event tar msg ren bdata sommsg
+                updatebd bd =
+                    abstractRec data bd
             in
             Roll
                 { update = updates
                 , updaterec = updaterecs
-                , view = views
-                , matcher = matchers
-                , baseData = baseDatas
+                , view = \env -> conmodel.view env data base
+                , matcher = conmodel.matcher data base
+                , baseData = base
+                , updateBaseData = updatebd
                 }
 
         ( init_d, init_bd ) =

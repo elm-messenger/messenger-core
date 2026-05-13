@@ -29,7 +29,7 @@ module MainConfig exposing
 
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData, decodeUserData, encodeUserData)
-import Messenger.Base exposing (UserViewGlobalData)
+import Messenger.Base exposing (GlobalData, GlobalDataInit)
 import Messenger.UserConfig exposing (EnabledBuiltinProgram(..))
 import REGL
 
@@ -74,17 +74,13 @@ timeInterval =
 You may set the initial user data based on the user data.
 
 -}
-initGlobalData : String -> UserViewGlobalData UserData
+initGlobalData : String -> GlobalDataInit UserData
 initGlobalData data =
     let
         storage =
             decodeUserData data
     in
-    { sceneStartTime = 0
-    , sceneStartFrame = 0
-    , globalStartTime = 0
-    , globalStartFrame = 0
-    , volume = 0.5
+    { volume = 0.5
     , canvasAttributes = []
     , extraHTML = Nothing
     , userData = storage
@@ -102,7 +98,7 @@ initGlobalData data =
 Used when saving the user data to local storage.
 
 -}
-saveGlobalData : UserViewGlobalData UserData -> String
+saveGlobalData : GlobalData UserData -> String
 saveGlobalData globalData =
     encodeUserData globalData.userData
 

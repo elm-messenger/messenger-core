@@ -14,6 +14,7 @@ module Messenger.Render.Texture exposing
 -}
 
 import Messenger.Base exposing (InternalData)
+import Messenger.Internal as Internal
 import Messenger.Resources.Base exposing (igetSprite)
 import REGL exposing (Texture)
 import REGL.BuiltinPrograms as P
@@ -26,7 +27,7 @@ renderSprite : InternalData -> ( Float, Float ) -> ( Float, Float ) -> String ->
 renderSprite gd position size name =
     let
         dst =
-            gd.sprites
+            (Internal.getInternalData gd).sprites
     in
     case igetSprite name dst of
         Just t ->
@@ -63,4 +64,4 @@ textureDim gd name =
             (\t ->
                 ( t.width, t.height )
             )
-            (igetSprite name gd.sprites)
+            (igetSprite name (Internal.getInternalData gd).sprites)

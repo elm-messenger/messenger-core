@@ -7,11 +7,14 @@ module Scenes.Rain.Model exposing (scene)
 -}
 
 import Color
+import Duration
 import Lib.Base exposing (SceneMsg)
 import Lib.Programs.PointLight exposing (plight)
 import Lib.UserData exposing (UserData)
 import List exposing (length)
-import Messenger.Base exposing (UserEvent(..))
+import Messenger.Base exposing (UserEvent(..), getGlobalStartFrame)
+import Messenger.GlobalComponents.Transition.Model exposing (genMixedTransitionSOM)
+import Messenger.GlobalComponents.Transition.Transitions exposing (fadeMix)
 import Messenger.Scene.RawScene exposing (RawSceneInit, RawSceneUpdate, RawSceneView, genRawScene)
 import Messenger.Scene.Scene exposing (MConcreteScene, SceneStorage)
 import REGL.BuiltinPrograms as P exposing (clear, lines)
@@ -50,7 +53,7 @@ genRandomPos nofl t ws we =
 
 init : RawSceneInit Data UserData SceneMsg
 init env msg =
-    { rainPos = genRandomPos 100 env.globalData.globalStartFrame 0 1080
+    { rainPos = genRandomPos 100 (getGlobalStartFrame env.globalData) 0 1080
     }
 
 
@@ -99,7 +102,14 @@ update : RawSceneUpdate Data UserData SceneMsg
 update env msg data =
     case msg of
         Tick t ->
-            ( updateRain env.globalData.globalStartFrame (t * 0.1) data, [], env )
+            ( updateRain (getGlobalStartFrame env.globalData) (t * 0.1) data, [], env )
+
+        KeyDown 8 ->
+            ( data
+            , [ genMixedTransitionSOM ( fadeMix, Duration.seconds 1 ) ( "Home", Nothing )
+              ]
+            , env
+            )
 
         _ ->
             ( data, [], env )

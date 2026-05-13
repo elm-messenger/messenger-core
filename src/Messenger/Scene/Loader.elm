@@ -13,6 +13,7 @@ Scene loader is used to find and load scenes.
 
 import Dict
 import Messenger.Base exposing (removeCommonData)
+import Messenger.Internal as Internal
 import Messenger.Model exposing (Model)
 import Messenger.Scene.Scene exposing (AllScenes, SceneStorage)
 
@@ -64,8 +65,17 @@ loadSceneByName name scenes smsg model =
                 env =
                     newModel.env
 
+                internalData =
+                    Internal.getInternalData gd.internalData
+
                 newEnv =
-                    { env | globalData = { gd | currentScene = name } }
+                    { env
+                        | globalData =
+                            { gd
+                                | internalData =
+                                    Internal.InternalData { internalData | currentScene = name }
+                            }
+                    }
             in
             { newModel | env = newEnv }
 

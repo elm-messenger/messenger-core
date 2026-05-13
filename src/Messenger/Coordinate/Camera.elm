@@ -13,7 +13,7 @@ module Messenger.Coordinate.Camera exposing
 
 -}
 
-import Messenger.Base exposing (GlobalData)
+import Messenger.Base exposing (GlobalData, getVirtualSize)
 import REGL.Common exposing (Camera)
 
 
@@ -70,7 +70,11 @@ setCameraAngle angle user =
 -}
 defaultCamera : GlobalData u -> Camera
 defaultCamera gd =
-    { x = gd.internalData.virtualWidth / 2, y = gd.internalData.virtualHeight / 2, zoom = 1, rotation = 0 }
+    let
+        ( virtualWidth, virtualHeight ) =
+            getVirtualSize gd
+    in
+    { x = virtualWidth / 2, y = virtualHeight / 2, zoom = 1, rotation = 0 }
 
 
 {-| Tranform a position from the world coordinate system to the view (camera) coordinate system.

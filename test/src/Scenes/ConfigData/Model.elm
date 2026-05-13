@@ -7,12 +7,11 @@ module Scenes.ConfigData.Model exposing (scene)
 -}
 
 import Color
-import Dict
 import Duration
 import Json.Decode as Decode
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (Env, UserEvent(..))
+import Messenger.Base exposing (Env, UserEvent(..), getConfigData)
 import Messenger.GlobalComponents.Transition.Model exposing (genMixedTransitionSOM)
 import Messenger.GlobalComponents.Transition.Transitions exposing (fadeMix)
 import Messenger.Scene.RawScene exposing (RawSceneInit, RawSceneUpdate, RawSceneView, genRawScene)
@@ -29,7 +28,7 @@ type alias Data =
 
 parseTexts : Env () UserData -> List String
 parseTexts env =
-    case Dict.get "texts" env.globalData.internalData.configData of
+    case getConfigData "texts" env.globalData of
         Just raw ->
             case Decode.decodeString (Decode.list Decode.string) raw of
                 Ok texts ->

@@ -19,3 +19,7 @@ This library provides the core runtime and common user functions.
 - Virtual Coordinates
 
 For more details, please read the documentation in the main Messenger repository.
+
+## Test Application
+
+Make sure you have installed `git-lfs`. Otherwise the assets are not downloaded.
