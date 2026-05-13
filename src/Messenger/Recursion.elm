@@ -6,9 +6,13 @@ module Messenger.Recursion exposing
 {-|
 
 
-# RecursionList
+# Recursion List
 
-List implementation for the recursion algorithm
+Low-level helpers for updating lists of Messenger general models.
+
+Most games should use the component and layer helpers generated in templates.
+Use this module when building your own abstraction over
+`Messenger.GeneralModel.AbstractGeneralModel`.
 
 @docs updateObjects, updateObjectsWithTarget
 @docs removeObjects
@@ -19,7 +23,13 @@ import List exposing (reverse)
 import Messenger.GeneralModel exposing (AbstractGeneralModel, Msg(..), MsgBase, unroll)
 
 
-{-| Recursively update all the objects in the List
+{-| Update every object once with an event, then deliver generated target messages.
+
+The returned tuple contains the updated objects, parent/system messages, and the
+final environment plus a block flag. If an object blocks the event, later objects
+do not receive the original event, but queued target messages are still delivered
+afterwards.
+
 -}
 updateObjects : env -> event -> List (AbstractGeneralModel env event tar msg ren bdata sommsg) -> ( List (AbstractGeneralModel env event tar msg ren bdata sommsg), List (MsgBase msg sommsg), ( env, Bool ) )
 updateObjects env evt objs =
@@ -33,14 +43,19 @@ updateObjects env evt objs =
     ( resObj, resMsg, ( resEnv, newBlock ) )
 
 
-{-| Recursively update all the objects in the List, but also uses target
+{-| Deliver target messages to a list of objects.
+
+Each `( target, msg )` pair is sent to every object whose matcher accepts the
+target. Messages generated during delivery are recursively delivered until no
+target messages remain.
+
 -}
 updateObjectsWithTarget : env -> List ( tar, msg ) -> List (AbstractGeneralModel env event tar msg ren bdata sommsg) -> ( List (AbstractGeneralModel env event tar msg ren bdata sommsg), List (MsgBase msg sommsg), env )
 updateObjectsWithTarget env msgs objs =
     updateRemain env ( msgs, [] ) objs
 
 
-{-| Remove all objects by target.
+{-| Remove all objects that match a target.
 -}
 removeObjects : tar -> List (AbstractGeneralModel env event tar msg ren bdata sommsg) -> List (AbstractGeneralModel env event tar msg ren bdata sommsg)
 removeObjects t xs =

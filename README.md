@@ -17,6 +17,7 @@ This library provides the core runtime and common user functions.
 - Audio
 - WebGL Rendering
 - Virtual Coordinates
+- Virtual Scene Runner (VSR)
 
 For more details, please read the documentation in the main Messenger repository.
 

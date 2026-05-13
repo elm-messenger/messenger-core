@@ -8,6 +8,10 @@ module Messenger.Scene.VSR exposing
 
 # Virtual Scene Runner
 
+Run a scene as data inside another object, usually a global component. This is
+used by transitions and stacked scenes where the previous scene must continue to
+render or update while another scene is active.
+
 @docs VSR
 @docs updateVSR, viewVSR
 
@@ -19,7 +23,10 @@ import Messenger.Scene.Scene exposing (MAbstractScene, SceneOutputMsg, unroll)
 import REGL.Common exposing (Renderable)
 
 
-{-| Virtual Scene Runner
+{-| Virtual scene runner state.
+
+It stores the virtual scene's environment and the abstract scene value.
+
 -}
 type alias VSR userdata scenemsg =
     { env : Env () userdata
@@ -27,7 +34,11 @@ type alias VSR userdata scenemsg =
     }
 
 
-{-| Update the VSR.
+{-| Update the virtual scene runner with a user event.
+
+`Tick` also advances the virtual scene's internal time counters, mirroring how
+the main Messenger model updates scene time.
+
 -}
 updateVSR : VSR userdata scenemsg -> UserEvent -> ( VSR userdata scenemsg, List (SceneOutputMsg scenemsg userdata) )
 updateVSR vsr evnt =
@@ -68,7 +79,7 @@ updateVSR vsr evnt =
     ( VSR newEnv newScene, newMsg )
 
 
-{-| View the VSR.
+{-| Render the virtual scene.
 -}
 viewVSR : VSR userdata scenemsg -> Renderable
 viewVSR vsr =

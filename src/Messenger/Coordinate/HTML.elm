@@ -5,7 +5,8 @@ module Messenger.Coordinate.HTML exposing (genAttribute)
 
 # HTML Coordinate Lib
 
-This is only useful when you use extraHTML.
+Helpers for positioning `extraHTML` elements in the same virtual coordinate
+system as the game canvas.
 
 @docs genAttribute
 
@@ -17,9 +18,12 @@ import Messenger.Base exposing (InternalData)
 import Messenger.Coordinate.Coordinates exposing (fixedPosToReal, lengthToReal)
 
 
-{-| Generate HTML Attributes that has the correct position
+{-| Generate HTML attributes for a virtual rectangle.
 
-Useful when you try to add extra HTML
+The first argument is `env.globalData.internalData`. The `( x, y )` argument is
+the virtual top-left position, and `( w, h )` is the virtual size. The generated
+attributes use fixed browser positioning and automatically account for canvas
+scale and offset.
 
 -}
 genAttribute : InternalData -> ( Float, Float ) -> ( Float, Float ) -> List (Attribute msg)

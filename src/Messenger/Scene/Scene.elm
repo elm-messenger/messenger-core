@@ -18,7 +18,11 @@ module Messenger.Scene.Scene exposing
 
 # Scene Base
 
-General Model and Basic types for Scenes
+Core scene types and message types.
+
+Most projects use the type aliases from `Messenger.Scene.RawScene` or
+`Messenger.Scene.LayeredScene`. This module is the lower-level foundation they
+build on.
 
 @docs AbstractScene
 @docs MConcreteScene, MAbstractScene
@@ -34,7 +38,7 @@ General Model and Basic types for Scenes
 @docs updateResultRemap
 
 
-# Global Component
+## Global Component
 
 @docs GCCommonData, GCBaseData, GCMsg, GCTarget
 @docs AbstractGlobalComponent, ConcreteGlobalComponent
@@ -54,13 +58,14 @@ import REGL
 import REGL.Common exposing (Renderable)
 
 
-{-| Concrete Scene Model
+{-| Concrete scene model.
 
-Users deal with the fields in concrete model.
+This is the record shape implemented by raw scenes and layered scenes before
+they are abstracted into `SceneStorage`.
 
-  - Note: Since there should only be one scene running at a time, a scene needed to receive messages from other, so updateRec is unnecessary.
-    However, as we introduce GlobalComponent, this assumption is weakened. Also matcher is also unnecessary since we may use name as matcher.
-    Therefore, we should only determine init, update and view function.
+  - `init` creates scene data from the environment and an optional scene message.
+  - `update` handles a user event and may emit `SceneOutputMsg`s.
+  - `view` renders the scene from its environment and data.
 
 -}
 type alias ConcreteScene data env event ren scenemsg userdata =
@@ -70,11 +75,10 @@ type alias ConcreteScene data env event ren scenemsg userdata =
     }
 
 
-{-| Unrolled Abstract Scene Model
+{-| Unrolled abstract scene model.
 
-The unrolled abstract model. Used internally.
-
-  - Note: The init function will only be called once when the object is created, so there is no need to store it in actual running models. Also the data is stored in globalData, so there is no need to store data.
+An `AbstractScene` hides the concrete data type. `unroll` exposes only the
+operations Messenger needs after initialization: update and view.
 
 -}
 type alias UnrolledAbstractScene env event ren scenemsg userdata =
@@ -83,42 +87,43 @@ type alias UnrolledAbstractScene env event ren scenemsg userdata =
     }
 
 
-{-| Rolled Abstract Scene Model.
+{-| Rolled abstract scene model.
 
-Cannot be directedly modified.
-Used for storage.
+This hides the concrete scene data type so scenes with different data can be
+stored in the same scene map.
 
 -}
 type AbstractScene env event ren scenemsg userdata
     = Roll (UnrolledAbstractScene env event ren scenemsg userdata)
 
 
-{-| Specialized Concrete scene for Messenger
-
-  - Note: MConcreteScene concretes the concrete general model with Event type and renderable type that is static regardless of what userdata, data, basedata or commondata is..
-
+{-| Specialized concrete scene for Messenger.
 -}
 type alias MConcreteScene data userdata scenemsg =
     ConcreteScene data (Env () userdata) UserEvent Renderable scenemsg userdata
 
 
-{-| Specialized Abstract scene for Messenger
-Note: MAbstractScene concretes the abstract general model with Event type and renderable type that is static regardless of what userdata, data, basedata or commondata is..
+{-| Specialized abstract scene for Messenger.
 -}
 type alias MAbstractScene userdata scenemsg =
     AbstractScene (Env () userdata) UserEvent Renderable scenemsg userdata
 
 
-{-| Unroll a rolled abstract scene.
+{-| Unroll an abstract scene.
+
+This is useful when advanced code needs to manually update or view an abstract
+scene, for example in `Messenger.Scene.VSR`.
+
 -}
 unroll : AbstractScene env event ren scenemsg userdata -> UnrolledAbstractScene env event ren scenemsg userdata
 unroll (Roll un) =
     un
 
 
-{-| Abstract a concrete scene to an abstract scene.
+{-| Abstract a concrete scene.
 
-Initialize it with env and msg.
+The concrete scene is initialized immediately with the given message and
+environment. The resulting `AbstractScene` stores its data privately.
 
 -}
 abstract : ConcreteScene data env event ren scenemsg userdata -> Maybe scenemsg -> env -> AbstractScene env event ren scenemsg userdata
@@ -146,29 +151,28 @@ abstract conmodel initMsg initEnv =
     abstractRec (conmodel.init initEnv initMsg)
 
 
-{-| Scene Output Msg is the message directly handled by the top-level core.
+{-| Scene output messages handled by Messenger core.
 
-`scenemsg` is a custom type which represents the message type users wants
-to send to a scene when switching scenes.
+Scenes, layers, components, and global components emit these messages when they
+need top-level effects such as changing scenes, playing audio, loading
+resources, saving global data, or managing global components.
 
-  - `SOMChangeScene (Maybe scenemsg) name` is used to change to a target scene by giving the initial message and name of the scene.
-      - Note: initial message is defined in Scene.elm or Scenebase.elm, depending on whether you use sceneproto or not.
-  - `SOMAlert` makes an alert
-  - `SOMPrompt name title` makes a prompt with name and title. This means the system will eject a some textbox with the given title and name.
-      - Note: The returning message from the user will be given as a worldevent.
-  - `SOMPlayAudio channel name option` is used to play an audio resource by giving **channel name option**
-      - Note: See the docs in Audio.elm for more information on options.
-  - `SOMStopAudio` is used to stop a playing audio by giving the desired AudioTarget(see the docs on AudioTarget)
-  - `SOMTransformAudio` is used to transform a playing audio (e.g., adding some effects).
-  - `SOMSetVolume` is used to set the volume with a value **from 0 to 1**
-  - `SOMSaveGlobalData` saves the global by encode function given in UserConfig
-      - Note: At the beginning of the game messenger will load the stored data into userdata (which is also the only chance to load it)
-  - `SOMLoadGC` is used to load a global component by giving the GC.
-  - `SOMUnloadGC` is used to unload a global component by giving the target.
-  - `SOMCallGC` is used to call a global component by giving the target and message.
-  - `SOMChangeFPS` is used to change the FPS by giving the time interval.
-  - `SOMLoadResource` is used to load a resource by giving the name and resource definition.
-      - Note: The result of the loading will be in globaldata.internaldata. No user event will be triggered.
+  - `SOMChangeScene initMsg name` changes to a scene by name.
+  - `SOMAlert text` sends an alert command through user ports.
+  - `SOMPrompt name title` sends a prompt command. The result comes back as a
+    `Prompt name result` user event.
+  - `SOMPlayAudio channel name option` plays a loaded audio resource.
+  - `SOMStopAudio target` stops matching playing audio.
+  - `SOMTransformAudio target transform` applies an `elm-audio` transform.
+  - `SOMSetVolume volume` changes the global volume.
+  - `SOMSaveGlobalData` calls `globalDataCodec.encode`.
+  - `SOMLoadGC gc` loads a global component.
+  - `SOMUnloadGC target` unloads matching global components.
+  - `SOMCallGC ( target, msg )` sends a message to a global component.
+  - `SOMChangeFPS interval` changes the REGL update interval.
+  - `SOMLoadResource key resource` loads a resource at runtime. Loaded data is
+    stored in opaque internal data and can be read through `Messenger.Base`
+    getters.
 
 -}
 type SceneOutputMsg scenemsg userdata
@@ -187,49 +191,60 @@ type SceneOutputMsg scenemsg userdata
     | SOMLoadResource String ResourceDef
 
 
-{-| The type used to store the scene data.
-You should not handle this by yourself.
+{-| Scene storage.
+
+A `SceneStorage` is what goes into the `AllScenes` dictionary. It receives an
+optional scene message and the current environment, then returns an initialized
+abstract scene.
+
 -}
 type alias SceneStorage userdata scenemsg =
     Maybe scenemsg -> Env () userdata -> MAbstractScene userdata scenemsg
 
 
-{-| All scenes type
+{-| A dictionary of scene names to scene storage.
 -}
 type alias AllScenes userdata scenemsg =
     Dict.Dict String (SceneStorage userdata scenemsg)
 
 
-{-| Messenger MsgBase
-This message base make concrete MMsg type from abstract Msg type. By using MMsgBase, messenger can know what is SOMMsg and make reaction to it accordingly.
-Users should use Msg at most of the time.
+{-| Messenger message base.
+
+This specializes `Messenger.GeneralModel.MsgBase` with `SceneOutputMsg` as the
+parent/system message type.
+
 -}
 type alias MMsgBase othermsg scenemsg userdata =
     MsgBase othermsg (SceneOutputMsg scenemsg userdata)
 
 
-{-| Messenger Msg
+{-| Messenger message.
 
-  - Note: This is similar to MMsg, by using which messenger can know what is SOMMsg and make reaction to it accordingly.
+This specializes `Messenger.GeneralModel.Msg` with `SceneOutputMsg` as the
+parent/system message type.
 
 -}
 type alias MMsg othertar msg scenemsg userdata =
     Msg othertar msg (SceneOutputMsg scenemsg userdata)
 
 
-{-| Specialized Concrete Model for Messenger
+{-| Specialized concrete general model for Messenger scenes, layers, and components.
 -}
 type alias MConcreteGeneralModel data common userdata tar msg bdata scenemsg =
     ConcreteGeneralModel data (Env common userdata) UserEvent tar msg Renderable bdata (SceneOutputMsg scenemsg userdata)
 
 
-{-| Specialized Abstract Model for Messenger
+{-| Specialized abstract general model for Messenger scenes, layers, and components.
 -}
 type alias MAbstractGeneralModel common userdata tar msg bdata scenemsg =
     AbstractGeneralModel (Env common userdata) UserEvent tar msg Renderable bdata (SceneOutputMsg scenemsg userdata)
 
 
-{-| Change the `update` function to remap the result and return the changed abstract scene.
+{-| Remap the result of an abstract scene update.
+
+Use this when wrapping a scene and transforming its emitted `SceneOutputMsg`s or
+environment.
+
 -}
 updateResultRemap : (( List (SceneOutputMsg scenemsg userdata), env ) -> ( List (SceneOutputMsg scenemsg userdata), env )) -> AbstractScene env event ren scenemsg userdata -> AbstractScene env event ren scenemsg userdata
 updateResultRemap f model =
@@ -260,13 +275,21 @@ updateResultRemap f model =
 --- Global Component
 
 
-{-| Global component common data.
+{-| Common data passed to global components.
+
+It is the currently running scene, so global components can render or update in
+relation to the active scene when needed.
+
 -}
 type alias GCCommonData userdata scenemsg =
     MAbstractScene userdata scenemsg
 
 
-{-| Global component base data.
+{-| Base data shared by all global components.
+
+`dead` marks a component for removal. `postProcessor` transforms the scene
+renderable after the scene view is produced.
+
 -}
 type alias GCBaseData =
     { dead : Bool
@@ -275,6 +298,9 @@ type alias GCBaseData =
 
 
 {-| Global component message type.
+
+JSON values are used so global components can be addressed dynamically.
+
 -}
 type alias GCMsg =
     Json.Decode.Value
@@ -286,38 +312,47 @@ type alias GCTarget =
     String
 
 
-{-| init type sugar
+{-| Global component init type.
 -}
 type alias GlobalComponentInit userdata scenemsg data =
     Env (GCCommonData userdata scenemsg) userdata -> GCMsg -> ( data, GCBaseData )
 
 
-{-| update type sugar.
-In a layered scene, the job is done by Messenger, so you don't have to write this. However, in a raw scene, the logic is up to you to decide, so you are supposed to imply this.
+{-| Global component update type.
+
+The returned boolean is the block flag. If it is `True`, the current user event
+will not be passed to later global components or the scene.
+
 -}
 type alias GlobalComponentUpdate userdata scenemsg data =
     Env (GCCommonData userdata scenemsg) userdata -> UserEvent -> data -> GCBaseData -> ( ( data, GCBaseData ), List (MMsg GCTarget GCMsg scenemsg userdata), ( Env (GCCommonData userdata scenemsg) userdata, Bool ) )
 
 
-{-| updaterec type sugar
+{-| Global component recursive update type.
+
+This handles messages sent to the global component by target.
+
 -}
 type alias GlobalComponentUpdateRec userdata scenemsg data =
     Env (GCCommonData userdata scenemsg) userdata -> GCMsg -> data -> GCBaseData -> ( ( data, GCBaseData ), List (MMsg GCTarget GCMsg scenemsg userdata), Env (GCCommonData userdata scenemsg) userdata )
 
 
-{-| view type sugar
+{-| Global component view type.
 -}
 type alias GlobalComponentView userdata scenemsg data =
     Env (GCCommonData userdata scenemsg) userdata -> data -> GCBaseData -> Renderable
 
 
-{-| GlobalComponent Storage
+{-| Global component storage.
+
+This is what gets loaded by `SOMLoadGC` or startup global component lists.
+
 -}
 type alias GlobalComponentStorage userdata scenemsg =
     Env (GCCommonData userdata scenemsg) userdata -> AbstractGlobalComponent userdata scenemsg
 
 
-{-| Concrete GlobalComponent Model
+{-| Concrete global component model.
 -}
 type alias ConcreteGlobalComponent data userdata scenemsg =
     { init : GlobalComponentInit userdata scenemsg data
@@ -328,10 +363,9 @@ type alias ConcreteGlobalComponent data userdata scenemsg =
     }
 
 
-{-| Abstract GlobalComponent Model.
+{-| Abstract global component model.
 
-Cannot be directly modified.
-Used for storage.
+The concrete data type is hidden after initialization.
 
 -}
 type alias AbstractGlobalComponent userdata scenemsg =
