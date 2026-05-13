@@ -6,9 +6,12 @@ module Scenes.SpriteSheet.Model exposing (scene)
 
 -}
 
+import Duration
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (getSceneStartTime)
+import Messenger.Base exposing (UserEvent(..), getSceneStartTime)
+import Messenger.GlobalComponents.Transition.Model exposing (genMixedTransitionSOM)
+import Messenger.GlobalComponents.Transition.Transitions exposing (fadeMix)
 import Messenger.Render.Texture exposing (renderSprite)
 import Messenger.Scene.RawScene exposing (RawSceneInit, RawSceneUpdate, RawSceneView, genRawScene)
 import Messenger.Scene.Scene exposing (MConcreteScene, SceneStorage)
@@ -27,7 +30,16 @@ init env msg =
 
 update : RawSceneUpdate Data UserData SceneMsg
 update env msg data =
-    ( data, [], env )
+    case msg of
+        KeyDown 8 ->
+            ( data
+            , [ genMixedTransitionSOM ( fadeMix, Duration.seconds 1 ) ( "Home", Nothing )
+              ]
+            , env
+            )
+
+        _ ->
+            ( data, [], env )
 
 
 view : RawSceneView UserData Data
