@@ -14,7 +14,7 @@ The subscriptions for the game
 import Audio exposing (AudioData)
 import Browser.Events exposing (onKeyDown, onKeyUp, onMouseDown, onMouseMove, onMouseUp, onResize, onVisibilityChange)
 import Json.Decode as Decode
-import Messenger.Base exposing (WorldEvent(..))
+import Messenger.Internal exposing (WorldEvent(..))
 import Messenger.Model exposing (Model)
 import Messenger.UserConfig exposing (UserConfig)
 

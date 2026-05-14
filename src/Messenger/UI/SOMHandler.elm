@@ -12,9 +12,9 @@ module Messenger.UI.SOMHandler exposing (handleSOMs, handleSOM)
 import Audio exposing (AudioCmd)
 import Dict
 import Messenger.Audio.Internal exposing (playAudio, stopAudio, updateAudio)
-import Messenger.Base exposing (WorldEvent(..))
 import Messenger.GeneralModel exposing (filterSOM)
 import Messenger.Internal as Internal
+import Messenger.Internal exposing (WorldEvent(..))
 import Messenger.Model exposing (Model, resetSceneStartTime)
 import Messenger.Recursion exposing (removeObjects, updateObjectsWithTarget)
 import Messenger.Resources.Base exposing (ResourceDef(..))

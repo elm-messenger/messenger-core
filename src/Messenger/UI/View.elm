@@ -17,8 +17,8 @@ import Html.Attributes exposing (style)
 import Html.Events exposing (on)
 import Json.Decode as Decode
 import Messenger.Audio.Internal exposing (getAudio)
-import Messenger.Base exposing (WorldEvent(..))
 import Messenger.Internal as Internal
+import Messenger.Internal exposing (WorldEvent(..))
 import Messenger.Model exposing (Model)
 import Messenger.UI.Input exposing (Input)
 import REGL

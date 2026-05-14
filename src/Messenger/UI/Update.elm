@@ -13,11 +13,12 @@ Update the game
 
 import Audio exposing (AudioCmd, AudioData)
 import Dict
-import Messenger.Base exposing (UserEvent(..), WorldEvent(..), addCommonData, removeCommonData)
+import Messenger.Base exposing (UserEvent(..), addCommonData, removeCommonData)
 import Messenger.Component.GlobalComponent exposing (combinePP, filterAliveGC)
 import Messenger.Coordinate.Coordinates exposing (fromMouseToVirtual, getStartPoint, maxHandW)
 import Messenger.GeneralModel exposing (filterSOM, viewModelList)
 import Messenger.Internal as Internal
+import Messenger.Internal exposing (WorldEvent(..))
 import Messenger.Model exposing (Model, resetSceneStartTime, updateSceneTime)
 import Messenger.Recursion exposing (updateObjects)
 import Messenger.Resources.Base exposing (resourceNum, saveSprite)

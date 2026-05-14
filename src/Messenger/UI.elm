@@ -16,7 +16,8 @@ Top-level user interface to the Messenger engine.
 -}
 
 import Audio
-import Messenger.Base exposing (Flags, WorldEvent)
+import Messenger.Base exposing (Flags)
+import Messenger.Internal exposing (WorldEvent)
 import Messenger.Model exposing (Model)
 import Messenger.UI.Init exposing (init)
 import Messenger.UI.Input exposing (Input)

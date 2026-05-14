@@ -19,7 +19,8 @@ projects usually fill this record from `MainConfig.elm` and `Lib.Ports`.
 import Audio
 import Json.Decode as Decode
 import Json.Encode as Encode
-import Messenger.Base exposing (GlobalData, GlobalDataInit, WorldEvent)
+import Messenger.Base exposing (GlobalData, GlobalDataInit)
+import Messenger.Internal exposing (WorldEvent)
 import REGL
 
 

@@ -13,8 +13,9 @@ Initialize the game
 
 import Audio exposing (AudioCmd)
 import Browser.Dom exposing (getViewport)
-import Messenger.Base exposing (Env, Flags, GlobalData, UserEvent, WorldEvent(..), globalDataInitToGlobalData)
+import Messenger.Base exposing (Env, Flags, GlobalData, GlobalDataInit, UserEvent)
 import Messenger.Internal as Internal
+import Messenger.Internal exposing (WorldEvent(..))
 import Messenger.Model exposing (Model)
 import Messenger.Resources.Base exposing (ResourceDef(..), resourceNum)
 import Messenger.Scene.Loader exposing (loadSceneByName)
@@ -50,6 +51,24 @@ emptyScene =
 emptyGlobalData : UserConfig userdata scenemsg -> GlobalData userdata
 emptyGlobalData config =
     globalDataInitToGlobalData (config.globalDataCodec.decode "")
+
+
+globalDataInitToGlobalData : GlobalDataInit userdata -> GlobalData userdata
+globalDataInitToGlobalData user =
+    let
+        emptyInternalData =
+            Internal.getInternalData Internal.emptyInternalData
+    in
+    { internalData =
+        Internal.InternalData
+            { emptyInternalData
+                | volume = user.volume
+            }
+    , canvasAttributes = user.canvasAttributes
+    , extraHTML = user.extraHTML
+    , userData = user.userData
+    , camera = user.camera
+    }
 
 
 {-| Initial model

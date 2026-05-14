@@ -1,13 +1,11 @@
 module Messenger.Base exposing
-    ( WorldEvent(..)
-    , UserEvent(..)
+    ( UserEvent(..)
     , GlobalData
     , InternalData
     , Env
     , Flags
     , removeCommonData, addCommonData
     , GlobalDataInit
-    , globalDataInitToGlobalData
     , getSceneStartTime, getGlobalStartTime, getGlobalStartFrame, getSceneStartFrame
     , getCurrentTimeStamp, getWindowVisibility, getMousePos
     , getPressedMouseButtons, getPressedKeys, getVolume, getCurrentScene
@@ -22,7 +20,6 @@ module Messenger.Base exposing
 
 Some Basic Data Types for the game
 
-@docs WorldEvent
 @docs UserEvent
 @docs GlobalData
 @docs InternalData
@@ -30,7 +27,6 @@ Some Basic Data Types for the game
 @docs Flags
 @docs removeCommonData, addCommonData
 @docs GlobalDataInit
-@docs globalDataInitToGlobalData
 
 
 ## Internal Data Getters
@@ -45,12 +41,11 @@ Safe access to internal engine state
 
 -}
 
-import Audio
 import Browser.Events exposing (Visibility(..))
 import Dict exposing (Dict)
 import Html exposing (Html)
-import Json.Encode as Encode
 import Messenger.Internal as Internal
+import Messenger.Internal exposing (WorldEvent)
 import REGL
 import REGL.Common exposing (Camera)
 import Set exposing (Set)
@@ -60,32 +55,6 @@ import Set exposing (Set)
 -}
 type alias InternalData =
     Internal.InternalData
-
-
-{-| World Event
-
-This is the World Event for the game.
-
-The events that messenger will receive from outside
-
-Basically users don't need to deal with the world events, they work with user events instead.
-
--}
-type WorldEvent
-    = WTick Float
-    | WKeyDown Int
-    | WKeyUp Int
-    | NewWindowSize ( Float, Float )
-    | WindowVisibility Visibility
-    | SoundLoaded String (Result Audio.LoadError Audio.Source)
-    | REGLRecv Encode.Value
-    | WMouseDown Int ( Float, Float )
-    | WMouseUp Int ( Float, Float )
-    | MouseMove ( Float, Float )
-    | WMouseWheel Int
-    | WPrompt String String
-    | WDataLoaded String String
-    | NullEvent
 
 
 {-| User Event
@@ -159,26 +128,6 @@ type alias GlobalDataInit userdata =
     , extraHTML : Maybe (Html WorldEvent)
     , canvasAttributes : List (Html.Attribute WorldEvent)
     , userData : userdata
-    }
-
-
-{-| Turn GlobalDataInit into GlobalData.
--}
-globalDataInitToGlobalData : GlobalDataInit userdata -> GlobalData userdata
-globalDataInitToGlobalData user =
-    let
-        emptyInternalData =
-            Internal.getInternalData Internal.emptyInternalData
-    in
-    { internalData =
-        Internal.InternalData
-            { emptyInternalData
-                | volume = user.volume
-            }
-    , canvasAttributes = user.canvasAttributes
-    , extraHTML = user.extraHTML
-    , userData = user.userData
-    , camera = user.camera
     }
 
 
