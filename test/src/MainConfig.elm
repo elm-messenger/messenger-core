@@ -29,7 +29,7 @@ module MainConfig exposing
 
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData, decodeUserData, encodeUserData)
-import Messenger.Base exposing (GlobalData, GlobalDataInit)
+import Messenger.Base exposing (GlobalData, GlobalDataInit, Runtime)
 import Messenger.UserConfig exposing (EnabledBuiltinProgram(..))
 import REGL
 
@@ -98,8 +98,8 @@ initGlobalData data =
 Used when saving the user data to local storage.
 
 -}
-saveGlobalData : GlobalData UserData -> String
-saveGlobalData globalData =
+saveGlobalData : Runtime -> GlobalData UserData -> String
+saveGlobalData _ globalData =
     encodeUserData globalData.userData
 
 

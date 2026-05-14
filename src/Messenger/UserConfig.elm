@@ -19,7 +19,7 @@ projects usually fill this record from `MainConfig.elm` and `Lib.Ports`.
 import Audio
 import Json.Decode as Decode
 import Json.Encode as Encode
-import Messenger.Base exposing (GlobalData, GlobalDataInit)
+import Messenger.Base exposing (GlobalData, GlobalDataInit, Runtime)
 import Messenger.Internal exposing (WorldEvent)
 import REGL
 
@@ -53,7 +53,7 @@ to send to a scene when switching scenes.
   - `initScene` represents the scene users get start
   - `initSceneMsg` represents the message to initialize the start scene
   - `globalDataCodec` is for local storage. Users decode saved data into
-    `GlobalDataInit`, and encode the current `GlobalData` when saving.
+    `GlobalDataInit`, and encode the current `Runtime` and `GlobalData` when saving.
   - `virtualSize` represents how users want their game be virtual sized. In other words,
     users make their game in the virtual size, and the game will be resized due to the browser window size
     but keeping the aspect ratio
@@ -67,7 +67,7 @@ type alias UserConfig userdata scenemsg =
     { initScene : String
     , initSceneMsg : Maybe scenemsg
     , globalDataCodec :
-        { encode : GlobalData userdata -> String
+        { encode : Runtime -> GlobalData userdata -> String
         , decode : String -> GlobalDataInit userdata
         }
     , virtualSize :

@@ -44,8 +44,7 @@ Safe access to internal engine state
 import Browser.Events exposing (Visibility(..))
 import Dict exposing (Dict)
 import Html exposing (Html)
-import Messenger.Internal as Internal
-import Messenger.Internal exposing (WorldEvent)
+import Messenger.Internal as Internal exposing (WorldEvent)
 import REGL
 import REGL.Common exposing (Camera)
 import Set exposing (Set)
@@ -107,6 +106,7 @@ separate read-only `Runtime`; use the getter functions below to read them.
   - `extraHTML` is used to render extra HTML tags. Be careful to use this
   - `canvasAttributes` is used to attach attributes to the game canvas
   - `camera` records the camera position and zoom level
+
 -}
 type alias GlobalData userdata =
     { extraHTML : Maybe (Html WorldEvent)
