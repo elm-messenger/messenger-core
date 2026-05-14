@@ -26,17 +26,17 @@ If an audio is finished playing, it will be removed from the playing channel.
 import Dict
 import Duration exposing (Duration)
 import List exposing (maximum)
-import Messenger.Base exposing (InternalData)
+import Messenger.Base exposing (Runtime)
 import Messenger.Internal as Internal
 
 
 {-| Generate a new unique audio channel number.
 
-    You should add the internal data in globaldata as the parameter, and the returning value is a integer which is the generated channel number.
+    Pass the read-only Messenger runtime as the parameter. The returned value is a generated channel number.
         - Note: It is really similar to GenUID.
 
 -}
-newAudioChannel : InternalData -> Int
+newAudioChannel : Runtime -> Int
 newAudioChannel idata =
     let
         internalData =
@@ -55,17 +55,17 @@ newAudioChannel idata =
 
 {-| Get the duration of an audio by its ID.
 
-Usage : audioDuration internalData audioId
+Usage : audioDuration runtime audioId
 
-  - internalData is just env.globaldata.internalData. Just pass it as your first argument.
+  - runtime is the read-only Messenger runtime passed to user model functions.
   - audioID is the NAME (not ID!) of the desired audio, which should be registered in the resources.elm.
 
 The output of the function is a Maybe Duration, with which you can extract the Float value of the length in seconds via Duration.inSeconds.
 
-Example: audioDuration id "Boom" |> Duration.inSeconds == 1.274 -- the duration in seconds.
+Example: audioDuration runtime "Boom" |> Duration.inSeconds == 1.274 -- the duration in seconds.
 
 -}
-audioDuration : InternalData -> String -> Maybe Duration
+audioDuration : Runtime -> String -> Maybe Duration
 audioDuration internalData audioId =
     case Dict.get audioId (Internal.getInternalData internalData).audioRepo.audio of
         Just ( _, duration ) ->

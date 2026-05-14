@@ -24,7 +24,7 @@ type alias Data =
 
 
 init : ComponentInit SceneCommonData UserData ComponentMsg Data BaseData
-init env initMsg =
+init _ env initMsg =
     case initMsg of
         RectInit initData ->
             ( initData, () )
@@ -34,7 +34,7 @@ init env initMsg =
 
 
 update : ComponentUpdate SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-update env evnt data basedata =
+update _ env evnt data basedata =
     case evnt of
         MouseDown 0 pos ->
             if judgeMouseRect pos ( data.left, data.top ) ( data.width, data.height ) then
@@ -48,7 +48,7 @@ update env evnt data basedata =
 
 
 updaterec : ComponentUpdateRec SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-updaterec env msg data basedata =
+updaterec _ env msg data basedata =
     case msg of
         RectMsg c ->
             ( ( { data | color = c }, basedata ), [], env )
@@ -58,7 +58,7 @@ updaterec env msg data basedata =
 
 
 view : ComponentView SceneCommonData UserData Data BaseData
-view env data basedata =
+view _ env data basedata =
     ( P.rect ( data.left, data.top ) ( data.width, data.height ) data.color, 0 )
 
 

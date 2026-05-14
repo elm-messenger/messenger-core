@@ -52,8 +52,8 @@ genRandomPos nofl t ws we =
 
 
 init : RawSceneInit Data UserData SceneMsg
-init env msg =
-    { rainPos = genRandomPos 100 (getGlobalStartFrame env.globalData) 0 1080
+init runtime env msg =
+    { rainPos = genRandomPos 100 (getGlobalStartFrame runtime) 0 1080
     }
 
 
@@ -99,10 +99,10 @@ updateRain seed t data =
 
 
 update : RawSceneUpdate Data UserData SceneMsg
-update env msg data =
+update runtime env msg data =
     case msg of
         Tick t ->
-            ( updateRain (getGlobalStartFrame env.globalData) (t * 0.1) data, [], env )
+            ( updateRain (getGlobalStartFrame runtime) (t * 0.1) data, [], env )
 
         KeyDown 8 ->
             ( data
@@ -116,7 +116,7 @@ update env msg data =
 
 
 view : RawSceneView UserData Data
-view env data =
+view _ env data =
     group []
         [ clear Color.black
         , plight 1600 200 100 500 (Color.rgba 1 0.8 0.3 1)

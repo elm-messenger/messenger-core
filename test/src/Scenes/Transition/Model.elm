@@ -27,12 +27,12 @@ type alias Data =
 
 
 init : RawSceneInit Data UserData SceneMsg
-init env msg =
+init _ env msg =
     {}
 
 
 update : RawSceneUpdate Data UserData SceneMsg
-update env msg data =
+update runtime env msg data =
     case msg of
         KeyDown 8 ->
             ( data
@@ -57,7 +57,7 @@ update env msg data =
 
         KeyDown 51 ->
             ( data
-            , [ genSequentialTransitionSOM ( nullTransition, Quantity.zero ) ( fadeInWithRenderable <| view env data, Duration.seconds 1 ) ( "Home", Nothing )
+            , [ genSequentialTransitionSOM ( nullTransition, Quantity.zero ) ( fadeInWithRenderable <| view runtime env data, Duration.seconds 1 ) ( "Home", Nothing )
               ]
             , env
             )
@@ -92,11 +92,11 @@ comment =
 
 
 view : RawSceneView UserData Data
-view env data =
+view runtime env data =
     group []
         [ P.clear Color.lightGreen
         , P.textbox ( 0, 30 ) 40 comment "firacode" Color.black
-        , P.textbox ( 0, 900 ) 30 (fromInt (getSceneStartFrame env.globalData)) "firacode" Color.black
+        , P.textbox ( 0, 900 ) 30 (fromInt (getSceneStartFrame runtime)) "firacode" Color.black
         ]
 
 

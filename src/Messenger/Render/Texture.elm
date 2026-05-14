@@ -13,7 +13,7 @@ module Messenger.Render.Texture exposing
 
 -}
 
-import Messenger.Base exposing (InternalData)
+import Messenger.Base exposing (Runtime)
 import Messenger.Internal as Internal
 import Messenger.Resources.Base exposing (igetSprite)
 import REGL exposing (Texture)
@@ -23,7 +23,7 @@ import REGL.Common exposing (Renderable)
 
 {-| Render a sprite with the size automatically calculated from the texture.
 -}
-renderSprite : InternalData -> ( Float, Float ) -> ( Float, Float ) -> String -> Renderable
+renderSprite : Runtime -> ( Float, Float ) -> ( Float, Float ) -> String -> Renderable
 renderSprite gd position size name =
     let
         dst =
@@ -55,7 +55,7 @@ renderSpriteAutoHelper ( newx, newy ) ( w, h ) t =
 
 {-| Get the width and height of a texture.
 -}
-textureDim : InternalData -> String -> ( Int, Int )
+textureDim : Runtime -> String -> ( Int, Int )
 textureDim gd name =
     Maybe.withDefault
         ( 0, 0 )

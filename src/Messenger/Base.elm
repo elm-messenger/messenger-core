@@ -1,7 +1,7 @@
 module Messenger.Base exposing
     ( UserEvent(..)
     , GlobalData
-    , InternalData
+    , Runtime
     , Env
     , Flags
     , removeCommonData, addCommonData
@@ -22,7 +22,7 @@ Some Basic Data Types for the game
 
 @docs UserEvent
 @docs GlobalData
-@docs InternalData
+@docs Runtime
 @docs Env
 @docs Flags
 @docs removeCommonData, addCommonData
@@ -53,7 +53,7 @@ import Set exposing (Set)
 
 {-| Opaque internal engine data.
 -}
-type alias InternalData =
+type alias Runtime =
     Internal.InternalData
 
 
@@ -68,7 +68,7 @@ Users can get outside information through these events.
 `KeyDown`, `KeyUp` records the keyboard events.
 "KeyDown" event is sent when the key is pressed, "KeyUp" is sent when the key is released.
 
-  - Note: if you just want to check if a key is pressed or not, use `getPressedKeys globalData` instead.
+  - Note: if you just want to check if a key is pressed or not, use `getPressedKeys runtime` instead.
     check all the keycodes [here](https://www.toptal.com/developers/keycode).
 
 `MouseDown`, `MouseUp` records the button code and position when mouse up and down.
@@ -100,19 +100,16 @@ GlobalData is the user-facing global state.
 It won't be reset if you change the scene.
 
 It is mainly used for display and reading/writing some localstorage data.
-Runtime values like time, input state, scene name, and volume are read-only;
-use the getter functions below to read them.
+Runtime values like time, input state, scene name, and volume live in the
+separate read-only `Runtime`; use the getter functions below to read them.
 
   - `userdata` records the data that users set to save
   - `extraHTML` is used to render extra HTML tags. Be careful to use this
   - `canvasAttributes` is used to attach attributes to the game canvas
   - `camera` records the camera position and zoom level
-  - `internalData` stores opaque engine-owned data; use getters instead of editing it
-
 -}
 type alias GlobalData userdata =
-    { internalData : InternalData
-    , extraHTML : Maybe (Html WorldEvent)
+    { extraHTML : Maybe (Html WorldEvent)
     , canvasAttributes : List (Html.Attribute WorldEvent)
     , userData : userdata
     , camera : Camera
@@ -187,162 +184,162 @@ type alias Flags =
 
 {-| Get elapsed time since the current scene started.
 -}
-getSceneStartTime : GlobalData userdata -> Float
-getSceneStartTime globalData =
-    (Internal.getInternalData globalData.internalData).sceneStartTime
+getSceneStartTime : Runtime -> Float
+getSceneStartTime runtime =
+    (Internal.getInternalData runtime).sceneStartTime
 
 
 {-| Get elapsed time since the game started.
 -}
-getGlobalStartTime : GlobalData userdata -> Float
-getGlobalStartTime globalData =
-    (Internal.getInternalData globalData.internalData).globalStartTime
+getGlobalStartTime : Runtime -> Float
+getGlobalStartTime runtime =
+    (Internal.getInternalData runtime).globalStartTime
 
 
 {-| Get the frame count since the game started.
 -}
-getGlobalStartFrame : GlobalData userdata -> Int
-getGlobalStartFrame globalData =
-    (Internal.getInternalData globalData.internalData).globalStartFrame
+getGlobalStartFrame : Runtime -> Int
+getGlobalStartFrame runtime =
+    (Internal.getInternalData runtime).globalStartFrame
 
 
 {-| Get the frame count since the current scene started.
 -}
-getSceneStartFrame : GlobalData userdata -> Int
-getSceneStartFrame globalData =
-    (Internal.getInternalData globalData.internalData).sceneStartFrame
+getSceneStartFrame : Runtime -> Int
+getSceneStartFrame runtime =
+    (Internal.getInternalData runtime).sceneStartFrame
 
 
 {-| Get the current timestamp.
 -}
-getCurrentTimeStamp : GlobalData userdata -> Float
-getCurrentTimeStamp globalData =
-    (Internal.getInternalData globalData.internalData).currentTimeStamp
+getCurrentTimeStamp : Runtime -> Float
+getCurrentTimeStamp runtime =
+    (Internal.getInternalData runtime).currentTimeStamp
 
 
 {-| Get the current browser visibility.
 -}
-getWindowVisibility : GlobalData userdata -> Visibility
-getWindowVisibility globalData =
-    (Internal.getInternalData globalData.internalData).windowVisibility
+getWindowVisibility : Runtime -> Visibility
+getWindowVisibility runtime =
+    (Internal.getInternalData runtime).windowVisibility
 
 
 {-| Get the mouse position in virtual coordinates.
 -}
-getMousePos : GlobalData userdata -> ( Float, Float )
-getMousePos globalData =
-    (Internal.getInternalData globalData.internalData).mousePos
+getMousePos : Runtime -> ( Float, Float )
+getMousePos runtime =
+    (Internal.getInternalData runtime).mousePos
 
 
 {-| Get the pressed mouse buttons.
 -}
-getPressedMouseButtons : GlobalData userdata -> Set Int
-getPressedMouseButtons globalData =
-    (Internal.getInternalData globalData.internalData).pressedMouseButtons
+getPressedMouseButtons : Runtime -> Set Int
+getPressedMouseButtons runtime =
+    (Internal.getInternalData runtime).pressedMouseButtons
 
 
 {-| Get the pressed keys.
 -}
-getPressedKeys : GlobalData userdata -> Set Int
-getPressedKeys globalData =
-    (Internal.getInternalData globalData.internalData).pressedKeys
+getPressedKeys : Runtime -> Set Int
+getPressedKeys runtime =
+    (Internal.getInternalData runtime).pressedKeys
 
 
 {-| Get the current volume.
 -}
-getVolume : GlobalData userdata -> Float
-getVolume globalData =
-    (Internal.getInternalData globalData.internalData).volume
+getVolume : Runtime -> Float
+getVolume runtime =
+    (Internal.getInternalData runtime).volume
 
 
 {-| Get the current scene name.
 -}
-getCurrentScene : GlobalData userdata -> String
-getCurrentScene globalData =
-    (Internal.getInternalData globalData.internalData).currentScene
+getCurrentScene : Runtime -> String
+getCurrentScene runtime =
+    (Internal.getInternalData runtime).currentScene
 
 
 {-| Get virtual coordinate dimensions
 -}
-getVirtualSize : GlobalData userdata -> ( Float, Float )
-getVirtualSize globalData =
+getVirtualSize : Runtime -> ( Float, Float )
+getVirtualSize runtime =
     let
         internalData =
-            Internal.getInternalData globalData.internalData
+            Internal.getInternalData runtime
     in
     ( internalData.virtualWidth, internalData.virtualHeight )
 
 
 {-| Get real canvas dimensions
 -}
-getRealSize : GlobalData userdata -> ( Float, Float )
-getRealSize globalData =
+getRealSize : Runtime -> ( Float, Float )
+getRealSize runtime =
     let
         internalData =
-            Internal.getInternalData globalData.internalData
+            Internal.getInternalData runtime
     in
     ( internalData.realWidth, internalData.realHeight )
 
 
 {-| Get browser viewport dimensions
 -}
-getViewPort : GlobalData userdata -> ( Float, Float )
-getViewPort globalData =
-    (Internal.getInternalData globalData.internalData).browserViewPort
+getViewPort : Runtime -> ( Float, Float )
+getViewPort runtime =
+    (Internal.getInternalData runtime).browserViewPort
 
 
 {-| Get canvas positioning offset
 -}
-getCanvasOffset : GlobalData userdata -> ( Float, Float )
-getCanvasOffset globalData =
+getCanvasOffset : Runtime -> ( Float, Float )
+getCanvasOffset runtime =
     let
         internalData =
-            Internal.getInternalData globalData.internalData
+            Internal.getInternalData runtime
     in
     ( internalData.startLeft, internalData.startTop )
 
 
 {-| Get resource loading progress (loaded, total)
 -}
-getLoadingProgress : GlobalData userdata -> ( Int, Int )
-getLoadingProgress globalData =
+getLoadingProgress : Runtime -> ( Int, Int )
+getLoadingProgress runtime =
     let
         internalData =
-            Internal.getInternalData globalData.internalData
+            Internal.getInternalData runtime
     in
     ( internalData.loadedResNum, internalData.totResNum )
 
 
 {-| Get set of loaded font names
 -}
-getFonts : GlobalData userdata -> Set String
-getFonts globalData =
-    (Internal.getInternalData globalData.internalData).fonts
+getFonts : Runtime -> Set String
+getFonts runtime =
+    (Internal.getInternalData runtime).fonts
 
 
 {-| Get set of loaded shader program names
 -}
-getPrograms : GlobalData userdata -> Set String
-getPrograms globalData =
-    (Internal.getInternalData globalData.internalData).programs
+getPrograms : Runtime -> Set String
+getPrograms runtime =
+    (Internal.getInternalData runtime).programs
 
 
 {-| Get a specific sprite texture by name
 -}
-getSprite : String -> GlobalData userdata -> Maybe REGL.Texture
-getSprite name globalData =
-    Dict.get name (Internal.getInternalData globalData.internalData).sprites
+getSprite : String -> Runtime -> Maybe REGL.Texture
+getSprite name runtime =
+    Dict.get name (Internal.getInternalData runtime).sprites
 
 
 {-| Get all loaded sprite textures
 -}
-getAllSprites : GlobalData userdata -> Dict String REGL.Texture
-getAllSprites globalData =
-    (Internal.getInternalData globalData.internalData).sprites
+getAllSprites : Runtime -> Dict String REGL.Texture
+getAllSprites runtime =
+    (Internal.getInternalData runtime).sprites
 
 
 {-| Get loaded config data by key.
 -}
-getConfigData : String -> GlobalData userdata -> Maybe String
-getConfigData key globalData =
-    Dict.get key (Internal.getInternalData globalData.internalData).configData
+getConfigData : String -> Runtime -> Maybe String
+getConfigData key runtime =
+    Dict.get key (Internal.getInternalData runtime).configData

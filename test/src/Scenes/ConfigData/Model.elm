@@ -11,7 +11,7 @@ import Duration
 import Json.Decode as Decode
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (Env, UserEvent(..), getConfigData)
+import Messenger.Base exposing (Env, Runtime, UserEvent(..), getConfigData)
 import Messenger.GlobalComponents.Transition.Model exposing (genMixedTransitionSOM)
 import Messenger.GlobalComponents.Transition.Transitions exposing (fadeMix)
 import Messenger.Scene.RawScene exposing (RawSceneInit, RawSceneUpdate, RawSceneView, genRawScene)
@@ -26,9 +26,9 @@ type alias Data =
     }
 
 
-parseTexts : Env () UserData -> List String
-parseTexts env =
-    case getConfigData "texts" env.globalData of
+parseTexts : Runtime -> Env () UserData -> List String
+parseTexts runtime env =
+    case getConfigData "texts" runtime of
         Just raw ->
             case Decode.decodeString (Decode.list Decode.string) raw of
                 Ok texts ->
@@ -42,14 +42,14 @@ parseTexts env =
 
 
 init : RawSceneInit Data UserData SceneMsg
-init env _ =
-    { texts = parseTexts env
+init runtime env _ =
+    { texts = parseTexts runtime env
     , index = 0
     }
 
 
 update : RawSceneUpdate Data UserData SceneMsg
-update env msg data =
+update _ env msg data =
     case msg of
         KeyDown 8 ->
             ( data
@@ -69,7 +69,7 @@ update env msg data =
 
 
 view : RawSceneView UserData Data
-view env data =
+view _ env data =
     let
         currentText =
             Maybe.withDefault "" <|

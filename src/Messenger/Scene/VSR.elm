@@ -17,7 +17,7 @@ render or update while another scene is active.
 
 -}
 
-import Messenger.Base exposing (Env, UserEvent(..))
+import Messenger.Base exposing (Env, Runtime, UserEvent(..))
 import Messenger.Internal as Internal
 import Messenger.Scene.Scene exposing (MAbstractScene, SceneOutputMsg, unroll)
 import REGL.Common exposing (Renderable)
@@ -30,6 +30,7 @@ It stores the virtual scene's environment and the abstract scene value.
 -}
 type alias VSR userdata scenemsg =
     { env : Env () userdata
+    , runtime : Runtime
     , scene : MAbstractScene userdata scenemsg
     }
 
@@ -46,41 +47,32 @@ updateVSR vsr evnt =
         env =
             vsr.env
 
-        env1 =
+        runtime1 =
             case evnt of
                 Tick delta ->
                     let
-                        gd =
-                            env.globalData
-
                         internalData =
-                            Internal.getInternalData gd.internalData
-
-                        newgd =
-                            { gd
-                                | internalData =
-                                    Internal.InternalData
-                                        { internalData
-                                            | sceneStartFrame = internalData.sceneStartFrame + 1
-                                            , sceneStartTime = internalData.sceneStartTime + delta
-                                            , globalStartTime = internalData.globalStartTime + delta
-                                            , globalStartFrame = internalData.globalStartFrame + 1
-                                        }
-                            }
+                            Internal.getInternalData vsr.runtime
                     in
-                    { env | globalData = newgd }
+                    Internal.InternalData
+                        { internalData
+                            | sceneStartFrame = internalData.sceneStartFrame + 1
+                            , sceneStartTime = internalData.sceneStartTime + delta
+                            , globalStartTime = internalData.globalStartTime + delta
+                            , globalStartFrame = internalData.globalStartFrame + 1
+                        }
 
                 _ ->
-                    env
+                    vsr.runtime
 
         ( newScene, newMsg, newEnv ) =
-            (unroll vsr.scene).update env1 evnt
+            (unroll vsr.scene).update runtime1 env evnt
     in
-    ( VSR newEnv newScene, newMsg )
+    ( VSR newEnv runtime1 newScene, newMsg )
 
 
 {-| Render the virtual scene.
 -}
 viewVSR : VSR userdata scenemsg -> Renderable
 viewVSR vsr =
-    (unroll vsr.scene).view vsr.env
+    (unroll vsr.scene).view vsr.runtime vsr.env

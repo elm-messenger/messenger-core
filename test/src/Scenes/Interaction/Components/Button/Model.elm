@@ -35,7 +35,7 @@ type alias Data =
 
 
 init : ComponentInit SceneCommonData UserData ComponentMsg Data BaseData
-init env initMsg =
+init _ env initMsg =
     case initMsg of
         ButtonInitMsg msg ->
             let
@@ -52,10 +52,10 @@ init env initMsg =
 
 
 update : ComponentUpdate SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-update env evnt data basedata =
+update runtime env evnt data basedata =
     let
         isHovered =
-            judgeMouseRect (getMousePos env.globalData) data.pos data.initdata.size
+            judgeMouseRect (getMousePos runtime) data.pos data.initdata.size
 
         nextState =
             if isHovered && data.curState == Normal then
@@ -72,7 +72,7 @@ update env evnt data basedata =
             ( ( { data | curState = Normal }, basedata ), [ Parent <| OtherMsg <| ButtonUpdateMsg BMsg.Released ], ( env, False ) )
 
         MouseDown _ _ ->
-            if judgeMouseRect (getMousePos env.globalData) data.pos data.initdata.size then
+            if judgeMouseRect (getMousePos runtime) data.pos data.initdata.size then
                 ( ( { data | curState = Pressed }, basedata ), [ Parent <| OtherMsg <| ButtonUpdateMsg BMsg.Pressed ], ( env, True ) )
 
             else
@@ -83,12 +83,12 @@ update env evnt data basedata =
 
 
 updaterec : ComponentUpdateRec SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-updaterec env msg data basedata =
+updaterec _ env msg data basedata =
     ( ( data, basedata ), [], env )
 
 
 view : ComponentView SceneCommonData UserData Data BaseData
-view env data basedata =
+view _ env data basedata =
     let
         rsize =
             case data.curState of

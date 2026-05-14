@@ -33,18 +33,18 @@ type alias Data =
 
 
 init : LayerInit SceneCommonData UserData LayerMsg Data
-init _ _ =
+init _ _ _ =
     {}
 
 
 update : LayerUpdate SceneCommonData UserData LayerTarget LayerMsg SceneMsg Data
-update ({ globalData } as env) msg data =
+update runtime ({ globalData } as env) msg data =
     case msg of
         KeyDown 8 ->
             ( data
             , [ Parent <| SOMMsg <| genMixedTransitionSOM ( fadeMix, Duration.seconds 1 ) ( "Home", Nothing )
               ]
-            , ( { env | globalData = { globalData | camera = defaultCamera globalData } }, False )
+            , ( { env | globalData = { globalData | camera = defaultCamera runtime } }, False )
             )
 
         _ ->
@@ -52,12 +52,12 @@ update ({ globalData } as env) msg data =
 
 
 updaterec : LayerUpdateRec SceneCommonData UserData LayerTarget LayerMsg SceneMsg Data
-updaterec env _ data =
+updaterec _ env _ data =
     ( data, [], env )
 
 
 view : LayerView SceneCommonData UserData Data
-view env _ =
+view _ env _ =
     renderPanel env
 
 

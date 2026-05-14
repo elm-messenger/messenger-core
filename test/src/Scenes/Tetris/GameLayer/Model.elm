@@ -28,9 +28,9 @@ type alias Data =
 
 
 init : LayerInit SceneCommonData UserData LayerMsg Data
-init env _ =
+init runtime env _ =
     Data
-        [ GameGrid.component NullComponentMsg env
+        [ GameGrid.component NullComponentMsg runtime env
         , Button.component
             (ButtonInitMsg
                 { size = ( 120, 50 )
@@ -40,6 +40,7 @@ init env _ =
                 , buttonType = ButtonInit.State
                 }
             )
+            runtime
             env
         , Button.component
             (ButtonInitMsg
@@ -50,6 +51,7 @@ init env _ =
                 , buttonType = ButtonInit.Rotate
                 }
             )
+            runtime
             env
         , Button.component
             (ButtonInitMsg
@@ -60,6 +62,7 @@ init env _ =
                 , buttonType = ButtonInit.Move Left
                 }
             )
+            runtime
             env
         , Button.component
             (ButtonInitMsg
@@ -70,6 +73,7 @@ init env _ =
                 , buttonType = ButtonInit.Move Right
                 }
             )
+            runtime
             env
         , Button.component
             (ButtonInitMsg
@@ -80,12 +84,13 @@ init env _ =
                 , buttonType = ButtonInit.Accelerate
                 }
             )
+            runtime
             env
         ]
 
 
 handleComponentMsg : Handler Data SceneCommonData UserData LayerTarget LayerMsg SceneMsg ComponentMsg
-handleComponentMsg env compmsg data =
+handleComponentMsg _ env compmsg data =
     case compmsg of
         SOMMsg som ->
             ( data, [ Parent <| SOMMsg som ], env )
@@ -95,25 +100,25 @@ handleComponentMsg env compmsg data =
 
 
 update : LayerUpdate SceneCommonData UserData LayerTarget LayerMsg SceneMsg Data
-update env evt data =
+update runtime env evt data =
     let
         ( comps1, msgs1, ( env1, block1 ) ) =
-            updateComponents env evt data.components
+            updateComponents runtime env evt data.components
 
         ( data1, msgs2, env2 ) =
-            handleComponentMsgs env1 msgs1 { data | components = comps1 } [] handleComponentMsg
+            handleComponentMsgs runtime env1 msgs1 { data | components = comps1 } [] handleComponentMsg
     in
     ( data1, msgs2, ( env2, block1 ) )
 
 
 updaterec : LayerUpdateRec SceneCommonData UserData LayerTarget LayerMsg SceneMsg Data
-updaterec env _ data =
+updaterec _ env _ data =
     ( data, [], env )
 
 
 view : LayerView SceneCommonData UserData Data
-view env data =
-    viewComponents env data.components
+view runtime env data =
+    viewComponents runtime env data.components
 
 
 matcher : Matcher Data LayerTarget

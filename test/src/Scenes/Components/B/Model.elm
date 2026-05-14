@@ -26,15 +26,15 @@ type alias Data =
 
 
 init : LayerInit SceneCommonData UserData LayerMsg Data
-init env initMsg =
+init runtime env initMsg =
     Data
-        [ Rect.component (RectInit <| RectInit.InitData 250 250 200 200 2 Color.yellow) env
-        , Rect.component (RectInit <| RectInit.InitData 300 300 200 200 3 Color.brown) env
+        [ Rect.component (RectInit <| RectInit.InitData 250 250 200 200 2 Color.yellow) runtime env
+        , Rect.component (RectInit <| RectInit.InitData 300 300 200 200 3 Color.brown) runtime env
         ]
 
 
 handleComponentMsg : Handler Data SceneCommonData UserData LayerTarget LayerMsg SceneMsg ComponentMsg
-handleComponentMsg env compmsg data =
+handleComponentMsg _ env compmsg data =
     case compmsg of
         SOMMsg som ->
             ( data, [ Parent <| SOMMsg som ], env )
@@ -44,25 +44,25 @@ handleComponentMsg env compmsg data =
 
 
 update : LayerUpdate SceneCommonData UserData LayerTarget LayerMsg SceneMsg Data
-update env evt data =
+update runtime env evt data =
     let
         ( comps1, msgs1, ( env1, block1 ) ) =
-            updateComponents env evt data.components
+            updateComponents runtime env evt data.components
 
         ( data1, msgs2, env2 ) =
-            handleComponentMsgs env1 msgs1 { data | components = comps1 } [] handleComponentMsg
+            handleComponentMsgs runtime env1 msgs1 { data | components = comps1 } [] handleComponentMsg
     in
     ( data1, msgs2, ( env2, block1 ) )
 
 
 updaterec : LayerUpdateRec SceneCommonData UserData LayerTarget LayerMsg SceneMsg Data
-updaterec env msg data =
+updaterec _ env msg data =
     ( data, [], env )
 
 
 view : LayerView SceneCommonData UserData Data
-view env data =
-    viewComponents env data.components
+view runtime env data =
+    viewComponents runtime env data.components
 
 
 matcher : Matcher Data LayerTarget

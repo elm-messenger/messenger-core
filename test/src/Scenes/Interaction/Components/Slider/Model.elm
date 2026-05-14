@@ -28,7 +28,7 @@ type alias Data =
 
 
 init : ComponentInit SceneCommonData UserData ComponentMsg Data BaseData
-init env initMsg =
+init _ env initMsg =
     case initMsg of
         SliderInitMsg msg ->
             let
@@ -42,13 +42,13 @@ init env initMsg =
 
 
 update : ComponentUpdate SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-update env evnt data basedata =
+update runtime env evnt data basedata =
     case evnt of
         MouseUp _ _ ->
             ( ( { data | selected = False }, basedata ), [], ( env, False ) )
 
         MouseDown _ _ ->
-            if judgeMouseCircle (getMousePos env.globalData) data.pos 15 then
+            if judgeMouseCircle (getMousePos runtime) data.pos 15 then
                 ( ( { data | selected = True }, basedata ), [], ( env, True ) )
 
             else
@@ -58,7 +58,7 @@ update env evnt data basedata =
             if data.selected then
                 let
                     ( posx, _ ) =
-                        getMousePos env.globalData
+                        getMousePos runtime
 
                     ( cx, cy ) =
                         data.initData.center
@@ -83,12 +83,12 @@ update env evnt data basedata =
 
 
 updaterec : ComponentUpdateRec SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-updaterec env msg data basedata =
+updaterec _ env msg data basedata =
     ( ( data, basedata ), [], env )
 
 
 view : ComponentView SceneCommonData UserData Data BaseData
-view env data basedata =
+view _ env data basedata =
     ( group []
         [ P.rectCentered data.initData.center ( data.initData.width, 15 ) 0 Color.grey
         , P.circle data.pos 15 Color.black

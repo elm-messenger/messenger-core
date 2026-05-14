@@ -26,7 +26,7 @@ types.
 
 -}
 
-import Messenger.Base exposing (Env, UserEvent, addCommonData, removeCommonData)
+import Messenger.Base exposing (Env, Runtime, UserEvent, addCommonData, removeCommonData)
 import Messenger.GeneralModel exposing (MsgBase(..), filterSOM, viewModelList)
 import Messenger.Layer.Layer exposing (AbstractLayer)
 import Messenger.Recursion exposing (updateObjects)
@@ -61,21 +61,21 @@ type alias LayeredSceneData cdata userdata tar msg scenemsg =
     }
 
 
-updateLayeredScene : (Env () userdata -> UserEvent -> LayeredSceneData cdata userdata tar msg scenemsg -> List Effect) -> Env () userdata -> UserEvent -> LayeredSceneData cdata userdata tar msg scenemsg -> ( LayeredSceneData cdata userdata tar msg scenemsg, List (SceneOutputMsg scenemsg userdata), Env () userdata )
-updateLayeredScene settingsFunc env evt lsd =
+updateLayeredScene : (Runtime -> Env () userdata -> UserEvent -> LayeredSceneData cdata userdata tar msg scenemsg -> List Effect) -> Runtime -> Env () userdata -> UserEvent -> LayeredSceneData cdata userdata tar msg scenemsg -> ( LayeredSceneData cdata userdata tar msg scenemsg, List (SceneOutputMsg scenemsg userdata), Env () userdata )
+updateLayeredScene settingsFunc runtime env evt lsd =
     let
         ( newLayers, newMsgs, ( newEnv, _ ) ) =
-            updateObjects (addCommonData lsd.commonData env) evt lsd.layers
+            updateObjects runtime (addCommonData lsd.commonData env) evt lsd.layers
 
         som =
             filterSOM newMsgs
     in
-    ( { renderSettings = settingsFunc env evt lsd, commonData = newEnv.commonData, layers = newLayers }, som, removeCommonData newEnv )
+    ( { renderSettings = settingsFunc runtime env evt lsd, commonData = newEnv.commonData, layers = newLayers }, som, removeCommonData newEnv )
 
 
-viewLayeredScene : Env () userdata -> LayeredSceneData cdata userdata tar msg scenemsg -> Renderable
-viewLayeredScene env { renderSettings, commonData, layers } =
-    viewModelList (addCommonData commonData env) layers
+viewLayeredScene : Runtime -> Env () userdata -> LayeredSceneData cdata userdata tar msg scenemsg -> Renderable
+viewLayeredScene runtime env { renderSettings, commonData, layers } =
+    viewModelList runtime (addCommonData commonData env) layers
         |> group renderSettings
 
 
@@ -92,7 +92,7 @@ It receives the environment and optional scene message, then returns the initial
 
 -}
 type alias LayeredSceneInit cdata userdata tar msg scenemsg =
-    Env () userdata -> Maybe scenemsg -> LayeredSceneData cdata userdata tar msg scenemsg
+    Runtime -> Env () userdata -> Maybe scenemsg -> LayeredSceneData cdata userdata tar msg scenemsg
 
 
 {-| Level init type for layered scene prototypes.
@@ -101,7 +101,7 @@ This converts a normal scene message into prototype initialization data.
 
 -}
 type alias LayeredSceneLevelInit userdata scenemsg idata =
-    Env () userdata -> Maybe scenemsg -> Maybe idata
+    Runtime -> Env () userdata -> Maybe scenemsg -> Maybe idata
 
 
 {-| Prototype init type for layered scene prototypes.
@@ -111,7 +111,7 @@ It receives the environment and prototype initialization data, then returns
 
 -}
 type alias LayeredSceneProtoInit cdata userdata tar msg scenemsg idata =
-    Env () userdata -> Maybe idata -> LayeredSceneData cdata userdata tar msg scenemsg
+    Runtime -> Env () userdata -> Maybe idata -> LayeredSceneData cdata userdata tar msg scenemsg
 
 
 {-| Effect function type for layered scenes.
@@ -121,7 +121,7 @@ grouped.
 
 -}
 type alias LayeredSceneEffectFunc cdata userdata tar msg scenemsg =
-    Env () userdata -> UserEvent -> LayeredSceneData cdata userdata tar msg scenemsg -> List Effect
+    Runtime -> Env () userdata -> UserEvent -> LayeredSceneData cdata userdata tar msg scenemsg -> List Effect
 
 
 {-| Generate scene storage for a layered scene.
@@ -144,5 +144,5 @@ genLayeredScene init settingsFunc =
 {-| Compose prototype init with level init.
 -}
 initCompose : LayeredSceneProtoInit cdata userdata tar msg scenemsg idata -> LayeredSceneLevelInit userdata scenemsg idata -> LayeredSceneInit cdata userdata tar msg scenemsg
-initCompose pinit linit env msg =
-    pinit env <| linit env msg
+initCompose pinit linit runtime env msg =
+    pinit runtime env <| linit runtime env msg

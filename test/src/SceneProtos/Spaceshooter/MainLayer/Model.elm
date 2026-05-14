@@ -11,7 +11,7 @@ Set the Data Type, Init logic, Update logic, View logic and Matcher logic here.
 import Color
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (Env, getGlobalStartTime)
+import Messenger.Base exposing (Env, Runtime, getGlobalStartTime)
 import Messenger.Component.Component exposing (AbstractComponent, updateComponentsWithBlock, updateComponentsWithTarget, viewComponents)
 import Messenger.GeneralModel exposing (Matcher, Msg(..), MsgBase(..), unroll)
 import Messenger.Layer.Layer exposing (ConcreteLayer, Handler, LayerInit, LayerStorage, LayerUpdate, LayerUpdateRec, LayerView, genLayer, handleComponentMsgs)
@@ -65,24 +65,24 @@ removeOutOfBound =
         )
 
 
-addEnemy : Env SceneCommonData UserData -> List GameComponent -> List GameComponent
-addEnemy env comps =
+addEnemy : Runtime -> Env SceneCommonData UserData -> List GameComponent -> List GameComponent
+addEnemy runtime env comps =
     if List.any (\comp -> (unroll comp).matcher <| Type "Enemy") comps then
         comps
 
     else
         let
             fixp =
-                (\x -> (*) (2 * pi) <| (-) x <| toFloat <| floor x) <| getGlobalStartTime env.globalData / (240 * pi)
+                (\x -> (*) (2 * pi) <| (-) x <| toFloat <| floor x) <| getGlobalStartTime runtime / (240 * pi)
 
             rangep =
-                fixp + (toFloat <| genRandomInt (floor (getGlobalStartTime env.globalData)) ( -50, 50 ))
+                fixp + (toFloat <| genRandomInt (floor (getGlobalStartTime runtime)) ( -50, 50 ))
         in
-        Enemy.component (EnemyInitMsg <| EnemyInit.InitData 1 (-1 / 10) ( 1920, 150 * (3 - cos rangep) ) 120 30 200) env :: comps
+        Enemy.component (EnemyInitMsg <| EnemyInit.InitData 1 (-1 / 10) ( 1920, 150 * (3 - cos rangep) ) 120 30 200) runtime env :: comps
 
 
 init : LayerInit SceneCommonData UserData (LayerMsg SceneMsg) Data
-init _ initMsg =
+init _ _ initMsg =
     case initMsg of
         MainInitData data ->
             Data data.components
@@ -92,7 +92,7 @@ init _ initMsg =
 
 
 handleComponentMsg : Handler Data SceneCommonData UserData LayerTarget (LayerMsg SceneMsg) SceneMsg ComponentMsg
-handleComponentMsg env compmsg data =
+handleComponentMsg runtime env compmsg data =
     case compmsg of
         SOMMsg som ->
             ( data, [ Parent <| SOMMsg som ], env )
@@ -113,7 +113,7 @@ handleComponentMsg env compmsg data =
                                 }
 
                         newBullet =
-                            Bullet.component newBulletInitMsg env
+                            Bullet.component newBulletInitMsg runtime env
 
                         newObjs =
                             newBullet :: objs
@@ -132,33 +132,33 @@ handleComponentMsg env compmsg data =
 
 
 updateBasic : BasicUpdater Data SceneCommonData UserData LayerTarget (LayerMsg SceneMsg) SceneMsg
-updateBasic env _ data =
-    ( { data | components = addEnemy env <| removeOutOfBound <| removeDead data.components }, [], ( env, False ) )
+updateBasic runtime env _ data =
+    ( { data | components = addEnemy runtime env <| removeOutOfBound <| removeDead data.components }, [], ( env, False ) )
 
 
 collisionDistributor : Distributor Data SceneCommonData UserData LayerTarget (LayerMsg SceneMsg) SceneMsg (List ( ComponentTarget, ComponentMsg ))
-collisionDistributor env _ data =
+collisionDistributor _ env _ data =
     ( data, ( [], judgeCollision data.components ), env )
 
 
 update : LayerUpdate SceneCommonData UserData LayerTarget (LayerMsg SceneMsg) SceneMsg Data
-update env evt data =
+update runtime env evt data =
     if not env.commonData.gameOver then
         let
             ( data1, lmsg1, ( env1, block1 ) ) =
-                updateBasic env evt data
+                updateBasic runtime env evt data
 
             ( comps1, cmsgs1, ( env2, block2 ) ) =
-                updateComponentsWithBlock env1 evt block1 data1.components
+                updateComponentsWithBlock runtime env1 evt block1 data1.components
 
             ( data2, ( lmsg2, tocmsg ), env3 ) =
-                collisionDistributor env2 evt { data1 | components = comps1 }
+                collisionDistributor runtime env2 evt { data1 | components = comps1 }
 
             ( comps2, cmsgs2, env4 ) =
-                updateComponentsWithTarget env3 tocmsg data2.components
+                updateComponentsWithTarget runtime env3 tocmsg data2.components
 
             ( data3, lmsgs3, env5 ) =
-                handleComponentMsgs env4 (cmsgs2 ++ cmsgs1) { data2 | components = comps2 } (lmsg1 ++ lmsg2) handleComponentMsg
+                handleComponentMsgs runtime env4 (cmsgs2 ++ cmsgs1) { data2 | components = comps2 } (lmsg1 ++ lmsg2) handleComponentMsg
         in
         ( data3, lmsgs3, ( env5, block2 ) )
 
@@ -167,12 +167,12 @@ update env evt data =
 
 
 updaterec : LayerUpdateRec SceneCommonData UserData LayerTarget (LayerMsg SceneMsg) SceneMsg Data
-updaterec env _ data =
+updaterec _ env _ data =
     ( data, [], env )
 
 
 view : LayerView SceneCommonData UserData Data
-view env data =
+view runtime env data =
     let
         gameOverVE =
             if env.commonData.gameOver then
@@ -183,7 +183,7 @@ view env data =
     in
     group gameOverVE
         [ P.rect ( 0, 0 ) ( 1920, 1080 ) Color.lightBlue
-        , viewComponents env data.components
+        , viewComponents runtime env data.components
         ]
 
 

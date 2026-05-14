@@ -26,7 +26,7 @@ import Scenes.Tetris.SceneBase exposing (SceneCommonData, State(..))
 
 
 init : ComponentInit SceneCommonData UserData ComponentMsg Data BaseData
-init _ _ =
+init _ _ _ =
     ( { grid = G.empty
       , active = G.empty
       , scale = { width = 10, height = 20 }
@@ -39,8 +39,8 @@ init _ _ =
 
 
 update : ComponentUpdate SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-update ({ globalData, commonData } as env) evnt data basedata =
-    if getWindowVisibility globalData == Visible then
+update runtime ({ commonData } as env) evnt data basedata =
+    if getWindowVisibility runtime == Visible then
         case evnt of
             KeyDown 37 ->
                 --Left
@@ -64,7 +64,7 @@ update ({ globalData, commonData } as env) evnt data basedata =
                     Stopped ->
                         let
                             ( newData, newEnv ) =
-                                spawnTetrimino { env | commonData = { commonData | score = 0, lines = 0, state = Playing } } { data | grid = G.empty }
+                                spawnTetrimino runtime { env | commonData = { commonData | score = 0, lines = 0, state = Playing } } { data | grid = G.empty }
                         in
                         ( ( newData, basedata ), [ Other ( "Button", TetrisMsg Resume ) ], ( newEnv, False ) )
 
@@ -79,6 +79,9 @@ update ({ globalData, commonData } as env) evnt data basedata =
 
             Tick dt ->
                 let
+                    globalData =
+                        env.globalData
+
                     newMaxScore =
                         max env.commonData.score globalData.userData.tetrisData.currentMaxScore
 
@@ -86,7 +89,7 @@ update ({ globalData, commonData } as env) evnt data basedata =
                         { env | globalData = { globalData | userData = UserData { lastMaxScore = globalData.userData.tetrisData.lastMaxScore, currentMaxScore = newMaxScore } } }
                 in
                 if env.commonData.state == Playing && dt <= 100 then
-                    animate dt newEnv data
+                    animate runtime dt newEnv data
                         |> (\( d, m, e ) -> ( ( d, () ), m ++ [ Parent <| SOMMsg SOMSaveGlobalData ], ( e, False ) ))
 
                 else
@@ -100,14 +103,14 @@ update ({ globalData, commonData } as env) evnt data basedata =
 
 
 updaterec : ComponentUpdateRec SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-updaterec ({ commonData } as env) msg data basedata =
+updaterec runtime ({ commonData } as env) msg data basedata =
     case msg of
         TetrisMsg tevent ->
             case tevent of
                 Start ->
                     let
                         ( newData, newEnv ) =
-                            spawnTetrimino { env | commonData = { commonData | score = 0, lines = 0 } } { data | grid = G.empty }
+                            spawnTetrimino runtime { env | commonData = { commonData | score = 0, lines = 0 } } { data | grid = G.empty }
                     in
                     ( ( newData, basedata ), [], newEnv )
 
@@ -131,7 +134,7 @@ updaterec ({ commonData } as env) msg data basedata =
 
 
 view : ComponentView SceneCommonData UserData Data BaseData
-view _ data _ =
+view _ _ data _ =
     ( group []
         [ renderWell data
         , rect ( 0, 0 ) ( 600, 30 ) Color.white

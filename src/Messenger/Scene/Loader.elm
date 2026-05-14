@@ -44,7 +44,7 @@ loadScene scenest smsg model =
             removeCommonData env
 
         newEnv =
-            { env | commonData = scenest smsg ncenv }
+            { env | commonData = scenest smsg model.runtime ncenv }
     in
     { model | env = newEnv }
 
@@ -59,25 +59,16 @@ loadSceneByName name scenes smsg model =
                 newModel =
                     loadScene scenest smsg model
 
-                gd =
-                    env.globalData
-
                 env =
                     newModel.env
 
                 internalData =
-                    Internal.getInternalData gd.internalData
+                    Internal.getInternalData newModel.runtime
 
-                newEnv =
-                    { env
-                        | globalData =
-                            { gd
-                                | internalData =
-                                    Internal.InternalData { internalData | currentScene = name }
-                            }
-                    }
+                newRuntime =
+                    Internal.InternalData { internalData | currentScene = name }
             in
-            { newModel | env = newEnv }
+            { newModel | env = env, runtime = newRuntime }
 
         Nothing ->
             model

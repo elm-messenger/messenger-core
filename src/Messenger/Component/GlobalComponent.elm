@@ -33,8 +33,8 @@ instances of the same global component type.
 
 -}
 genGlobalComponent : ConcreteGlobalComponent data userdata scenemsg -> GCMsg -> Maybe GCTarget -> GlobalComponentStorage userdata scenemsg
-genGlobalComponent conpcomp gcmsg gctar =
-    GM.abstract (gcTransform conpcomp gctar) <| gcmsg
+genGlobalComponent conpcomp gcmsg gctar runtime env =
+    GM.abstract (gcTransform conpcomp gctar) gcmsg runtime env
 
 
 {-| Turn global component into a general model.
@@ -50,22 +50,22 @@ gcTransform concomp gctar =
                 Nothing ->
                     concomp.id
     in
-    { init = \env msg -> concomp.init env msg
+    { init = \runtime env msg -> concomp.init runtime env msg
     , update =
-        \env evt data bdata ->
+        \runtime env evt data bdata ->
             let
                 ( resData, resMsg, resEnv ) =
-                    concomp.update env evt data bdata
+                    concomp.update runtime env evt data bdata
             in
             ( resData, resMsg, resEnv )
     , updaterec =
-        \env msg data bdata ->
+        \runtime env msg data bdata ->
             let
                 ( resData, resMsg, resEnv ) =
-                    concomp.updaterec env msg data bdata
+                    concomp.updaterec runtime env msg data bdata
             in
             ( resData, resMsg, resEnv )
-    , view = \env data bdata -> concomp.view env data bdata
+    , view = \runtime env data bdata -> concomp.view runtime env data bdata
     , matcher = \_ _ tar -> tar == id
     }
 

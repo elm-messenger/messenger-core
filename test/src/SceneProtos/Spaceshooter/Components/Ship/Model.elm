@@ -36,7 +36,7 @@ moveShip d dt =
 
 
 init : ComponentInit SceneCommonData UserData ComponentMsg Data BaseData
-init _ initMsg =
+init _ _ initMsg =
     case initMsg of
         ShipInitMsg msg ->
             ( { interval = msg.bulletInterval, timer = 15 }
@@ -54,7 +54,7 @@ init _ initMsg =
 
 
 update : ComponentUpdate SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-update env evnt data basedata =
+update runtime env evnt data basedata =
     if basedata.alive then
         case evnt of
             Tick dt ->
@@ -84,7 +84,7 @@ update env evnt data basedata =
                     ( ( data, basedata ), [], ( env, False ) )
 
             KeyUp key ->
-                if (key == arrowDown || key == arrowUp) && not (Set.member arrowUp (getPressedKeys env.globalData) || Set.member arrowDown (getPressedKeys env.globalData)) then
+                if (key == arrowDown || key == arrowUp) && not (Set.member arrowUp (getPressedKeys runtime) || Set.member arrowDown (getPressedKeys runtime)) then
                     ( ( data, { basedata | velocity = 0 } ), [], ( env, False ) )
 
                 else
@@ -98,7 +98,7 @@ update env evnt data basedata =
 
 
 updaterec : ComponentUpdateRec SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-updaterec env msg data basedata =
+updaterec _ env msg data basedata =
     case msg of
         CollisionMsg _ ->
             ( ( data, { basedata | alive = False } ), [ Parent <| OtherMsg <| GameOverMsg ], env )
@@ -108,7 +108,7 @@ updaterec env msg data basedata =
 
 
 view : ComponentView SceneCommonData UserData Data BaseData
-view _ _ basedata =
+view _ _ _ basedata =
     ( P.rectTexture basedata.position basedata.collisionBox "ship", 0 )
 
 

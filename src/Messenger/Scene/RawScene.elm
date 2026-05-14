@@ -23,7 +23,7 @@ do not fit Messenger's layered scene helper.
 
 -}
 
-import Messenger.Base exposing (Env, UserEvent)
+import Messenger.Base exposing (Env, Runtime, UserEvent)
 import Messenger.Scene.Scene exposing (MConcreteScene, SceneOutputMsg, SceneStorage, abstract)
 import REGL.Common exposing (Renderable)
 
@@ -34,7 +34,7 @@ Initialize scene data from the environment and optional scene message.
 
 -}
 type alias RawSceneInit data userdata scenemsg =
-    Env () userdata -> Maybe scenemsg -> data
+    Runtime -> Env () userdata -> Maybe scenemsg -> data
 
 
 {-| Level init type for raw scene prototypes.
@@ -44,7 +44,7 @@ data. It is commonly used by generated scene-prototype levels.
 
 -}
 type alias RawSceneProtoLevelInit userdata scenemsg idata =
-    Env () userdata -> Maybe scenemsg -> Maybe idata
+    Runtime -> Env () userdata -> Maybe scenemsg -> Maybe idata
 
 
 {-| Prototype init type for raw scene prototypes.
@@ -53,7 +53,7 @@ This creates scene data from prototype initialization data.
 
 -}
 type alias RawSceneProtoInit data userdata idata =
-    Env () userdata -> Maybe idata -> data
+    Runtime -> Env () userdata -> Maybe idata -> data
 
 
 {-| Raw scene update type.
@@ -63,7 +63,7 @@ data, scene output messages, and the updated environment.
 
 -}
 type alias RawSceneUpdate data userdata scenemsg =
-    Env () userdata -> UserEvent -> data -> ( data, List (SceneOutputMsg scenemsg userdata), Env () userdata )
+    Runtime -> Env () userdata -> UserEvent -> data -> ( data, List (SceneOutputMsg scenemsg userdata), Env () userdata )
 
 
 {-| Raw scene view type.
@@ -72,7 +72,7 @@ It receives the environment and scene data and returns a renderable.
 
 -}
 type alias RawSceneView userdata data =
-    Env () userdata -> data -> Renderable
+    Runtime -> Env () userdata -> data -> Renderable
 
 
 {-| Generate scene storage from a concrete raw scene.
@@ -85,5 +85,5 @@ genRawScene =
 {-| Compose prototype init with level init.
 -}
 initCompose : RawSceneProtoInit data userdata idata -> RawSceneProtoLevelInit userdata scenemsg idata -> RawSceneInit data userdata scenemsg
-initCompose pinit linit env msg =
-    pinit env <| linit env msg
+initCompose pinit linit runtime env msg =
+    pinit runtime env <| linit runtime env msg

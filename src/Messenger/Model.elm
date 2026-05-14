@@ -19,7 +19,7 @@ We only use it in the main update.
 
 -}
 
-import Messenger.Base exposing (Env)
+import Messenger.Base exposing (Env, Runtime)
 import Messenger.Internal as Internal
 import Messenger.Scene.Scene exposing (AbstractGlobalComponent, MAbstractScene)
 
@@ -27,7 +27,8 @@ import Messenger.Scene.Scene exposing (AbstractGlobalComponent, MAbstractScene)
 {-| The model for the game
 -}
 type alias Model userdata scenemsg =
-    { env : Env (MAbstractScene userdata scenemsg) userdata
+    { runtime : Runtime
+    , env : Env (MAbstractScene userdata scenemsg) userdata
     , globalComponents : List (AbstractGlobalComponent userdata scenemsg)
     }
 
@@ -37,26 +38,17 @@ type alias Model userdata scenemsg =
 updateSceneTime : Model userdata scenemsg -> Float -> Model userdata scenemsg
 updateSceneTime m delta =
     let
-        gd =
-            env.globalData
-
-        env =
-            m.env
-
         internalData =
-            Internal.getInternalData gd.internalData
-
-        ngd =
-            { gd
-                | internalData =
-                    Internal.InternalData
-                        { internalData
-                            | sceneStartTime = internalData.sceneStartTime + delta
-                            , sceneStartFrame = internalData.sceneStartFrame + 1
-                        }
-            }
+            Internal.getInternalData m.runtime
     in
-    { m | env = { env | globalData = ngd } }
+    { m
+        | runtime =
+            Internal.InternalData
+                { internalData
+                    | sceneStartTime = internalData.sceneStartTime + delta
+                    , sceneStartFrame = internalData.sceneStartFrame + 1
+                }
+    }
 
 
 {-| Reset the scene starttime to 0.
@@ -64,23 +56,14 @@ updateSceneTime m delta =
 resetSceneStartTime : Model userdata scenemsg -> Model userdata scenemsg
 resetSceneStartTime m =
     let
-        gd =
-            env.globalData
-
-        env =
-            m.env
-
         internalData =
-            Internal.getInternalData gd.internalData
-
-        ngd =
-            { gd
-                | internalData =
-                    Internal.InternalData
-                        { internalData
-                            | sceneStartTime = 0
-                            , sceneStartFrame = 0
-                        }
-            }
+            Internal.getInternalData m.runtime
     in
-    { m | env = { env | globalData = ngd } }
+    { m
+        | runtime =
+            Internal.InternalData
+                { internalData
+                    | sceneStartTime = 0
+                    , sceneStartFrame = 0
+                }
+    }

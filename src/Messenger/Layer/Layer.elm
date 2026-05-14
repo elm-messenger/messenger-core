@@ -33,7 +33,7 @@ General Model and Helper functions for Layers.
 
 -}
 
-import Messenger.Base exposing (Env, UserEvent)
+import Messenger.Base exposing (Env, Runtime, UserEvent)
 import Messenger.GeneralModel exposing (Matcher, abstract)
 import Messenger.Scene.Scene exposing (MAbstractGeneralModel, MConcreteGeneralModel, MMsg, MMsgBase)
 import REGL.Common exposing (Renderable)
@@ -43,7 +43,7 @@ import REGL.Common exposing (Renderable)
 The initializing function for layer. It receives the environment, the initializing message, and returns the layer's data.
 -}
 type alias LayerInit cdata userdata msg data =
-    Env cdata userdata -> msg -> data
+    Runtime -> Env cdata userdata -> msg -> data
 
 
 {-| update type sugar
@@ -59,7 +59,7 @@ Receives the environment env, the UserEvent evnt, the currect data of the layer 
 
 -}
 type alias LayerUpdate cdata userdata tar msg scenemsg data =
-    Env cdata userdata -> UserEvent -> data -> ( data, List (MMsg tar msg scenemsg userdata), ( Env cdata userdata, Bool ) )
+    Runtime -> Env cdata userdata -> UserEvent -> data -> ( data, List (MMsg tar msg scenemsg userdata), ( Env cdata userdata, Bool ) )
 
 
 {-| updaterec type sugar
@@ -70,7 +70,7 @@ Receives the environment env, the layer messages (defined in LayerBase.elm), the
 
 -}
 type alias LayerUpdateRec cdata userdata tar msg scenemsg data =
-    Env cdata userdata -> msg -> data -> ( data, List (MMsg tar msg scenemsg userdata), Env cdata userdata )
+    Runtime -> Env cdata userdata -> msg -> data -> ( data, List (MMsg tar msg scenemsg userdata), Env cdata userdata )
 
 
 {-| view type sugar
@@ -80,7 +80,7 @@ Receives the environment and the data of the layer.
 
 -}
 type alias LayerView cdata userdata data =
-    Env cdata userdata -> data -> Renderable
+    Runtime -> Env cdata userdata -> data -> Renderable
 
 
 {-| This is a type sugar for dividing a long update function into smaller pieces to enhance code quality. It receives a ((Data,BaseData),List Msg, (Env,bool)) and returns a tuple of same kind.
@@ -103,7 +103,7 @@ Not very likely to be used. The messenger template will handle this for you auto
 
 -}
 type alias LayerStorage cdata userdata tar msg scenemsg =
-    msg -> Env cdata userdata -> AbstractLayer cdata userdata tar msg scenemsg
+    msg -> Runtime -> Env cdata userdata -> AbstractLayer cdata userdata tar msg scenemsg
 
 
 {-| Concrete Layer Model
@@ -149,7 +149,7 @@ A handler is used to handle the Component Msg sent to the layer.
 
 -}
 type alias Handler data cdata userdata tar msg scenemsg cmsg =
-    Env cdata userdata -> MMsgBase cmsg scenemsg userdata -> data -> ( data, List (MMsg tar msg scenemsg userdata), Env cdata userdata )
+    Runtime -> Env cdata userdata -> MMsgBase cmsg scenemsg userdata -> data -> ( data, List (MMsg tar msg scenemsg userdata), Env cdata userdata )
 
 
 {-| Handle a list of component msgs.
@@ -160,13 +160,13 @@ type alias Handler data cdata userdata tar msg scenemsg cmsg =
     determine the handler function and put it as a parameter of this function.
 
 -}
-handleComponentMsgs : Env cdata userdata -> List (MMsgBase cmsg scenemsg userdata) -> data -> List (MMsg tar msg scenemsg userdata) -> Handler data cdata userdata tar msg scenemsg cmsg -> ( data, List (MMsg tar msg scenemsg userdata), Env cdata userdata )
-handleComponentMsgs lastEnv compMsgs lastData lastLayerMsgs handler =
+handleComponentMsgs : Runtime -> Env cdata userdata -> List (MMsgBase cmsg scenemsg userdata) -> data -> List (MMsg tar msg scenemsg userdata) -> Handler data cdata userdata tar msg scenemsg cmsg -> ( data, List (MMsg tar msg scenemsg userdata), Env cdata userdata )
+handleComponentMsgs runtime lastEnv compMsgs lastData lastLayerMsgs handler =
     List.foldl
         (\cm ( d, m, e ) ->
             let
                 ( d2, m2, e2 ) =
-                    handler e cm d
+                    handler runtime e cm d
             in
             ( d2, m ++ m2, e2 )
         )
@@ -179,21 +179,21 @@ Not very likely to be used. The messenger template will handle this for you auto
 -}
 addEmptyBData : ConcreteLayer data cdata userdata tar msg scenemsg -> MConcreteGeneralModel data cdata userdata tar msg () scenemsg
 addEmptyBData mconnoB =
-    { init = \env msg -> ( mconnoB.init env msg, () )
+    { init = \runtime env msg -> ( mconnoB.init runtime env msg, () )
     , update =
-        \env evt data () ->
+        \runtime env evt data () ->
             let
                 ( resData, resMsg, resEnv ) =
-                    mconnoB.update env evt data
+                    mconnoB.update runtime env evt data
             in
             ( ( resData, () ), resMsg, resEnv )
     , updaterec =
-        \env msg data () ->
+        \runtime env msg data () ->
             let
                 ( resData, resMsg, resEnv ) =
-                    mconnoB.updaterec env msg data
+                    mconnoB.updaterec runtime env msg data
             in
             ( ( resData, () ), resMsg, resEnv )
-    , view = \env data () -> mconnoB.view env data
+    , view = \runtime env data () -> mconnoB.view runtime env data
     , matcher = \data () tar -> mconnoB.matcher data tar
     }

@@ -13,7 +13,7 @@ Initialize the game
 
 import Audio exposing (AudioCmd)
 import Browser.Dom exposing (getViewport)
-import Messenger.Base exposing (Env, Flags, GlobalData, GlobalDataInit, UserEvent)
+import Messenger.Base exposing (Env, Flags, GlobalData, GlobalDataInit, Runtime, UserEvent)
 import Messenger.Internal as Internal
 import Messenger.Internal exposing (WorldEvent(..))
 import Messenger.Model exposing (Model)
@@ -34,13 +34,13 @@ emptyScene =
     let
         abstractRec _ =
             let
-                updates : Env () userdata -> UserEvent -> ( MAbstractScene userdata scenemsg, List (SceneOutputMsg scenemsg userdata), Env () userdata )
-                updates env _ =
+                updates : Runtime -> Env () userdata -> UserEvent -> ( MAbstractScene userdata scenemsg, List (SceneOutputMsg scenemsg userdata), Env () userdata )
+                updates _ env _ =
                     ( abstractRec (), [], env )
             in
             Roll
                 { update = updates
-                , view = \_ -> P.empty
+                , view = \_ _ -> P.empty
                 }
     in
     abstractRec ()
@@ -55,16 +55,7 @@ emptyGlobalData config =
 
 globalDataInitToGlobalData : GlobalDataInit userdata -> GlobalData userdata
 globalDataInitToGlobalData user =
-    let
-        emptyInternalData =
-            Internal.getInternalData Internal.emptyInternalData
-    in
-    { internalData =
-        Internal.InternalData
-            { emptyInternalData
-                | volume = user.volume
-            }
-    , canvasAttributes = user.canvasAttributes
+    { canvasAttributes = user.canvasAttributes
     , extraHTML = user.extraHTML
     , userData = user.userData
     , camera = user.camera
@@ -75,7 +66,8 @@ globalDataInitToGlobalData user =
 -}
 initModel : UserConfig userdata scenemsg -> Model userdata scenemsg
 initModel config =
-    { env = Env (emptyGlobalData config) emptyScene
+    { runtime = Internal.emptyInternalData
+    , env = Env (emptyGlobalData config) emptyScene
     , globalComponents = []
     }
 
@@ -97,23 +89,30 @@ init input flags =
         im =
             initModel config
 
+        initGlobalDataRaw =
+            config.globalDataCodec.decode flags.info
+
         env1 =
             im.env
 
+        imWithRuntime =
+            { im | runtime = runtime }
+
         newEnv1 =
-            { env1 | globalData = newgd }
+            { env1 | globalData = initGlobalData }
 
         ms =
-            loadSceneByName config.initScene scenes config.initSceneMsg { im | env = newEnv1 }
+            loadSceneByName config.initScene scenes config.initSceneMsg { imWithRuntime | env = newEnv1 }
 
-        newIT =
+        runtime =
             let
                 initInternalData =
-                    Internal.getInternalData initGlobalData.internalData
+                    Internal.getInternalData Internal.emptyInternalData
             in
             Internal.InternalData
                 { initInternalData
-                    | virtualWidth = config.virtualSize.width
+                    | volume = initGlobalDataRaw.volume
+                    , virtualWidth = config.virtualSize.width
                     , virtualHeight = config.virtualSize.height
                     , totResNum = resourceNum input.resources
                     , currentTimeStamp = flags.timeStamp
@@ -121,10 +120,7 @@ init input flags =
                 }
 
         initGlobalData =
-            globalDataInitToGlobalData (config.globalDataCodec.decode flags.info)
-
-        newgd =
-            { initGlobalData | internalData = newIT }
+            globalDataInitToGlobalData initGlobalDataRaw
 
         audioLoad =
             List.filterMap
@@ -139,13 +135,13 @@ init input flags =
                 resources
 
         gcs =
-            List.map (\gc -> gc (Env newgd ms.env.commonData)) input.globalComponents
+            List.map (\gc -> gc ms.runtime (Env initGlobalData ms.env.commonData)) input.globalComponents
 
         env2 =
             ms.env
 
         newEnv2 =
-            { env2 | globalData = newgd }
+            { env2 | globalData = initGlobalData }
 
         resloadcmds =
             List.filterMap

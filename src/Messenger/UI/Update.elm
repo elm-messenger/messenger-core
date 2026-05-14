@@ -35,7 +35,7 @@ import Set
 -}
 gameUpdate : Input userdata scenemsg -> UserEvent -> Model userdata scenemsg -> ( Model userdata scenemsg, Cmd WorldEvent, AudioCmd WorldEvent )
 gameUpdate input evnt model =
-    if (Internal.getInternalData model.env.globalData.internalData).loadedResNum < resourceNum input.resources then
+    if (Internal.getInternalData model.runtime).loadedResNum < resourceNum input.resources then
         -- Still loading assets (only possible when the game is just started)
         ( model, Cmd.none, Audio.cmdNone )
 
@@ -54,7 +54,7 @@ gameUpdate input evnt model =
                 filterAliveGC model.globalComponents
 
             ( gc2, gcsompre, ( env2, block ) ) =
-                updateObjects env1 evnt gc1
+                updateObjects model.runtime env1 evnt gc1
 
             gcsom =
                 filterSOM gcsompre
@@ -64,7 +64,7 @@ gameUpdate input evnt model =
 
             model1 : Model userdata scenemsg
             model1 =
-                { env = env2, globalComponents = gc2 }
+                { model | env = env2, globalComponents = gc2 }
 
             ( scenesom, model2 ) =
                 if block then
@@ -73,7 +73,7 @@ gameUpdate input evnt model =
                 else
                     let
                         ( scene, psom, env ) =
-                            (unroll env2.commonData).update (removeCommonData env2) evnt
+                            (unroll env2.commonData).update model.runtime (removeCommonData env2) evnt
 
                         envc =
                             addCommonData scene env
@@ -107,14 +107,8 @@ gameUpdate input evnt model =
 update : Input userdata scenemsg -> AudioData -> WorldEvent -> Model userdata scenemsg -> ( Model userdata scenemsg, Cmd WorldEvent, AudioCmd WorldEvent )
 update input audiodata msg model =
     let
-        gd =
-            env.globalData
-
-        env =
-            model.env
-
         gdid =
-            Internal.getInternalData gd.internalData
+            Internal.getInternalData model.runtime
 
         scenes =
             input.scenes
@@ -136,10 +130,10 @@ update input audiodata msg model =
                         ard =
                             Dict.insert name ( sound, Audio.length audiodata sound ) ar.audio
 
-                        newEnv =
-                            { env | globalData = { gd | internalData = Internal.InternalData { gdid | audioRepo = { ar | audio = ard }, loadedResNum = gdid.loadedResNum + 1 } } }
+                        newRuntime =
+                            Internal.InternalData { gdid | audioRepo = { ar | audio = ard }, loadedResNum = gdid.loadedResNum + 1 }
                     in
-                    ( { model | env = newEnv }
+                    ( { model | runtime = newRuntime }
                     , Cmd.none
                     , Audio.cmdNone
                     )
@@ -158,70 +152,58 @@ update input audiodata msg model =
                 ( fl, ft ) =
                     getStartPoint ( gdid.virtualWidth, gdid.virtualHeight ) t
 
-                newIT =
+                newRuntime =
                     Internal.InternalData { gdid | browserViewPort = t, realWidth = gw, realHeight = gh, startLeft = fl, startTop = ft }
-
-                newgd =
-                    { gd | internalData = newIT }
-
-                newEnv =
-                    { env | globalData = newgd }
             in
-            ( { model | env = newEnv }, Cmd.none, Audio.cmdNone )
+            ( { model | runtime = newRuntime }, Cmd.none, Audio.cmdNone )
 
         WindowVisibility v ->
             let
-                newgd =
-                    { gd
-                        | internalData =
-                            Internal.InternalData
-                                { gdid
-                                    | windowVisibility = v
-                                    , pressedKeys = Set.empty
-                                    , pressedMouseButtons = Set.empty
-                                }
-                    }
-
-                newEnv =
-                    { env | globalData = newgd }
+                newRuntime =
+                    Internal.InternalData
+                        { gdid
+                            | windowVisibility = v
+                            , pressedKeys = Set.empty
+                            , pressedMouseButtons = Set.empty
+                        }
             in
-            ( { model | env = newEnv }, Cmd.none, Audio.cmdNone )
+            ( { model | runtime = newRuntime }, Cmd.none, Audio.cmdNone )
 
         MouseMove ( px, py ) ->
             let
                 mp =
-                    fromMouseToVirtual gd.internalData ( px, py )
+                    fromMouseToVirtual model.runtime ( px, py )
 
-                newEnv =
-                    { env | globalData = { gd | internalData = Internal.InternalData { gdid | mousePos = mp } } }
+                newRuntime =
+                    Internal.InternalData { gdid | mousePos = mp }
             in
-            ( { model | env = newEnv }, Cmd.none, Audio.cmdNone )
+            ( { model | runtime = newRuntime }, Cmd.none, Audio.cmdNone )
 
         WMouseDown e pos ->
             let
                 newPressedMouseButtons =
                     Set.insert e gdid.pressedMouseButtons
 
-                newEnv =
-                    { env | globalData = { gd | internalData = Internal.InternalData { gdid | pressedMouseButtons = newPressedMouseButtons } } }
+                newRuntime =
+                    Internal.InternalData { gdid | pressedMouseButtons = newPressedMouseButtons }
 
                 newModel =
-                    { model | env = newEnv }
+                    { model | runtime = newRuntime }
             in
-            gameUpdateInner (MouseDown e <| fromMouseToVirtual newModel.env.globalData.internalData pos) newModel
+            gameUpdateInner (MouseDown e <| fromMouseToVirtual newModel.runtime pos) newModel
 
         WMouseUp e pos ->
             let
                 newPressedMouseButtons =
                     Set.remove e gdid.pressedMouseButtons
 
-                newEnv =
-                    { env | globalData = { gd | internalData = Internal.InternalData { gdid | pressedMouseButtons = newPressedMouseButtons } } }
+                newRuntime =
+                    Internal.InternalData { gdid | pressedMouseButtons = newPressedMouseButtons }
 
                 newModel =
-                    { model | env = newEnv }
+                    { model | runtime = newRuntime }
             in
-            gameUpdateInner (MouseUp e <| fromMouseToVirtual newModel.env.globalData.internalData pos) newModel
+            gameUpdateInner (MouseUp e <| fromMouseToVirtual newModel.runtime pos) newModel
 
         WKeyDown 112 ->
             if config.debug then
@@ -245,10 +227,10 @@ update input audiodata msg model =
                     newPressedKeys =
                         Set.remove key gdid.pressedKeys
 
-                    newEnv =
-                        { env | globalData = { gd | internalData = Internal.InternalData { gdid | pressedKeys = newPressedKeys } } }
+                    newRuntime =
+                        Internal.InternalData { gdid | pressedKeys = newPressedKeys }
                 in
-                gameUpdateInner (KeyUp key) { model | env = newEnv }
+                gameUpdateInner (KeyUp key) { model | runtime = newRuntime }
 
             else
                 ( model, Cmd.none, Audio.cmdNone )
@@ -262,10 +244,10 @@ update input audiodata msg model =
                     newPressedKeys =
                         Set.insert key gdid.pressedKeys
 
-                    newEnv =
-                        { env | globalData = { gd | internalData = Internal.InternalData { gdid | pressedKeys = newPressedKeys } } }
+                    newRuntime =
+                        Internal.InternalData { gdid | pressedKeys = newPressedKeys }
                 in
-                gameUpdateInner (KeyDown key) { model | env = newEnv }
+                gameUpdateInner (KeyDown key) { model | runtime = newRuntime }
 
         WPrompt "load" result ->
             if existScene result scenes then
@@ -286,13 +268,10 @@ update input audiodata msg model =
             case vol of
                 Just v ->
                     let
-                        newgd =
-                            { gd | internalData = Internal.InternalData { gdid | volume = v } }
-
-                        newEnv =
-                            { env | globalData = newgd }
+                        newRuntime =
+                            Internal.InternalData { gdid | volume = v }
                     in
-                    ( { model | env = newEnv }, Cmd.none, Audio.cmdNone )
+                    ( { model | runtime = newRuntime }, Cmd.none, Audio.cmdNone )
 
                 Nothing ->
                     ( model, config.ports.alert "Not a number", Audio.cmdNone )
@@ -305,22 +284,16 @@ update input audiodata msg model =
                 timeInterval =
                     ts - gdid.currentTimeStamp
 
-                newgd =
-                    { gd
-                        | internalData =
-                            Internal.InternalData
-                                { gdid
-                                    | currentTimeStamp = ts
-                                    , globalStartFrame = gdid.globalStartFrame + 1
-                                    , globalStartTime = gdid.globalStartTime + timeInterval
-                                }
-                    }
-
-                newEnv =
-                    { env | globalData = newgd }
+                newRuntime =
+                    Internal.InternalData
+                        { gdid
+                            | currentTimeStamp = ts
+                            , globalStartFrame = gdid.globalStartFrame + 1
+                            , globalStartTime = gdid.globalStartTime + timeInterval
+                        }
 
                 ( model1, cmd1, acmd1 ) =
-                    gameUpdateInner (Tick timeInterval) { model | env = newEnv }
+                    gameUpdateInner (Tick timeInterval) { model | runtime = newRuntime }
             in
             ( model1, renderModel input model1 cmd1, acmd1 )
 
@@ -331,58 +304,34 @@ update input audiodata msg model =
             case REGL.decodeRecvMsg v of
                 Just (REGL.REGLTextureLoaded t) ->
                     let
-                        newgd =
-                            let
-                                newIT =
-                                    Internal.InternalData { gdid | sprites = saveSprite gdid.sprites t.name t, loadedResNum = gdid.loadedResNum + 1 }
-                            in
-                            { gd | internalData = newIT }
-
-                        newEnv =
-                            { env | globalData = newgd }
+                        newRuntime =
+                            Internal.InternalData { gdid | sprites = saveSprite gdid.sprites t.name t, loadedResNum = gdid.loadedResNum + 1 }
                     in
-                    ( { model | env = newEnv }, Cmd.none, Audio.cmdNone )
+                    ( { model | runtime = newRuntime }, Cmd.none, Audio.cmdNone )
 
                 Just (REGL.REGLFontLoaded font) ->
                     let
-                        newgd =
-                            let
-                                newIT =
-                                    Internal.InternalData { gdid | fonts = Set.insert font gdid.fonts, loadedResNum = gdid.loadedResNum + 1 }
-                            in
-                            { gd | internalData = newIT }
-
-                        newEnv =
-                            { env | globalData = newgd }
+                        newRuntime =
+                            Internal.InternalData { gdid | fonts = Set.insert font gdid.fonts, loadedResNum = gdid.loadedResNum + 1 }
                     in
-                    ( { model | env = newEnv }, Cmd.none, Audio.cmdNone )
+                    ( { model | runtime = newRuntime }, Cmd.none, Audio.cmdNone )
 
                 Just (REGL.REGLProgramCreated prog) ->
                     let
-                        newgd =
-                            let
-                                newIT =
-                                    Internal.InternalData { gdid | programs = Set.insert prog gdid.programs, loadedResNum = gdid.loadedResNum + 1 }
-                            in
-                            { gd | internalData = newIT }
-
-                        newEnv =
-                            { env | globalData = newgd }
+                        newRuntime =
+                            Internal.InternalData { gdid | programs = Set.insert prog gdid.programs, loadedResNum = gdid.loadedResNum + 1 }
                     in
-                    ( { model | env = newEnv }, Cmd.none, Audio.cmdNone )
+                    ( { model | runtime = newRuntime }, Cmd.none, Audio.cmdNone )
 
                 _ ->
                     ( model, Cmd.none, Audio.cmdNone )
 
         WDataLoaded name data ->
             let
-                newIT =
+                newRuntime =
                     Internal.InternalData { gdid | configData = Dict.insert name data gdid.configData, loadedResNum = gdid.loadedResNum + 1 }
-
-                newEnv =
-                    { env | globalData = { gd | internalData = newIT } }
             in
-            ( { model | env = newEnv }, Cmd.none, Audio.cmdNone )
+            ( { model | runtime = newRuntime }, Cmd.none, Audio.cmdNone )
 
         NullEvent ->
             ( model, Cmd.none, Audio.cmdNone )
@@ -392,10 +341,10 @@ renderModel : Input userdata scenemsg -> Model userdata scenemsg -> Cmd WorldEve
 renderModel input model oldcmd =
     let
         sceneView =
-            (unroll model.env.commonData).view { globalData = model.env.globalData, commonData = () }
+            (unroll model.env.commonData).view model.runtime { globalData = model.env.globalData, commonData = () }
 
         gcView =
-            viewModelList model.env model.globalComponents
+            viewModelList model.runtime model.env model.globalComponents
 
         camera =
             model.env.globalData.camera

@@ -12,7 +12,7 @@ import Lib.Tetris.Base exposing (AnimationState, Direction(..), TetrisEvent(..))
 import Lib.Tetris.Grid as G
 import Lib.Tetris.Tetriminos as Tetriminos
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (getCurrentTimeStamp)
+import Messenger.Base exposing (Runtime, getCurrentTimeStamp)
 import Messenger.GeneralModel exposing (Msg(..), MsgBase(..))
 import Scenes.Tetris.Components.ComponentBase exposing (ComponentMsg(..))
 import Scenes.Tetris.Components.GameGrid.Base exposing (Data, EnvGameGrid, OutputMsg)
@@ -27,11 +27,11 @@ cancelState data =
     }
 
 
-animate : Float -> EnvGameGrid -> Data -> ( Data, List OutputMsg, EnvGameGrid )
-animate dt env data =
+animate : Runtime -> Float -> EnvGameGrid -> Data -> ( Data, List OutputMsg, EnvGameGrid )
+animate runtime dt env data =
     moveTetrimino dt data
         |> rotateTetrimino dt
-        |> dropTetrimino dt env
+        |> dropTetrimino runtime dt env
         |> (\( resd, rese ) -> checkEndGame rese resd)
 
 
@@ -75,11 +75,11 @@ startAccelerate on data =
     { data | animation = { ani | accelerate = on } }
 
 
-spawnTetrimino : EnvGameGrid -> Data -> ( Data, EnvGameGrid )
-spawnTetrimino ({ commonData, globalData } as env) data =
+spawnTetrimino : Runtime -> EnvGameGrid -> Data -> ( Data, EnvGameGrid )
+spawnTetrimino runtime ({ commonData } as env) data =
     let
         next =
-            Tetriminos.random <| round (getCurrentTimeStamp globalData)
+            Tetriminos.random <| round (getCurrentTimeStamp runtime)
 
         ( x, y ) =
             G.initPosition data.scale.width commonData.next
@@ -177,8 +177,8 @@ rotateTetrimino dt data =
             data
 
 
-dropTetrimino : Float -> EnvGameGrid -> Data -> ( Data, EnvGameGrid )
-dropTetrimino dt ({ commonData } as env) data =
+dropTetrimino : Runtime -> Float -> EnvGameGrid -> Data -> ( Data, EnvGameGrid )
+dropTetrimino runtime dt ({ commonData } as env) data =
     let
         ( x, y ) =
             data.position
@@ -205,7 +205,7 @@ dropTetrimino dt ({ commonData } as env) data =
                 G.stamp x (floor y) data.active data.grid
         in
         (\( d, e ) -> clearLines e d) <|
-            spawnTetrimino { env | commonData = { commonData | score = commonData.score + score } } { data | grid = newGrid }
+            spawnTetrimino runtime { env | commonData = { commonData | score = commonData.score + score } } { data | grid = newGrid }
 
     else
         ( { data | position = ( x, y + dt / interval ) }, env )

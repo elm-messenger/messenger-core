@@ -14,19 +14,19 @@ system as the game canvas.
 
 import Html exposing (Attribute)
 import Html.Attributes exposing (style)
-import Messenger.Base exposing (InternalData)
+import Messenger.Base exposing (Runtime)
 import Messenger.Coordinate.Coordinates exposing (fixedPosToReal, lengthToReal)
 
 
 {-| Generate HTML attributes for a virtual rectangle.
 
-The first argument is `env.globalData.internalData`. The `( x, y )` argument is
-the virtual top-left position, and `( w, h )` is the virtual size. The generated
+The first argument is the Messenger runtime. The `( x, y )` argument is the
+virtual top-left position, and `( w, h )` is the virtual size. The generated
 attributes use fixed browser positioning and automatically account for canvas
 scale and offset.
 
 -}
-genAttribute : InternalData -> ( Float, Float ) -> ( Float, Float ) -> List (Attribute msg)
+genAttribute : Runtime -> ( Float, Float ) -> ( Float, Float ) -> List (Attribute msg)
 genAttribute gd ( x, y ) ( w, h ) =
     let
         ( rx, ry ) =

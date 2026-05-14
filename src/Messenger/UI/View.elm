@@ -29,11 +29,8 @@ import REGL
 view : Input userdata scenemsg -> AudioData -> Model userdata scenemsg -> Html WorldEvent
 view _ _ model =
     let
-        gd =
-            model.env.globalData
-
         internalData =
-            Internal.getInternalData gd.internalData
+            Internal.getInternalData model.runtime
 
         canvas =
             REGL.toHtmlWith
@@ -44,11 +41,11 @@ view _ _ model =
                  , style "top" (String.fromFloat internalData.startTop)
                  , style "position" "fixed"
                  ]
-                    ++ gd.canvasAttributes
+                    ++ model.env.globalData.canvasAttributes
                 )
     in
     Html.div [ on "wheel" (Decode.map WMouseWheel (Decode.field "deltaY" Decode.int)) ]
-        (case gd.extraHTML of
+        (case model.env.globalData.extraHTML of
             Just x ->
                 [ canvas, x ]
 
@@ -66,7 +63,7 @@ audio : AudioData -> Model userdata scenemsg -> Audio
 audio _ model =
     let
         internalData =
-            Internal.getInternalData model.env.globalData.internalData
+            Internal.getInternalData model.runtime
     in
     Audio.group (getAudio internalData.audioRepo)
         |> Audio.scaleVolume internalData.volume

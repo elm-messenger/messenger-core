@@ -25,12 +25,12 @@ type alias Data =
 
 
 init : RawSceneInit Data UserData SceneMsg
-init env msg =
+init _ env msg =
     {}
 
 
 update : RawSceneUpdate Data UserData SceneMsg
-update env msg data =
+update runtime env msg data =
     let
         gd =
             env.globalData
@@ -89,7 +89,7 @@ update env msg data =
         KeyDown 53 ->
             let
                 ( virtualWidth, virtualHeight ) =
-                    getVirtualSize gd
+                    getVirtualSize runtime
 
                 ng =
                     gd
@@ -118,11 +118,11 @@ comment =
 
 
 view : RawSceneView UserData Data
-view env data =
+view runtime env data =
     group []
         [ P.clear Color.lightBlue
         , P.textbox ( 0, 30 ) 40 comment "firacode" Color.black
-        , groupWithCamera (defaultCamera env.globalData)
+        , groupWithCamera (defaultCamera runtime)
             []
             [ P.textbox ( 100, 0 ) 30 "Some fixed text on the screen" "firacode" Color.black
             ]

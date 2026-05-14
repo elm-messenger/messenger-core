@@ -51,7 +51,7 @@ import Audio exposing (Audio)
 import Dict
 import Json.Decode
 import Messenger.Audio.Base exposing (AudioOption, AudioTarget)
-import Messenger.Base exposing (Env, UserEvent)
+import Messenger.Base exposing (Env, Runtime, UserEvent)
 import Messenger.GeneralModel exposing (AbstractGeneralModel, ConcreteGeneralModel, Msg, MsgBase)
 import Messenger.Resources.Base exposing (ResourceDef)
 import REGL
@@ -68,10 +68,10 @@ they are abstracted into `SceneStorage`.
   - `view` renders the scene from its environment and data.
 
 -}
-type alias ConcreteScene data env event ren scenemsg userdata =
-    { init : env -> Maybe scenemsg -> data
-    , update : env -> event -> data -> ( data, List (SceneOutputMsg scenemsg userdata), env )
-    , view : env -> data -> ren
+type alias ConcreteScene data envro env event ren scenemsg userdata =
+    { init : envro -> env -> Maybe scenemsg -> data
+    , update : envro -> env -> event -> data -> ( data, List (SceneOutputMsg scenemsg userdata), env )
+    , view : envro -> env -> data -> ren
     }
 
 
@@ -81,9 +81,9 @@ An `AbstractScene` hides the concrete data type. `unroll` exposes only the
 operations Messenger needs after initialization: update and view.
 
 -}
-type alias UnrolledAbstractScene env event ren scenemsg userdata =
-    { update : env -> event -> ( AbstractScene env event ren scenemsg userdata, List (SceneOutputMsg scenemsg userdata), env )
-    , view : env -> ren
+type alias UnrolledAbstractScene envro env event ren scenemsg userdata =
+    { update : envro -> env -> event -> ( AbstractScene envro env event ren scenemsg userdata, List (SceneOutputMsg scenemsg userdata), env )
+    , view : envro -> env -> ren
     }
 
 
@@ -93,20 +93,20 @@ This hides the concrete scene data type so scenes with different data can be
 stored in the same scene map.
 
 -}
-type AbstractScene env event ren scenemsg userdata
-    = Roll (UnrolledAbstractScene env event ren scenemsg userdata)
+type AbstractScene envro env event ren scenemsg userdata
+    = Roll (UnrolledAbstractScene envro env event ren scenemsg userdata)
 
 
 {-| Specialized concrete scene for Messenger.
 -}
 type alias MConcreteScene data userdata scenemsg =
-    ConcreteScene data (Env () userdata) UserEvent Renderable scenemsg userdata
+    ConcreteScene data Runtime (Env () userdata) UserEvent Renderable scenemsg userdata
 
 
 {-| Specialized abstract scene for Messenger.
 -}
 type alias MAbstractScene userdata scenemsg =
-    AbstractScene (Env () userdata) UserEvent Renderable scenemsg userdata
+    AbstractScene Runtime (Env () userdata) UserEvent Renderable scenemsg userdata
 
 
 {-| Unroll an abstract scene.
@@ -115,7 +115,7 @@ This is useful when advanced code needs to manually update or view an abstract
 scene, for example in `Messenger.Scene.VSR`.
 
 -}
-unroll : AbstractScene env event ren scenemsg userdata -> UnrolledAbstractScene env event ren scenemsg userdata
+unroll : AbstractScene envro env event ren scenemsg userdata -> UnrolledAbstractScene envro env event ren scenemsg userdata
 unroll (Roll un) =
     un
 
@@ -126,29 +126,29 @@ The concrete scene is initialized immediately with the given message and
 environment. The resulting `AbstractScene` stores its data privately.
 
 -}
-abstract : ConcreteScene data env event ren scenemsg userdata -> Maybe scenemsg -> env -> AbstractScene env event ren scenemsg userdata
-abstract conmodel initMsg initEnv =
+abstract : ConcreteScene data envro env event ren scenemsg userdata -> Maybe scenemsg -> envro -> env -> AbstractScene envro env event ren scenemsg userdata
+abstract conmodel initMsg initEnvRO initEnv =
     let
         abstractRec data =
             let
-                updates : env -> event -> ( AbstractScene env event ren scenemsg userdata, List (SceneOutputMsg scenemsg userdata), env )
-                updates env event =
+                updates : envro -> env -> event -> ( AbstractScene envro env event ren scenemsg userdata, List (SceneOutputMsg scenemsg userdata), env )
+                updates envro env event =
                     let
                         ( new_d, new_m, new_e ) =
-                            conmodel.update env event data
+                            conmodel.update envro env event data
                     in
                     ( abstractRec new_d, new_m, new_e )
 
-                views : env -> ren
-                views env =
-                    conmodel.view env data
+                views : envro -> env -> ren
+                views envro env =
+                    conmodel.view envro env data
             in
             Roll
                 { update = updates
                 , view = views
                 }
     in
-    abstractRec (conmodel.init initEnv initMsg)
+    abstractRec (conmodel.init initEnvRO initEnv initMsg)
 
 
 {-| Scene output messages handled by Messenger core.
@@ -171,7 +171,7 @@ resources, saving global data, or managing global components.
   - `SOMCallGC ( target, msg )` sends a message to a global component.
   - `SOMChangeFPS interval` changes the REGL update interval.
   - `SOMLoadResource key resource` loads a resource at runtime. Loaded data is
-    stored in opaque internal data and can be read through `Messenger.Base`
+    stored in opaque runtime data and can be read through `Messenger.Base`
     getters.
 
 -}
@@ -199,7 +199,7 @@ abstract scene.
 
 -}
 type alias SceneStorage userdata scenemsg =
-    Maybe scenemsg -> Env () userdata -> MAbstractScene userdata scenemsg
+    Maybe scenemsg -> Runtime -> Env () userdata -> MAbstractScene userdata scenemsg
 
 
 {-| A dictionary of scene names to scene storage.
@@ -231,13 +231,13 @@ type alias MMsg othertar msg scenemsg userdata =
 {-| Specialized concrete general model for Messenger scenes, layers, and components.
 -}
 type alias MConcreteGeneralModel data common userdata tar msg bdata scenemsg =
-    ConcreteGeneralModel data (Env common userdata) UserEvent tar msg Renderable bdata (SceneOutputMsg scenemsg userdata)
+    ConcreteGeneralModel data Runtime (Env common userdata) UserEvent tar msg Renderable bdata (SceneOutputMsg scenemsg userdata)
 
 
 {-| Specialized abstract general model for Messenger scenes, layers, and components.
 -}
 type alias MAbstractGeneralModel common userdata tar msg bdata scenemsg =
-    AbstractGeneralModel (Env common userdata) UserEvent tar msg Renderable bdata (SceneOutputMsg scenemsg userdata)
+    AbstractGeneralModel Runtime (Env common userdata) UserEvent tar msg Renderable bdata (SceneOutputMsg scenemsg userdata)
 
 
 {-| Remap the result of an abstract scene update.
@@ -246,20 +246,20 @@ Use this when wrapping a scene and transforming its emitted `SceneOutputMsg`s or
 environment.
 
 -}
-updateResultRemap : (( List (SceneOutputMsg scenemsg userdata), env ) -> ( List (SceneOutputMsg scenemsg userdata), env )) -> AbstractScene env event ren scenemsg userdata -> AbstractScene env event ren scenemsg userdata
+updateResultRemap : (( List (SceneOutputMsg scenemsg userdata), env ) -> ( List (SceneOutputMsg scenemsg userdata), env )) -> AbstractScene envro env event ren scenemsg userdata -> AbstractScene envro env event ren scenemsg userdata
 updateResultRemap f model =
     let
-        change : AbstractScene env event ren scenemsg userdata -> AbstractScene env event ren scenemsg userdata
+        change : AbstractScene envro env event ren scenemsg userdata -> AbstractScene envro env event ren scenemsg userdata
         change m =
             let
                 um =
                     unroll m
 
-                newUpdate : env -> event -> ( AbstractScene env event ren scenemsg userdata, List (SceneOutputMsg scenemsg userdata), env )
-                newUpdate env evnt =
+                newUpdate : envro -> env -> event -> ( AbstractScene envro env event ren scenemsg userdata, List (SceneOutputMsg scenemsg userdata), env )
+                newUpdate envro env evnt =
                     let
                         ( oldr, oldmsg, oldres ) =
-                            um.update env evnt
+                            um.update envro env evnt
 
                         ( newmsg, newres ) =
                             f ( oldmsg, oldres )
@@ -315,7 +315,7 @@ type alias GCTarget =
 {-| Global component init type.
 -}
 type alias GlobalComponentInit userdata scenemsg data =
-    Env (GCCommonData userdata scenemsg) userdata -> GCMsg -> ( data, GCBaseData )
+    Runtime -> Env (GCCommonData userdata scenemsg) userdata -> GCMsg -> ( data, GCBaseData )
 
 
 {-| Global component update type.
@@ -325,7 +325,7 @@ will not be passed to later global components or the scene.
 
 -}
 type alias GlobalComponentUpdate userdata scenemsg data =
-    Env (GCCommonData userdata scenemsg) userdata -> UserEvent -> data -> GCBaseData -> ( ( data, GCBaseData ), List (MMsg GCTarget GCMsg scenemsg userdata), ( Env (GCCommonData userdata scenemsg) userdata, Bool ) )
+    Runtime -> Env (GCCommonData userdata scenemsg) userdata -> UserEvent -> data -> GCBaseData -> ( ( data, GCBaseData ), List (MMsg GCTarget GCMsg scenemsg userdata), ( Env (GCCommonData userdata scenemsg) userdata, Bool ) )
 
 
 {-| Global component recursive update type.
@@ -334,13 +334,13 @@ This handles messages sent to the global component by target.
 
 -}
 type alias GlobalComponentUpdateRec userdata scenemsg data =
-    Env (GCCommonData userdata scenemsg) userdata -> GCMsg -> data -> GCBaseData -> ( ( data, GCBaseData ), List (MMsg GCTarget GCMsg scenemsg userdata), Env (GCCommonData userdata scenemsg) userdata )
+    Runtime -> Env (GCCommonData userdata scenemsg) userdata -> GCMsg -> data -> GCBaseData -> ( ( data, GCBaseData ), List (MMsg GCTarget GCMsg scenemsg userdata), Env (GCCommonData userdata scenemsg) userdata )
 
 
 {-| Global component view type.
 -}
 type alias GlobalComponentView userdata scenemsg data =
-    Env (GCCommonData userdata scenemsg) userdata -> data -> GCBaseData -> Renderable
+    Runtime -> Env (GCCommonData userdata scenemsg) userdata -> data -> GCBaseData -> Renderable
 
 
 {-| Global component storage.
@@ -349,7 +349,7 @@ This is what gets loaded by `SOMLoadGC` or startup global component lists.
 
 -}
 type alias GlobalComponentStorage userdata scenemsg =
-    Env (GCCommonData userdata scenemsg) userdata -> AbstractGlobalComponent userdata scenemsg
+    Runtime -> Env (GCCommonData userdata scenemsg) userdata -> AbstractGlobalComponent userdata scenemsg
 
 
 {-| Concrete global component model.
