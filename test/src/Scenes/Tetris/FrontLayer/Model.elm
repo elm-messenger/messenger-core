@@ -9,16 +9,14 @@ Set the Data Type, Init logic, Update logic, View logic and Matcher logic here.
 -}
 
 import Color exposing (Color)
-import Duration
 import Lib.Base exposing (SceneMsg)
 import Lib.Tetris.Grid as Grid exposing (Grid)
 import Lib.UserData exposing (UserData)
 import Messenger.Base exposing (Env, UserEvent(..))
 import Messenger.Coordinate.Camera exposing (defaultCamera)
 import Messenger.GeneralModel exposing (Matcher, Msg(..), MsgBase(..))
-import Messenger.GlobalComponents.Transition.Model exposing (genMixedTransitionSOM)
-import Messenger.GlobalComponents.Transition.Transitions exposing (fadeMix)
 import Messenger.Layer.Layer exposing (ConcreteLayer, LayerInit, LayerStorage, LayerUpdate, LayerUpdateRec, LayerView, genLayer)
+import Messenger.Scene.Scene exposing (SceneOutputMsg(..))
 import REGL.BuiltinPrograms as P
 import REGL.Common exposing (Renderable, group)
 import Scenes.Tetris.SceneBase exposing (..)
@@ -42,7 +40,7 @@ update runtime ({ globalData } as env) msg data =
     case msg of
         KeyDown 8 ->
             ( data
-            , [ Parent <| SOMMsg <| genMixedTransitionSOM ( fadeMix, Duration.seconds 1 ) ( "Home", Nothing )
+            , [ Parent <| SOMMsg <| SOMChangeScene Nothing "Home"
               ]
             , ( { env | globalData = { globalData | camera = defaultCamera runtime } }, False )
             )
