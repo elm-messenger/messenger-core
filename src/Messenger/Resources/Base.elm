@@ -9,15 +9,15 @@ module Messenger.Resources.Base exposing
 
 # Resource
 
-There are many assets (images) in our game, so it's important to manage them.
+Resource definitions used by Messenger's loader.
 
-In elm-canvas, we have to preload all the images before the game starts.
+Resources are declared as `( name, ResourceDef )` pairs. Messenger loads initial
+resources before normal updates begin, and dynamic resources can be loaded later
+with `SOMLoadResource`.
 
-The game will only start when all resources are loaded.
-
-If some asset is not found, the game will panic and throw an error (alert).
-
-After the resources are loaded, we can get those data from globaldata.sprites.
+Loaded data is stored in opaque internal engine state. User code should use
+getters from `Messenger.Base` such as `getLoadingProgress`, `getSprite`,
+`getFonts`, `getPrograms`, and `getConfigData`.
 
 @docs saveSprite
 @docs igetSprite
@@ -30,21 +30,35 @@ import REGL exposing (Texture)
 import REGL.Program exposing (REGLProgram)
 
 
-{-| Save the sprite.
+{-| Save a loaded texture into the texture dictionary.
+
+This is used internally by the loader. User code usually reads textures through
+`Messenger.Base.getSprite` or renders by name with `Messenger.Render.Texture`.
+
 -}
 saveSprite : Dict String Texture -> String -> Texture -> Dict String Texture
 saveSprite dst name text =
     Dict.insert name text dst
 
 
-{-| Get the texture by name.
+{-| Get a texture by name from a texture dictionary.
+
+This is a low-level helper used by texture rendering internals.
+
 -}
 igetSprite : String -> Dict String Texture -> Maybe Texture
 igetSprite name dst =
     Dict.get name dst
 
 
-{-| Definition for a resource.
+{-| Definition for a loadable resource.
+
+  - `TextureRes url options` loads an image texture.
+  - `AudioRes url` loads an audio source.
+  - `FontRes textureUrl jsonUrl` loads an MSDF font.
+  - `ProgramRes program` creates a custom REGL program.
+  - `DataRes path` loads a plain text data file.
+
 -}
 type ResourceDef
     = TextureRes String (Maybe REGL.TextureOptions)
@@ -54,13 +68,16 @@ type ResourceDef
     | DataRes String
 
 
-{-| A list of resource definitions.
+{-| A list of named resource definitions.
 -}
 type alias ResourceDefs =
     List ( String, ResourceDef )
 
 
-{-| The number of sprites in the game.
+{-| Count resource definitions.
+
+Messenger uses this to track loading progress.
+
 -}
 resourceNum : ResourceDefs -> Int
 resourceNum =

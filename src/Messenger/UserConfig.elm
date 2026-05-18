@@ -8,6 +8,9 @@ module Messenger.UserConfig exposing
 
 # User Configuration
 
+Configuration and port definitions used to start a Messenger program. Generated
+projects usually fill this record from `MainConfig.elm` and `Lib.Ports`.
+
 @docs UserConfig, PortDefs
 @docs EnabledBuiltinProgram
 
@@ -16,11 +19,12 @@ module Messenger.UserConfig exposing
 import Audio
 import Json.Decode as Decode
 import Json.Encode as Encode
-import Messenger.Base exposing (GlobalData, GlobalDataInit, WorldEvent)
+import Messenger.Base exposing (GlobalData, GlobalDataInit, Runtime)
+import Messenger.Internal exposing (WorldEvent)
 import REGL
 
 
-{-| Enabled Builtin Program
+{-| Built-in REGL programs enabled at startup.
 
   - `NoBuiltinProgram` represents enabling no builtin program
   - `CustomBuiltinProgramList` represents enabling a list of custom builtin programs
@@ -38,7 +42,7 @@ type EnabledBuiltinProgram
     | AllBuiltinProgram
 
 
-{-| User Configuration for the messenger.
+{-| User configuration for Messenger.
 
 `userdata` is a custom type which can store any data in the game.
 users can **save their own global data** and **implement local storage** here.
@@ -48,15 +52,13 @@ to send to a scene when switching scenes.
 
   - `initScene` represents the scene users get start
   - `initSceneMsg` represents the message to initialize the start scene
-  - `globalDataCodec` is for local storage. Users decode saved data into initial global data,
-    and encode the current global data when saving.
+  - `globalDataCodec` is for local storage. Users decode saved data into
+    `GlobalDataInit`, and encode the current `Runtime` and `GlobalData` when saving.
   - `virtualSize` represents how users want their game be virtual sized. In other words,
     users make their game in the virtual size, and the game will be resized due to the browser window size
     but keeping the aspect ratio
   - `debug` option determines whether enable some simple debugging tools or not
     remember to disable it when releasing game
-  - `background` determines the background of the game
-    transparent background and colored background is already prepared
   - `timeInterval` See `TimeInterval`
   - `ports` stores the ports that users must provide.
 
@@ -65,7 +67,7 @@ type alias UserConfig userdata scenemsg =
     { initScene : String
     , initSceneMsg : Maybe scenemsg
     , globalDataCodec :
-        { encode : GlobalData userdata -> String
+        { encode : Runtime -> GlobalData userdata -> String
         , decode : String -> GlobalDataInit userdata
         }
     , virtualSize :
@@ -80,7 +82,11 @@ type alias UserConfig userdata scenemsg =
     }
 
 
-{-| The ports that the user must provide to the messenger.
+{-| Ports required by Messenger.
+
+Generated projects define these ports in `Lib.Ports`. Messenger uses them for
+local storage, prompts, alerts, REGL commands, data-file loading, and audio
+interop.
 
 **Learn more about ports [here](https://guide.elm-lang.org/interop/ports)**
 

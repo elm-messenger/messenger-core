@@ -22,7 +22,7 @@ type alias Data =
 
 
 init : ComponentInit SceneCommonData UserData ComponentMsg Data BaseData
-init _ initMsg =
+init _ _ initMsg =
     case initMsg of
         BulletInitMsg msg ->
             ( { color = msg.color }
@@ -40,7 +40,7 @@ init _ initMsg =
 
 
 update : ComponentUpdate SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-update env evnt data basedata =
+update _ env evnt data basedata =
     case evnt of
         Tick dt ->
             let
@@ -54,7 +54,7 @@ update env evnt data basedata =
 
 
 updaterec : ComponentUpdateRec SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-updaterec env msg data basedata =
+updaterec _ env msg data basedata =
     case msg of
         CollisionMsg "Bullet" ->
             ( ( data, { basedata | alive = False } ), [], env )
@@ -64,7 +64,7 @@ updaterec env msg data basedata =
 
 
 view : ComponentView SceneCommonData UserData Data BaseData
-view _ data basedata =
+view _ _ data basedata =
     ( P.roundedRect basedata.position ( 20, 10 ) 5 data.color
     , 0
     )

@@ -37,10 +37,10 @@ type alias Data =
 
 
 init : RawSceneInit Data UserData SceneMsg
-init env msg =
+init runtime env msg =
     { components =
-        [ Button.component (ButtonInitMsg <| ButtonInit.InitData ( 200, 200 ) ( 100, 50 ) Color.green "NICE") env
-        , Slider.component (SliderInitMsg <| SliderInit.InitData 0.5 ( 200, 300 ) 300) env
+        [ Button.component (ButtonInitMsg <| ButtonInit.InitData ( 200, 200 ) ( 100, 50 ) Color.green "NICE") runtime env
+        , Slider.component (SliderInitMsg <| SliderInit.InitData 0.5 ( 200, 300 ) 300) runtime env
         ]
     , buttonStatus = "IDLE"
     , sliderValue = 0.5
@@ -48,7 +48,7 @@ init env msg =
 
 
 handleComponentMsg : Handler Data SceneCommonData UserData ComponentTarget ComponentMsg SceneMsg ComponentMsg
-handleComponentMsg env compmsg data =
+handleComponentMsg _ env compmsg data =
     case compmsg of
         SOMMsg som ->
             ( data, [ Parent <| SOMMsg som ], env )
@@ -71,13 +71,13 @@ handleComponentMsg env compmsg data =
 
 
 update : RawSceneUpdate Data UserData SceneMsg
-update env msg data =
+update runtime env msg data =
     let
         ( comps1, msgs1, ( env1, _ ) ) =
-            updateComponents env msg data.components
+            updateComponents runtime env msg data.components
 
         ( data1, msgs2, env2 ) =
-            handleComponentMsgs env1 msgs1 { data | components = comps1 } [] handleComponentMsg
+            handleComponentMsgs runtime env1 msgs1 { data | components = comps1 } [] handleComponentMsg
 
         sommsgs =
             List.filterMap
@@ -109,9 +109,9 @@ update env msg data =
 
 
 view : RawSceneView UserData Data
-view env data =
+view runtime env data =
     group []
-        [ viewComponents env data.components
+        [ viewComponents runtime env data.components
         , textbox ( 0, 50 ) 20 ("Button Status: " ++ data.buttonStatus) "firacode" Color.black
         , textbox ( 0, 80 ) 20 ("Slider Value: " ++ String.fromFloat data.sliderValue) "firacode" Color.black
         ]

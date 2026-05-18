@@ -9,7 +9,7 @@ module Scenes.Tetris.Model exposing (scene)
 import Lib.Base exposing (SceneMsg)
 import Lib.Tetris.Tetriminos as Tetriminos
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (Env, addCommonData, getCurrentTimeStamp)
+import Messenger.Base exposing (Env, Runtime, addCommonData, getCurrentTimeStamp)
 import Messenger.Scene.LayeredScene exposing (LayeredSceneEffectFunc, LayeredSceneInit, genLayeredScene)
 import Messenger.Scene.Scene exposing (SceneStorage)
 import Scenes.Tetris.FrontLayer.Model as FrontLayer
@@ -17,20 +17,20 @@ import Scenes.Tetris.GameLayer.Model as GameLayer
 import Scenes.Tetris.SceneBase exposing (..)
 
 
-commonDataInit : Env () UserData -> Maybe SceneMsg -> SceneCommonData
-commonDataInit env _ =
+commonDataInit : Runtime -> Env () UserData -> Maybe SceneMsg -> SceneCommonData
+commonDataInit runtime _ _ =
     { state = Stopped
     , score = 0
     , lines = 0
-    , next = Tetriminos.random <| round (getCurrentTimeStamp env.globalData)
+    , next = Tetriminos.random <| round (getCurrentTimeStamp runtime)
     }
 
 
 init : LayeredSceneInit SceneCommonData UserData LayerTarget LayerMsg SceneMsg
-init env msg =
+init runtime env msg =
     let
         cd =
-            commonDataInit env msg
+            commonDataInit runtime env msg
 
         envcd =
             addCommonData cd env
@@ -38,14 +38,14 @@ init env msg =
     { renderSettings = []
     , commonData = cd
     , layers =
-        [ GameLayer.layer NullLayerMsg envcd
-        , FrontLayer.layer NullLayerMsg envcd
+        [ GameLayer.layer NullLayerMsg runtime envcd
+        , FrontLayer.layer NullLayerMsg runtime envcd
         ]
     }
 
 
 settings : LayeredSceneEffectFunc SceneCommonData UserData LayerTarget LayerMsg SceneMsg
-settings _ _ _ =
+settings _ _ _ _ =
     []
 
 

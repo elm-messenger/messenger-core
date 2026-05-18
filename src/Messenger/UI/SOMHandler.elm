@@ -12,9 +12,8 @@ module Messenger.UI.SOMHandler exposing (handleSOMs, handleSOM)
 import Audio exposing (AudioCmd)
 import Dict
 import Messenger.Audio.Internal exposing (playAudio, stopAudio, updateAudio)
-import Messenger.Base exposing (WorldEvent(..))
 import Messenger.GeneralModel exposing (filterSOM)
-import Messenger.Internal as Internal
+import Messenger.Internal as Internal exposing (WorldEvent(..))
 import Messenger.Model exposing (Model, resetSceneStartTime)
 import Messenger.Recursion exposing (removeObjects, updateObjectsWithTarget)
 import Messenger.Resources.Base exposing (ResourceDef(..))
@@ -50,14 +49,11 @@ handleSOMs config scenes som model =
 handleSOM : UserConfig userdata scenemsg -> AllScenes userdata scenemsg -> SceneOutputMsg scenemsg userdata -> Model userdata scenemsg -> ( Model userdata scenemsg, List (Cmd WorldEvent), List (AudioCmd WorldEvent) )
 handleSOM config scenes som model =
     let
-        gd =
-            env.globalData
-
         env =
             model.env
 
         gdid =
-            Internal.getInternalData gd.internalData
+            Internal.getInternalData model.runtime
     in
     case som of
         SOMChangeScene tm name ->
@@ -77,30 +73,27 @@ handleSOM config scenes som model =
                 newRepo =
                     playAudio gdid.audioRepo ch name opt gdid.currentTimeStamp
 
-                newEnv =
-                    { env | globalData = { gd | internalData = Internal.InternalData { gdid | audioRepo = newRepo } } }
+                newRuntime =
+                    Internal.InternalData { gdid | audioRepo = newRepo }
             in
-            ( { model | env = newEnv }, [], [] )
+            ( { model | runtime = newRuntime }, [], [] )
 
         SOMSetVolume s ->
             let
-                newgd2 =
-                    { gd | internalData = Internal.InternalData { gdid | volume = s } }
-
-                newEnv =
-                    { env | globalData = newgd2 }
+                newRuntime =
+                    Internal.InternalData { gdid | volume = s }
             in
-            ( { model | env = newEnv }, [], [] )
+            ( { model | runtime = newRuntime }, [], [] )
 
         SOMStopAudio ch ->
             let
                 newRepo =
                     stopAudio gdid.audioRepo gdid.currentTimeStamp ch
 
-                newEnv =
-                    { env | globalData = { gd | internalData = Internal.InternalData { gdid | audioRepo = newRepo } } }
+                newRuntime =
+                    Internal.InternalData { gdid | audioRepo = newRepo }
             in
-            ( { model | env = newEnv }, [], [] )
+            ( { model | runtime = newRuntime }, [], [] )
 
         SOMAlert text ->
             ( model, [ config.ports.alert text ], [] )
@@ -111,12 +104,12 @@ handleSOM config scenes som model =
         SOMSaveGlobalData ->
             let
                 encodedGD =
-                    config.globalDataCodec.encode gd
+                    config.globalDataCodec.encode model.runtime env.globalData
             in
             ( model, [ config.ports.sendInfo encodedGD ], [] )
 
         SOMLoadGC gc ->
-            ( { model | globalComponents = model.globalComponents ++ [ gc env ] }, [], [] )
+            ( { model | globalComponents = model.globalComponents ++ [ gc model.runtime env ] }, [], [] )
 
         SOMUnloadGC gctar ->
             ( { model | globalComponents = removeObjects gctar model.globalComponents }, [], [] )
@@ -124,11 +117,11 @@ handleSOM config scenes som model =
         SOMCallGC call ->
             let
                 ( gc1, som1, env1 ) =
-                    updateObjectsWithTarget env [ call ] model.globalComponents
+                    updateObjectsWithTarget model.runtime env [ call ] model.globalComponents
 
                 model1 : Model userdata scenemsg
                 model1 =
-                    { globalComponents = gc1, env = env1 }
+                    { model | globalComponents = gc1, env = env1 }
             in
             if List.isEmpty som1 then
                 -- End
@@ -143,7 +136,7 @@ handleSOM config scenes som model =
                     updateAudio gdid.audioRepo tar trans
 
                 newModel =
-                    { model | env = { env | globalData = { gd | internalData = Internal.InternalData { gdid | audioRepo = newAR } } } }
+                    { model | runtime = Internal.InternalData { gdid | audioRepo = newAR } }
             in
             ( newModel, [], [] )
 
@@ -159,7 +152,7 @@ handleSOM config scenes som model =
         SOMLoadResource key res ->
             let
                 nm =
-                    { model | env = { env | globalData = { gd | internalData = Internal.InternalData { gdid | totResNum = gdid.totResNum + 1 } } } }
+                    { model | runtime = Internal.InternalData { gdid | totResNum = gdid.totResNum + 1 } }
             in
             case res of
                 AudioRes url ->

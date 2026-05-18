@@ -13,7 +13,7 @@ module Messenger.Coordinate.Camera exposing
 
 -}
 
-import Messenger.Base exposing (GlobalData, getVirtualSize)
+import Messenger.Base exposing (GlobalData, Runtime, getVirtualSize)
 import REGL.Common exposing (Camera)
 
 
@@ -68,11 +68,11 @@ setCameraAngle angle user =
 
 {-| Default camera for the game.
 -}
-defaultCamera : GlobalData u -> Camera
-defaultCamera gd =
+defaultCamera : Runtime -> Camera
+defaultCamera runtime =
     let
         ( virtualWidth, virtualHeight ) =
-            getVirtualSize gd
+            getVirtualSize runtime
     in
     { x = virtualWidth / 2, y = virtualHeight / 2, zoom = 1, rotation = 0 }
 

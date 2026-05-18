@@ -6,9 +6,13 @@ module Messenger.Recursion exposing
 {-|
 
 
-# RecursionList
+# Recursion List
 
-List implementation for the recursion algorithm
+Low-level helpers for updating lists of Messenger general models.
+
+Most games should use the component and layer helpers generated in templates.
+Use this module when building your own abstraction over
+`Messenger.GeneralModel.AbstractGeneralModel`.
 
 @docs updateObjects, updateObjectsWithTarget
 @docs removeObjects
@@ -19,30 +23,41 @@ import List exposing (reverse)
 import Messenger.GeneralModel exposing (AbstractGeneralModel, Msg(..), MsgBase, unroll)
 
 
-{-| Recursively update all the objects in the List
+{-| Update every object once with an event, then deliver generated target messages.
+
+The returned tuple contains the updated objects, parent/system messages, and the
+final environment plus a block flag. If an object blocks the event, later objects
+do not receive the original event, but queued target messages are still delivered
+afterwards.
+
 -}
-updateObjects : env -> event -> List (AbstractGeneralModel env event tar msg ren bdata sommsg) -> ( List (AbstractGeneralModel env event tar msg ren bdata sommsg), List (MsgBase msg sommsg), ( env, Bool ) )
-updateObjects env evt objs =
+updateObjects : envro -> env -> event -> List (AbstractGeneralModel envro env event tar msg ren bdata sommsg) -> ( List (AbstractGeneralModel envro env event tar msg ren bdata sommsg), List (MsgBase msg sommsg), ( env, Bool ) )
+updateObjects envro env evt objs =
     let
         ( newObjs, ( newMsgUnfinished, newMsgFinished ), ( newEnv, newBlock ) ) =
-            updateOnce env evt objs
+            updateOnce envro env evt objs
 
         ( resObj, resMsg, resEnv ) =
-            updateRemain newEnv ( newMsgUnfinished, newMsgFinished ) newObjs
+            updateRemain envro newEnv ( newMsgUnfinished, newMsgFinished ) newObjs
     in
     ( resObj, resMsg, ( resEnv, newBlock ) )
 
 
-{-| Recursively update all the objects in the List, but also uses target
+{-| Deliver target messages to a list of objects.
+
+Each `( target, msg )` pair is sent to every object whose matcher accepts the
+target. Messages generated during delivery are recursively delivered until no
+target messages remain.
+
 -}
-updateObjectsWithTarget : env -> List ( tar, msg ) -> List (AbstractGeneralModel env event tar msg ren bdata sommsg) -> ( List (AbstractGeneralModel env event tar msg ren bdata sommsg), List (MsgBase msg sommsg), env )
-updateObjectsWithTarget env msgs objs =
-    updateRemain env ( msgs, [] ) objs
+updateObjectsWithTarget : envro -> env -> List ( tar, msg ) -> List (AbstractGeneralModel envro env event tar msg ren bdata sommsg) -> ( List (AbstractGeneralModel envro env event tar msg ren bdata sommsg), List (MsgBase msg sommsg), env )
+updateObjectsWithTarget envro env msgs objs =
+    updateRemain envro env ( msgs, [] ) objs
 
 
-{-| Remove all objects by target.
+{-| Remove all objects that match a target.
 -}
-removeObjects : tar -> List (AbstractGeneralModel env event tar msg ren bdata sommsg) -> List (AbstractGeneralModel env event tar msg ren bdata sommsg)
+removeObjects : tar -> List (AbstractGeneralModel envro env event tar msg ren bdata sommsg) -> List (AbstractGeneralModel envro env event tar msg ren bdata sommsg)
 removeObjects t xs =
     List.filter (\x -> not <| (unroll x).matcher t) xs
 
@@ -51,13 +66,13 @@ removeObjects t xs =
 -- Below are some helper functions
 
 
-updateOne : env -> event -> List (AbstractGeneralModel env event tar msg ren bdata sommsg) -> List (AbstractGeneralModel env event tar msg ren bdata sommsg) -> List ( tar, msg ) -> List (MsgBase msg sommsg) -> ( List (AbstractGeneralModel env event tar msg ren bdata sommsg), ( List ( tar, msg ), List (MsgBase msg sommsg) ), ( env, Bool ) )
-updateOne lastEnv evt objs lastObjs lastMsgUnfinished lastMsgFinished =
+updateOne : envro -> env -> event -> List (AbstractGeneralModel envro env event tar msg ren bdata sommsg) -> List (AbstractGeneralModel envro env event tar msg ren bdata sommsg) -> List ( tar, msg ) -> List (MsgBase msg sommsg) -> ( List (AbstractGeneralModel envro env event tar msg ren bdata sommsg), ( List ( tar, msg ), List (MsgBase msg sommsg) ), ( env, Bool ) )
+updateOne envro lastEnv evt objs lastObjs lastMsgUnfinished lastMsgFinished =
     case objs of
         ele :: restObjs ->
             let
                 ( newObj, newMsg, ( newEnv, block ) ) =
-                    (unroll ele).update lastEnv evt
+                    (unroll ele).update envro lastEnv evt
 
                 finishedMsg =
                     List.filterMap
@@ -87,21 +102,21 @@ updateOne lastEnv evt objs lastObjs lastMsgUnfinished lastMsgFinished =
                 ( reverse restObjs ++ newObj :: lastObjs, ( lastMsgUnfinished ++ unfinishedMsg, lastMsgFinished ++ finishedMsg ), ( newEnv, block ) )
 
             else
-                updateOne newEnv evt restObjs (newObj :: lastObjs) (lastMsgUnfinished ++ unfinishedMsg) (lastMsgFinished ++ finishedMsg)
+                updateOne envro newEnv evt restObjs (newObj :: lastObjs) (lastMsgUnfinished ++ unfinishedMsg) (lastMsgFinished ++ finishedMsg)
 
         [] ->
             ( lastObjs, ( lastMsgUnfinished, lastMsgFinished ), ( lastEnv, False ) )
 
 
-updateOnce : env -> event -> List (AbstractGeneralModel env event tar msg ren bdata sommsg) -> ( List (AbstractGeneralModel env event tar msg ren bdata sommsg), ( List ( tar, msg ), List (MsgBase msg sommsg) ), ( env, Bool ) )
-updateOnce env evt objs =
-    updateOne env evt (reverse objs) [] [] []
+updateOnce : envro -> env -> event -> List (AbstractGeneralModel envro env event tar msg ren bdata sommsg) -> ( List (AbstractGeneralModel envro env event tar msg ren bdata sommsg), ( List ( tar, msg ), List (MsgBase msg sommsg) ), ( env, Bool ) )
+updateOnce envro env evt objs =
+    updateOne envro env evt (reverse objs) [] [] []
 
 
 {-| Recursively update remaining objects
 -}
-updateRemain : env -> ( List ( tar, msg ), List (MsgBase msg sommsg) ) -> List (AbstractGeneralModel env event tar msg ren bdata sommsg) -> ( List (AbstractGeneralModel env event tar msg ren bdata sommsg), List (MsgBase msg sommsg), env )
-updateRemain env ( unfinishedMsg, finishedMsg ) objs =
+updateRemain : envro -> env -> ( List ( tar, msg ), List (MsgBase msg sommsg) ) -> List (AbstractGeneralModel envro env event tar msg ren bdata sommsg) -> ( List (AbstractGeneralModel envro env event tar msg ren bdata sommsg), List (MsgBase msg sommsg), env )
+updateRemain envro env ( unfinishedMsg, finishedMsg ) objs =
     if List.isEmpty unfinishedMsg then
         ( objs, finishedMsg, env )
 
@@ -135,7 +150,7 @@ updateRemain env ( unfinishedMsg, finishedMsg ) objs =
                                         (\msg ( lastObj2, ( lastMsgUnfinished2, lastMsgFinished2 ), lastEnv2 ) ->
                                             let
                                                 ( newEle, newMsgs, newEnv3 ) =
-                                                    (unroll lastObj2).updaterec lastEnv2 msg
+                                                    (unroll lastObj2).updaterec envro lastEnv2 msg
 
                                                 finishedMsgs =
                                                     List.filterMap
@@ -171,4 +186,4 @@ updateRemain env ( unfinishedMsg, finishedMsg ) objs =
                     ( [], ( [], [] ), env )
                     objs
         in
-        updateRemain newEnv ( newUnfinishedMsg, finishedMsg ++ newFinishedMsg ) newObjs
+        updateRemain envro newEnv ( newUnfinishedMsg, finishedMsg ++ newFinishedMsg ) newObjs

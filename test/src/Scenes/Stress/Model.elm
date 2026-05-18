@@ -24,12 +24,12 @@ type alias Data =
 
 
 init : RawSceneInit Data UserData SceneMsg
-init env msg =
+init _ env msg =
     {}
 
 
 update : RawSceneUpdate Data UserData SceneMsg
-update env msg data =
+update _ env msg data =
     case msg of
         KeyDown 8 ->
             ( data
@@ -43,10 +43,10 @@ update env msg data =
 
 
 view : RawSceneView UserData Data
-view env data =
+view runtime env data =
     let
         time =
-            getSceneStartFrame env.globalData
+            getSceneStartFrame runtime
     in
     group [] <|
         P.clear Color.white

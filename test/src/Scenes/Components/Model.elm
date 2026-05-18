@@ -8,7 +8,7 @@ module Scenes.Components.Model exposing (scene)
 
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
-import Messenger.Base exposing (Env, addCommonData)
+import Messenger.Base exposing (Env, Runtime, addCommonData)
 import Messenger.Scene.LayeredScene exposing (LayeredSceneEffectFunc, LayeredSceneInit, genLayeredScene)
 import Messenger.Scene.Scene exposing (SceneStorage)
 import Scenes.Components.A.Model as A
@@ -16,16 +16,16 @@ import Scenes.Components.B.Model as B
 import Scenes.Components.SceneBase exposing (..)
 
 
-commonDataInit : Env () UserData -> Maybe SceneMsg -> SceneCommonData
-commonDataInit _ _ =
+commonDataInit : Runtime -> Env () UserData -> Maybe SceneMsg -> SceneCommonData
+commonDataInit _ _ _ =
     {}
 
 
 init : LayeredSceneInit SceneCommonData UserData LayerTarget LayerMsg SceneMsg
-init env msg =
+init runtime env msg =
     let
         cd =
-            commonDataInit env msg
+            commonDataInit runtime env msg
 
         envcd =
             addCommonData cd env
@@ -33,14 +33,14 @@ init env msg =
     { renderSettings = []
     , commonData = cd
     , layers =
-        [ A.layer NullLayerMsg envcd
-        , B.layer NullLayerMsg envcd
+        [ A.layer NullLayerMsg runtime envcd
+        , B.layer NullLayerMsg runtime envcd
         ]
     }
 
 
 settings : LayeredSceneEffectFunc SceneCommonData UserData LayerTarget LayerMsg SceneMsg
-settings _ _ _ =
+settings _ _ _ _ =
     []
 
 

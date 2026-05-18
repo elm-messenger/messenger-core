@@ -27,7 +27,7 @@ type alias Data =
 
 
 init : ComponentInit SceneCommonData UserData ComponentMsg Data BaseData
-init _ initMsg =
+init _ _ initMsg =
     case initMsg of
         EnemyInitMsg msg ->
             ( { interval = msg.bulletInterval, sinf = msg.sinF, sina = msg.sinA, timer = 15 }
@@ -45,12 +45,12 @@ init _ initMsg =
 
 
 update : ComponentUpdate SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-update env evnt data basedata =
+update runtime env evnt data basedata =
     case evnt of
         Tick dt ->
             let
                 velx =
-                    sin (getSceneStartTime env.globalData / data.sinf) * data.sina
+                    sin (getSceneStartTime runtime / data.sinf) * data.sina
 
                 ( x, y ) =
                     basedata.position
@@ -73,7 +73,7 @@ update env evnt data basedata =
 
 
 updaterec : ComponentUpdateRec SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-updaterec env msg data basedata =
+updaterec _ env msg data basedata =
     case msg of
         CollisionMsg "Bullet" ->
             let
@@ -87,7 +87,7 @@ updaterec env msg data basedata =
 
 
 view : ComponentView SceneCommonData UserData Data BaseData
-view _ _ basedata =
+view _ _ _ basedata =
     ( P.rectTexture basedata.position basedata.collisionBox "enemy", 0 )
 
 

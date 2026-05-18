@@ -101,11 +101,11 @@ type Msg othertar msg sommsg
 Users deal with the fields in concrete model. That is to say, you should implement the init,update,updaterec,view and matcher function in the model.
 
 -}
-type alias ConcreteGeneralModel data env event tar msg ren bdata sommsg =
-    { init : env -> msg -> ( data, bdata )
-    , update : env -> event -> data -> bdata -> ( ( data, bdata ), List (Msg tar msg sommsg), ( env, Bool ) )
-    , updaterec : env -> msg -> data -> bdata -> ( ( data, bdata ), List (Msg tar msg sommsg), env )
-    , view : env -> data -> bdata -> ren
+type alias ConcreteGeneralModel data envro env event tar msg ren bdata sommsg =
+    { init : envro -> env -> msg -> ( data, bdata )
+    , update : envro -> env -> event -> data -> bdata -> ( ( data, bdata ), List (Msg tar msg sommsg), ( env, Bool ) )
+    , updaterec : envro -> env -> msg -> data -> bdata -> ( ( data, bdata ), List (Msg tar msg sommsg), env )
+    , view : envro -> env -> data -> bdata -> ren
     , matcher : data -> bdata -> tar -> Bool
     }
 
@@ -115,13 +115,13 @@ type alias ConcreteGeneralModel data env event tar msg ren bdata sommsg =
 the unrolled abstract model. Used internally, but it the actual model for storaging data for models. It is sealed by roll in most of the time. See the manual and unroll function for more information.
 
 -}
-type alias UnrolledAbstractGeneralModel env event tar msg ren bdata sommsg =
-    { update : env -> event -> ( AbstractGeneralModel env event tar msg ren bdata sommsg, List (Msg tar msg sommsg), ( env, Bool ) )
-    , updaterec : env -> msg -> ( AbstractGeneralModel env event tar msg ren bdata sommsg, List (Msg tar msg sommsg), env )
-    , view : env -> ren
+type alias UnrolledAbstractGeneralModel envro env event tar msg ren bdata sommsg =
+    { update : envro -> env -> event -> ( AbstractGeneralModel envro env event tar msg ren bdata sommsg, List (Msg tar msg sommsg), ( env, Bool ) )
+    , updaterec : envro -> env -> msg -> ( AbstractGeneralModel envro env event tar msg ren bdata sommsg, List (Msg tar msg sommsg), env )
+    , view : envro -> env -> ren
     , matcher : tar -> Bool
     , baseData : bdata
-    , updateBaseData : bdata -> AbstractGeneralModel env event tar msg ren bdata sommsg
+    , updateBaseData : bdata -> AbstractGeneralModel envro env event tar msg ren bdata sommsg
     }
 
 
@@ -131,8 +131,8 @@ Cannot be directedly modified.
 Used for storage.
 
 -}
-type AbstractGeneralModel env event tar msg ren bdata sommsg
-    = Roll (UnrolledAbstractGeneralModel env event tar msg ren bdata sommsg)
+type AbstractGeneralModel envro env event tar msg ren bdata sommsg
+    = Roll (UnrolledAbstractGeneralModel envro env event tar msg ren bdata sommsg)
 
 
 {-| Unroll a rolled abstract model. In this way, you retrieve the data from the storage.
@@ -144,7 +144,7 @@ posX=x\_data.baseData.position
 in
 ...
 -}
-unroll : AbstractGeneralModel env event tar msg ren bdata sommsg -> UnrolledAbstractGeneralModel env event tar msg ren bdata sommsg
+unroll : AbstractGeneralModel envro env event tar msg ren bdata sommsg -> UnrolledAbstractGeneralModel envro env event tar msg ren bdata sommsg
 unroll (Roll un) =
     un
 
@@ -155,43 +155,43 @@ Initialize it with env and msg.
 Messenger will handle this for you.
 
 -}
-abstract : ConcreteGeneralModel data env event tar msg ren bdata sommsg -> msg -> env -> AbstractGeneralModel env event tar msg ren bdata sommsg
-abstract conmodel initMsg initEnv =
+abstract : ConcreteGeneralModel data envro env event tar msg ren bdata sommsg -> msg -> envro -> env -> AbstractGeneralModel envro env event tar msg ren bdata sommsg
+abstract conmodel initMsg initEnvRO initEnv =
     let
-        abstractRec : data -> bdata -> AbstractGeneralModel env event tar msg ren bdata sommsg
+        abstractRec : data -> bdata -> AbstractGeneralModel envro env event tar msg ren bdata sommsg
         abstractRec data base =
             let
-                updates : env -> event -> ( AbstractGeneralModel env event tar msg ren bdata sommsg, List (Msg tar msg sommsg), ( env, Bool ) )
-                updates env event =
+                updates : envro -> env -> event -> ( AbstractGeneralModel envro env event tar msg ren bdata sommsg, List (Msg tar msg sommsg), ( env, Bool ) )
+                updates envro env event =
                     let
                         ( ( new_d, new_bd ), new_m, new_e ) =
-                            conmodel.update env event data base
+                            conmodel.update envro env event data base
                     in
                     ( abstractRec new_d new_bd, new_m, new_e )
 
-                updaterecs : env -> msg -> ( AbstractGeneralModel env event tar msg ren bdata sommsg, List (Msg tar msg sommsg), env )
-                updaterecs env msg =
+                updaterecs : envro -> env -> msg -> ( AbstractGeneralModel envro env event tar msg ren bdata sommsg, List (Msg tar msg sommsg), env )
+                updaterecs envro env msg =
                     let
                         ( ( new_d, new_bd ), new_m, new_e ) =
-                            conmodel.updaterec env msg data base
+                            conmodel.updaterec envro env msg data base
                     in
                     ( abstractRec new_d new_bd, new_m, new_e )
 
-                updatebd : bdata -> AbstractGeneralModel env event tar msg ren bdata sommsg
+                updatebd : bdata -> AbstractGeneralModel envro env event tar msg ren bdata sommsg
                 updatebd bd =
                     abstractRec data bd
             in
             Roll
                 { update = updates
                 , updaterec = updaterecs
-                , view = \env -> conmodel.view env data base
+                , view = \envro env -> conmodel.view envro env data base
                 , matcher = conmodel.matcher data base
                 , baseData = base
                 , updateBaseData = updatebd
                 }
 
         ( init_d, init_bd ) =
-            conmodel.init initEnv initMsg
+            conmodel.init initEnvRO initEnv initMsg
     in
     abstractRec init_d init_bd
 
@@ -201,9 +201,9 @@ abstract conmodel initMsg initEnv =
   - Not very likely to be used. The messenger template will handle this for you automatically.
 
 -}
-viewModelList : Env common userdata -> List (AbstractGeneralModel (Env common userdata) UserEvent tar msg Renderable bdata sommsg) -> List Renderable
-viewModelList env models =
-    List.map (\model -> (unroll model).view env) models
+viewModelList : envro -> Env common userdata -> List (AbstractGeneralModel envro (Env common userdata) UserEvent tar msg Renderable bdata sommsg) -> List Renderable
+viewModelList envro env models =
+    List.map (\model -> (unroll model).view envro env) models
 
 
 {-| A general matcher type sugar
@@ -220,20 +220,20 @@ type alias Matcher data tar =
   - Not very likely to be used. The messenger template will handle this for you automatically.
 
 -}
-updateResultRemap : (( List (Msg tar msg sommsg), ( env, Bool ) ) -> ( List (Msg tar msg sommsg), ( env, Bool ) )) -> AbstractGeneralModel env event tar msg ren bdata sommsg -> AbstractGeneralModel env event tar msg ren bdata sommsg
+updateResultRemap : (( List (Msg tar msg sommsg), ( env, Bool ) ) -> ( List (Msg tar msg sommsg), ( env, Bool ) )) -> AbstractGeneralModel envro env event tar msg ren bdata sommsg -> AbstractGeneralModel envro env event tar msg ren bdata sommsg
 updateResultRemap f model =
     let
-        change : AbstractGeneralModel env event tar msg ren bdata sommsg -> AbstractGeneralModel env event tar msg ren bdata sommsg
+        change : AbstractGeneralModel envro env event tar msg ren bdata sommsg -> AbstractGeneralModel envro env event tar msg ren bdata sommsg
         change m =
             let
                 um =
                     unroll m
 
-                newUpdate : env -> event -> ( AbstractGeneralModel env event tar msg ren bdata sommsg, List (Msg tar msg sommsg), ( env, Bool ) )
-                newUpdate env evnt =
+                newUpdate : envro -> env -> event -> ( AbstractGeneralModel envro env event tar msg ren bdata sommsg, List (Msg tar msg sommsg), ( env, Bool ) )
+                newUpdate envro env evnt =
                     let
                         ( oldr, oldmsg, oldres ) =
-                            um.update env evnt
+                            um.update envro env evnt
 
                         ( newmsg, newres ) =
                             f ( oldmsg, oldres )
@@ -250,20 +250,20 @@ updateResultRemap f model =
   - Not very likely to be used. The messenger template will handle this for you automatically.
 
 -}
-updaterecResultRemap : (( List (Msg tar msg sommsg), env ) -> ( List (Msg tar msg sommsg), env )) -> AbstractGeneralModel env event tar msg ren bdata sommsg -> AbstractGeneralModel env event tar msg ren bdata sommsg
+updaterecResultRemap : (( List (Msg tar msg sommsg), env ) -> ( List (Msg tar msg sommsg), env )) -> AbstractGeneralModel envro env event tar msg ren bdata sommsg -> AbstractGeneralModel envro env event tar msg ren bdata sommsg
 updaterecResultRemap f model =
     let
-        change : AbstractGeneralModel env event tar msg ren bdata sommsg -> AbstractGeneralModel env event tar msg ren bdata sommsg
+        change : AbstractGeneralModel envro env event tar msg ren bdata sommsg -> AbstractGeneralModel envro env event tar msg ren bdata sommsg
         change m =
             let
                 um =
                     unroll m
 
-                newUpdateRec : env -> msg -> ( AbstractGeneralModel env event tar msg ren bdata sommsg, List (Msg tar msg sommsg), env )
-                newUpdateRec env msg =
+                newUpdateRec : envro -> env -> msg -> ( AbstractGeneralModel envro env event tar msg ren bdata sommsg, List (Msg tar msg sommsg), env )
+                newUpdateRec envro env msg =
                     let
                         ( oldr, oldmsg, oldres ) =
-                            um.updaterec env msg
+                            um.updaterec envro env msg
 
                         ( newmsg, newres ) =
                             f ( oldmsg, oldres )

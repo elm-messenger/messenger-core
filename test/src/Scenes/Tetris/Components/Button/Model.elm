@@ -31,7 +31,7 @@ type alias Data =
 
 
 init : ComponentInit SceneCommonData UserData ComponentMsg Data BaseData
-init _ initMsg =
+init _ _ initMsg =
     case initMsg of
         ButtonInitMsg initData ->
             ( initData, () )
@@ -41,10 +41,10 @@ init _ initMsg =
 
 
 update : ComponentUpdate SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-update ({ commonData } as env) evnt ({ text } as data) basedata =
+update runtime ({ commonData } as env) evnt ({ text } as data) basedata =
     case evnt of
         MouseDown 0 pos ->
-            if judgeMouseRectWithCamera env.globalData.internalData env.globalData.camera pos data.position data.size then
+            if judgeMouseRectWithCamera runtime env.globalData.camera pos data.position data.size then
                 case ( data.buttonType, commonData.state ) of
                     ( Button.State, Stopped ) ->
                         ( ( { data | text = { text | content = "Pause" } }, basedata ), [ Other ( "GameGrid", TetrisMsg Tetris.Start ) ], ( { env | commonData = { commonData | state = Playing } }, False ) )
@@ -78,7 +78,7 @@ update ({ commonData } as env) evnt ({ text } as data) basedata =
 
 
 updaterec : ComponentUpdateRec SceneCommonData Data UserData SceneMsg ComponentTarget ComponentMsg BaseData
-updaterec env msg ({ text } as data) basedata =
+updaterec _ env msg ({ text } as data) basedata =
     if data.buttonType == Button.State then
         case msg of
             TetrisMsg Tetris.GameOver ->
@@ -98,7 +98,7 @@ updaterec env msg ({ text } as data) basedata =
 
 
 view : ComponentView SceneCommonData UserData Data BaseData
-view _ data _ =
+view _ _ data _ =
     let
         ( x, y ) =
             data.position

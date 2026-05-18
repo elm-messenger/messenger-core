@@ -32,7 +32,7 @@ initData _ _ =
 
 
 init : RawSceneProtoLevelInit UserData SceneMsg (InitData SceneMsg)
-init env msg =
+init _ env msg =
     Just (initData env msg)
 
 

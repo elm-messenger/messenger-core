@@ -29,15 +29,15 @@ type alias Data =
 
 
 init : RawSceneInit Data UserData SceneMsg
-init env msg =
+init _ env msg =
     {}
 
 
 update : RawSceneUpdate Data UserData SceneMsg
-update env msg data =
+update runtime env msg data =
     let
         length =
-            audioDuration env.globalData.internalData "test"
+            audioDuration runtime "test"
     in
     case msg of
         KeyDown 8 ->
@@ -80,7 +80,7 @@ update env msg data =
         KeyDown 54 ->
             let
                 ts =
-                    getCurrentTimeStamp env.globalData
+                    getCurrentTimeStamp runtime
 
                 nts =
                     Time.millisToPosix <| floor ts + 2000
@@ -89,7 +89,7 @@ update env msg data =
                     Time.millisToPosix <| floor ts + 6000
             in
             ( data
-            , [ SOMStopAudio <| AudioName 0 "test", SOMPlayAudio 0 "test" <| ALoop Nothing Nothing, SOMTransformAudio (AudioName 0 "test") (scaleVolumeAt [ ( Time.millisToPosix <| floor (getCurrentTimeStamp env.globalData), 0 ), ( nts, 2 ), ( lts, 0 ) ]) ]
+            , [ SOMStopAudio <| AudioName 0 "test", SOMPlayAudio 0 "test" <| ALoop Nothing Nothing, SOMTransformAudio (AudioName 0 "test") (scaleVolumeAt [ ( Time.millisToPosix <| floor (getCurrentTimeStamp runtime), 0 ), ( nts, 2 ), ( lts, 0 ) ]) ]
             , env
             )
 
@@ -109,7 +109,7 @@ prompt =
 
 
 view : RawSceneView UserData Data
-view env data =
+view _ env data =
     group []
         [ P.clear (Color.rgb 1.0 0.0 0.0)
         , P.textbox ( 0, 30 ) 50 prompt "firacode" Color.black

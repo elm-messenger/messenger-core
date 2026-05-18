@@ -17,8 +17,7 @@ import Html.Attributes exposing (style)
 import Html.Events exposing (on)
 import Json.Decode as Decode
 import Messenger.Audio.Internal exposing (getAudio)
-import Messenger.Base exposing (WorldEvent(..))
-import Messenger.Internal as Internal
+import Messenger.Internal as Internal exposing (WorldEvent(..))
 import Messenger.Model exposing (Model)
 import Messenger.UI.Input exposing (Input)
 import REGL
@@ -29,11 +28,8 @@ import REGL
 view : Input userdata scenemsg -> AudioData -> Model userdata scenemsg -> Html WorldEvent
 view _ _ model =
     let
-        gd =
-            model.env.globalData
-
         internalData =
-            Internal.getInternalData gd.internalData
+            Internal.getInternalData model.runtime
 
         canvas =
             REGL.toHtmlWith
@@ -44,11 +40,11 @@ view _ _ model =
                  , style "top" (String.fromFloat internalData.startTop)
                  , style "position" "fixed"
                  ]
-                    ++ gd.canvasAttributes
+                    ++ model.env.globalData.canvasAttributes
                 )
     in
     Html.div [ on "wheel" (Decode.map WMouseWheel (Decode.field "deltaY" Decode.int)) ]
-        (case gd.extraHTML of
+        (case model.env.globalData.extraHTML of
             Just x ->
                 [ canvas, x ]
 
@@ -66,7 +62,7 @@ audio : AudioData -> Model userdata scenemsg -> Audio
 audio _ model =
     let
         internalData =
-            Internal.getInternalData model.env.globalData.internalData
+            Internal.getInternalData model.runtime
     in
     Audio.group (getAudio internalData.audioRepo)
         |> Audio.scaleVolume internalData.volume

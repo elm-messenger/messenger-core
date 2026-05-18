@@ -29,12 +29,12 @@ type alias Data =
 
 
 init : RawSceneInit Data UserData SceneMsg
-init env msg =
+init _ env msg =
     {}
 
 
 update : RawSceneUpdate Data UserData SceneMsg
-update env msg data =
+update _ env msg data =
     case msg of
         KeyDown 49 ->
             ( data
@@ -167,12 +167,12 @@ e. ConfigData Test
 
 
 view : RawSceneView UserData Data
-view env data =
+view runtime env data =
     group []
         [ P.clear Color.lightYellow
         , P.textbox ( 0, 30 ) 30 prompt "firacode" Color.black
-        , renderSprite env.globalData.internalData ( 1200, 0 ) ( 0, 200 ) "ship"
-        , renderSprite env.globalData.internalData ( 1500, 300 ) ( 0, 200 ) "sq"
+        , renderSprite runtime ( 1200, 0 ) ( 0, 200 ) "ship"
+        , renderSprite runtime ( 1500, 300 ) ( 0, 200 ) "sq"
         ]
 
 

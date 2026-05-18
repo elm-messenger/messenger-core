@@ -24,12 +24,12 @@ type alias Data =
 
 
 init : RawSceneInit Data UserData SceneMsg
-init env msg =
+init _ env msg =
     {}
 
 
 update : RawSceneUpdate Data UserData SceneMsg
-update env msg data =
+update _ env msg data =
     case msg of
         KeyDown 8 ->
             ( data
@@ -43,19 +43,16 @@ update env msg data =
 
 
 view : RawSceneView UserData Data
-view env data =
+view runtime env data =
     let
-        gd =
-            env.globalData
-
         id =
-            gd.internalData
+            runtime
 
         rate =
             100
 
         currentAct x =
-            String.fromInt (modBy x (floor (getSceneStartTime gd / rate)))
+            String.fromInt (modBy x (floor (getSceneStartTime runtime / rate)))
     in
     group []
         [ renderSprite id ( 100, 300 ) ( 100, 0 ) ("char0" ++ currentAct 13)

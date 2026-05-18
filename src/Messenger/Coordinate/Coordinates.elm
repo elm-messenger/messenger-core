@@ -33,7 +33,7 @@ Normally, users do not need to use this module directly, as Messenger will handl
 
 -}
 
-import Messenger.Base exposing (InternalData)
+import Messenger.Base exposing (Runtime)
 import Messenger.Coordinate.Camera exposing (viewToWorld)
 import Messenger.Internal as Internal
 import REGL.Common exposing (Camera)
@@ -58,7 +58,7 @@ floatpairadd ( x, y ) ( z, w ) =
 Example: If your screen is 2560\*1440, the virtual canvas size is 1920\*1080 and the actual window size 960\*540 at the center of screen, then the function will map (600,300) to (2560/2-960/2+(960/1920)\*600,1440/2-540/2+(540/1080)\*300) = (1100,600)
 
 -}
-fixedPosToReal : InternalData -> ( Float, Float ) -> ( Float, Float )
+fixedPosToReal : Runtime -> ( Float, Float ) -> ( Float, Float )
 fixedPosToReal gd ( x, y ) =
     let
         internalData =
@@ -76,7 +76,7 @@ Usage : `posToReal gd ( x, y )` where (x,y) is the virtual coordinates and gd th
 The function returns the position in real canvas.
 
 -}
-posToReal : InternalData -> ( Float, Float ) -> ( Float, Float )
+posToReal : Runtime -> ( Float, Float ) -> ( Float, Float )
 posToReal gd ( x, y ) =
     let
         internalData =
@@ -97,7 +97,7 @@ Usage : `posToReal gd ( x, y )` where (x,y) is the real coordinates and gd the i
 The function returns the coordinate in virtual coordinate system.
 
 -}
-posToVirtual : InternalData -> ( Float, Float ) -> ( Float, Float )
+posToVirtual : Runtime -> ( Float, Float ) -> ( Float, Float )
 posToVirtual gd ( x, y ) =
     let
         internalData =
@@ -125,7 +125,7 @@ Usage: `lengthToReal gd x`
 The function returns the length in real coordinate system.
 
 -}
-lengthToReal : InternalData -> Float -> Float
+lengthToReal : Runtime -> Float -> Float
 lengthToReal gd x =
     let
         internalData =
@@ -146,7 +146,7 @@ lengthToReal gd x =
 The function returns the length in virtual coordinate system.
 
 -}
-fromRealLength : InternalData -> Float -> Float
+fromRealLength : Runtime -> Float -> Float
 fromRealLength gd x =
     let
         internalData =
@@ -218,7 +218,7 @@ judgeMouseCircle ( mx, my ) ( cx, cy ) r =
 
 {-| Judge whether the mouse position is in the rectangle, with camera.
 -}
-judgeMouseRectWithCamera : InternalData -> Camera -> ( Float, Float ) -> ( Float, Float ) -> ( Float, Float ) -> Bool
+judgeMouseRectWithCamera : Runtime -> Camera -> ( Float, Float ) -> ( Float, Float ) -> ( Float, Float ) -> Bool
 judgeMouseRectWithCamera id cam ( x1, y1 ) ( x, y ) ( w, h ) =
     let
         internalData =
@@ -238,7 +238,7 @@ judgeMouseRectWithCamera id cam ( x1, y1 ) ( x, y ) ( w, h ) =
 The coordinate in the globalData is already in virtual coordinates.
 
 -}
-fromMouseToVirtual : InternalData -> ( Float, Float ) -> ( Float, Float )
+fromMouseToVirtual : Runtime -> ( Float, Float ) -> ( Float, Float )
 fromMouseToVirtual gd ( px, py ) =
     let
         internalData =

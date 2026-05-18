@@ -31,7 +31,7 @@ type alias Data =
 
 
 init : LayerInit SceneCommonData UserData (LayerMsg SceneMsg) Data
-init _ initMsg =
+init _ _ initMsg =
     case initMsg of
         FrontInitData lv ->
             Data lv
@@ -41,7 +41,7 @@ init _ initMsg =
 
 
 update : LayerUpdate SceneCommonData UserData LayerTarget (LayerMsg SceneMsg) SceneMsg Data
-update env evt data =
+update _ env evt data =
     case evt of
         KeyDown 8 ->
             ( data
@@ -76,12 +76,12 @@ update env evt data =
 
 
 updaterec : LayerUpdateRec SceneCommonData UserData LayerTarget (LayerMsg SceneMsg) SceneMsg Data
-updaterec env _ data =
+updaterec _ env _ data =
     ( data, [], env )
 
 
 view : LayerView SceneCommonData UserData Data
-view env data =
+view _ env data =
     let
         gameOverVE =
             if env.commonData.gameOver then
