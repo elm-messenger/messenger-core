@@ -1,7 +1,7 @@
 {
     "type": "application",
     "source-directories": ["src", "../src", "messenger-extra/src"],
-    "elm-version": "0.19.1",
+    "elm-version": "0.19.2",
     "dependencies": {
         "direct": {
             "MartinSStewart/elm-audio": "4.0.4",
