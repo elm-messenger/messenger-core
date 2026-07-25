@@ -18,7 +18,7 @@ import Messenger.GlobalComponents.Transition.Transitions exposing (fadeMix)
 import Messenger.Layer.Layer exposing (Handler, handleComponentMsgs)
 import Messenger.Scene.RawScene exposing (RawSceneInit, RawSceneUpdate, RawSceneView, genRawScene)
 import Messenger.Scene.Scene exposing (MConcreteScene, SceneStorage)
-import REGL.BuiltinPrograms exposing (textbox)
+import REGL.BuiltinPrograms exposing (clear, textbox)
 import REGL.Common exposing (group)
 import Scenes.Interaction.Components.Button.Init as ButtonInit
 import Scenes.Interaction.Components.Button.Model as Button
@@ -111,7 +111,8 @@ update runtime env msg data =
 view : RawSceneView UserData Data
 view runtime env data =
     group []
-        [ viewComponents runtime env data.components
+        [ clear Color.white
+        , viewComponents runtime env data.components
         , textbox ( 0, 50 ) 20 ("Button Status: " ++ data.buttonStatus) "firacode" Color.black
         , textbox ( 0, 80 ) 20 ("Slider Value: " ++ String.fromFloat data.sliderValue) "firacode" Color.black
         ]

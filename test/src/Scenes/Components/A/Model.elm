@@ -14,6 +14,8 @@ import Lib.UserData exposing (UserData)
 import Messenger.Component.Component exposing (AbstractComponent, updateComponents, viewComponents)
 import Messenger.GeneralModel exposing (Matcher, Msg(..), MsgBase(..))
 import Messenger.Layer.Layer exposing (ConcreteLayer, Handler, LayerInit, LayerStorage, LayerUpdate, LayerUpdateRec, LayerView, genLayer, handleComponentMsgs)
+import REGL.BuiltinPrograms as P
+import REGL.Common exposing (group)
 import Scenes.Components.Components.ComponentBase exposing (BaseData, ComponentMsg(..), ComponentTarget)
 import Scenes.Components.Components.Rect.Init as RectInit
 import Scenes.Components.Components.Rect.Model as Rect
@@ -71,7 +73,10 @@ updaterec _ env msg data =
 
 view : LayerView SceneCommonData UserData Data
 view runtime env data =
-    viewComponents runtime env data.components
+    group []
+        [ P.clear Color.white
+        , viewComponents runtime env data.components
+        ]
 
 
 matcher : Matcher Data LayerTarget

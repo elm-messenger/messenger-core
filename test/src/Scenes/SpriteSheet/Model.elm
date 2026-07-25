@@ -6,6 +6,7 @@ module Scenes.SpriteSheet.Model exposing (scene)
 
 -}
 
+import Color
 import Duration
 import Lib.Base exposing (SceneMsg)
 import Lib.UserData exposing (UserData)
@@ -55,7 +56,8 @@ view runtime env data =
             String.fromInt (modBy x (floor (getSceneStartTime runtime / rate)))
     in
     group []
-        [ renderSprite id ( 100, 300 ) ( 100, 0 ) ("char0" ++ currentAct 13)
+        [ P.clear Color.white
+        , renderSprite id ( 100, 300 ) ( 100, 0 ) ("char0" ++ currentAct 13)
         , renderSprite id ( 300, 300 ) ( 100, 0 ) ("char1" ++ currentAct 8)
         , renderSprite id ( 500, 300 ) ( 100, 0 ) ("char2" ++ currentAct 10)
         , renderSprite id ( 700, 300 ) ( 100, 0 ) ("char3" ++ currentAct 10)

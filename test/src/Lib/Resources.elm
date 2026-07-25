@@ -74,7 +74,7 @@ spriteSheet =
                         )
                     )
                 <|
-                    List.range 0 colsize
+                    List.range 0 (colsize - 1)
             )
             playerSize
 
